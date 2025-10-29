@@ -1,9 +1,10 @@
-version: '3.9'
+version: "3.9"
 
 services:
   db:
     image: postgres:15
     container_name: sgac_db
+    restart: always
     environment:
       POSTGRES_DB: ${DB_NAME:-sgac_db}
       POSTGRES_USER: ${DB_USER:-sgac_user}
@@ -21,6 +22,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sgac_redis
+    restart: always
     ports:
       - "6379:6379"
     healthcheck:
@@ -30,12 +32,17 @@ services:
       retries: 5
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: sgac_web
+    restart: always
     command: >
-      sh -c "python manage.py migrate &&
-             python manage.py collectstatic --noinput &&
-             gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --reload"
+      sh -c "
+        python manage.py migrate &&
+        python manage.py collectstatic --noinput &&
+        gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --reload
+      "
     volumes:
       - .:/app
     ports:
@@ -49,17 +56,23 @@ services:
         condition: service_healthy
 
   celery:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: sgac_celery
+    restart: always
     command: celery -A config worker -l info
     volumes:
       - .:/app
     env_file:
       - .env
     depends_on:
-      - db
-      - redis
-      - web
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      web:
+        condition: service_started
 
 volumes:
   postgres_data:
