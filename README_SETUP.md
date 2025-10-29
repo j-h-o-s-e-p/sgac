@@ -1,8 +1,17 @@
 # SGAC - Guía de Setup para el Equipo
 
 ## 📋 Requisitos Previos
-- Docker y Docker Compose instalados
-- Git
+
+Antes de comenzar, asegúrate de tener instalado:
+
+- [Docker Engine](https://docs.docker.com/engine/install/)
+- [Docker Compose (v2 o superior)](https://docs.docker.com/compose/install/)
+- [Git](https://git-scm.com/downloads)
+
+Verifica tus versiones:
+```bash
+docker --version
+docker compose version
 
 ## 🚀 Primeros Pasos
 
@@ -20,7 +29,7 @@ cp .env.example .env
 
 ### 3. Construir y levantar los contenedores
 ```bash
-docker-compose up -d --build
+docker compose up -d --build
 ```
 
 Esto levantará:
@@ -31,13 +40,13 @@ Esto levantará:
 
 ### 4. Ejecutar migraciones
 ```bash
-docker-compose exec web python manage.py makemigrations
-docker-compose exec web python manage.py migrate
+docker compose exec web python manage.py makemigrations
+docker compose exec web python manage.py migrate
 ```
 
 ### 5. Crear superusuario
 ```bash
-docker-compose exec web python manage.py createsuperuser
+docker compose exec web python manage.py createsuperuser
 ```
 
 ### 6. Acceder a la aplicación
@@ -79,37 +88,37 @@ git checkout -b feature/tu-contexto
 
 ### Ver logs en tiempo real
 ```bash
-docker-compose logs -f web
+docker compose logs -f web
 ```
 
 ### Ejecutar tests
 ```bash
-docker-compose exec web pytest
+docker compose exec web pytest
 ```
 
 ### Acceder al shell de Django
 ```bash
-docker-compose exec web python manage.py shell
+docker compose exec web python manage.py shell
 ```
 
 ### Ejecutar comandos de manage.py
 ```bash
-docker-compose exec web python manage.py [comando]
+docker compose exec web python manage.py [comando]
 ```
 
 ### Parar los contenedores
 ```bash
-docker-compose down
+docker compose down
 ```
 
 ### Reiniciar todo desde cero
 ```bash
-docker-compose down -v
-docker-compose up -d --build
-docker-compose exec web python manage.py migrate
+docker compose down -v
+docker compose up -d --build
+docker compose exec web python manage.py migrate
 ```
 
-## 📝 Convenciones de Código
+## 📏 Convenciones de Código
 
 - **Lenguaje:** Python 3.11
 - **Estilo:** PEP 8
@@ -120,13 +129,13 @@ docker-compose exec web python manage.py migrate
 ### Antes de hacer commit
 ```bash
 # Formatear código
-docker-compose exec web black .
+docker compose exec web black .
 
 # Verificar estilo
-docker-compose exec web flake8
+docker compose exec web flake8
 
 # Ordenar imports
-docker-compose exec web isort .
+docker compose exec web isort .
 ```
 
 ## 🔄 Flujo de Trabajo
@@ -158,27 +167,27 @@ Ejemplo:
 
 ### Ejecutar todos los tests
 ```bash
-docker-compose exec web pytest
+docker compose exec web pytest
 ```
 
 ### Ejecutar tests con cobertura
 ```bash
-docker-compose exec web pytest --cov
+docker compose exec web pytest --cov
 ```
 
 ### Ejecutar tests específicos
 ```bash
-docker-compose exec web pytest tests/unit/domain/test_user.py
+docker compose exec web pytest tests/unit/domain/test_user.py
 ```
 
 ## 🐛 Troubleshooting
 
 ### Error de conexión a la BD
 ```bash
-docker-compose down
-docker-compose up -d db
-# Esperar 10 segundos
-docker-compose up -d web
+docker compose down
+docker compose up -d db
+# Esperar unos segundos
+docker compose up -d web
 ```
 
 ### Limpiar caché de Python
@@ -189,10 +198,27 @@ find . -type f -name "*.pyc" -delete
 
 ### Resetear la base de datos
 ```bash
-docker-compose down -v
-docker-compose up -d
-docker-compose exec web python manage.py migrate
+docker compose down -v
+docker compose up -d
+docker compose exec web python manage.py migrate
 ```
+
+## 💡 Notas Técnicas
+
+### Usa siempre el comando moderno:
+```bash
+docker compose ...
+```
+### Antes de apagar tu PC, detén los contenedores:
+```bash
+docker compose down
+```
+### Si clonas el proyecto en otra máquina:
+```bash
+docker compose down -v --remove-orphans
+docker compose up -d --build
+```
+### Todos los servicios usan volúmenes nombrados, por lo que el entorno puede recrearse sin conflictos.
 
 ## 📞 Contacto
 
