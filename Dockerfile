@@ -44,6 +44,9 @@ RUN mkdir -p logs && chmod 755 logs
 # Exponer el puerto de Django/Gunicorn
 EXPOSE 8000
 
+# Instalar pandas adicionalmente
+RUN pip install pandas
+
 # Comando por defecto (production-ready)
 CMD ["gunicorn", "config.wsgi:application", "--bind", "0.0.0.0:8000", "--workers", "4"]
 
