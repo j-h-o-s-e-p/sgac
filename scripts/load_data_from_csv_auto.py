@@ -1,21 +1,24 @@
 """
-Script para cargar datos desde CSV y matricular alumnos automáticamente según CSV de origen
-Ejecutar: docker compose run --rm web python manage.py shell < scripts/load_data_from_csv_auto.py
+Script para cargar datos desde CSV y matricular alumnos automáticamente.
+Ejecutar:
+docker compose run --rm web python manage.py shell < scripts/load_data_from_csv_auto.py
 """
+
 import pandas as pd
 from datetime import date, time
-import ftfy  # pip install ftfy
+import ftfy
+import re
 
 from infrastructure.persistence.models import (
     CustomUser, Semester, Course, CourseGroup, StudentEnrollment, Evaluation
 )
 
 print("="*50)
-print(" CARGANDO DATOS DESDE CSV (FINAL DETALLADO) ")
+print(" CARGANDO DATOS DESDE CSV (FINAL LIMPIO) ")
 print("="*50)
 
 # --- 1. Crear semestre ---
-semester, created = Semester.objects.get_or_create(
+semester, _ = Semester.objects.update_or_create(
     name="2024-2",
     defaults={'start_date': date(2024,8,1), 'end_date': date(2024,12,20), 'is_active': True}
 )
@@ -24,19 +27,17 @@ print(f"✅ Semestre: {semester.name}")
 # --- 2. Leer CSV de cursos/profesores ---
 df_cursos = pd.read_csv('scripts/data/Curso_Profesor.csv', encoding='utf-8-sig')
 
-# Crear cursos, grupos y profesores
 curso_grupo_map = {}
 ciclo_map = {'A': 1, 'B': 2, 'C': 3, 'D': 4}
 
 for idx, row in df_cursos.iterrows():
-    # PROFESOR
     correo = ftfy.fix_text(str(row['Correo UNSA']).strip())
     docente = ftfy.fix_text(str(row['Docentes']).strip())
     nombres_docente = docente.split()
     first_name = nombres_docente[0]
     last_name = nombres_docente[-1] if len(nombres_docente) > 1 else nombres_docente[0]
 
-    profesor, created = CustomUser.objects.get_or_create(
+    profesor, _ = CustomUser.objects.update_or_create(
         email=correo,
         defaults={
             'username': correo,
@@ -46,14 +47,12 @@ for idx, row in df_cursos.iterrows():
             'account_status': 'ACTIVO',
         }
     )
-    if created:
-        profesor.set_password('profesor123')
-        profesor.save()
+    profesor.set_password('profesor123')
+    profesor.save()
 
-    # CURSO
     ciclo_value = ciclo_map.get(str(row['Cicl']).strip(), 1)
     curso_code = str(row['Codigo']).strip()
-    curso, created = Course.objects.get_or_create(
+    curso, _ = Course.objects.update_or_create(
         course_code=curso_code,
         defaults={
             'semester': semester,
@@ -64,14 +63,13 @@ for idx, row in df_cursos.iterrows():
         }
     )
 
-    # GRUPO
     grupo_code = f"{curso_code}-{str(row['Grup']).strip()}"
-    grupo, created = CourseGroup.objects.get_or_create(
+    grupo, _ = CourseGroup.objects.update_or_create(
         group_code=grupo_code,
         course=curso,
         defaults={
             'capacity': 30,
-            'day_of_week': 'LUNES',  # valor por defecto
+            'day_of_week': 'LUNES',
             'start_time': time(8,0),
             'end_time': time(10,0),
             'room': 'Aula 101',
@@ -88,7 +86,6 @@ archivo_alumnos = [
 ]
 
 for f in archivo_alumnos:
-    import re
     match = re.search(r'(.+?)_Ciclo_(.+?)_Grupo_(.+?)\.csv', f.split('/')[-1])
     if match:
         ciclo = match.group(2)
@@ -99,27 +96,35 @@ for f in archivo_alumnos:
 
     df = pd.read_csv(f, encoding='utf-8-sig')
 
-    # Ignorar la primera fila si es encabezado
     for idx, row in df.iterrows():
-        # Nombre de alumno
-        nombres_apellidos = ftfy.fix_text(str(row['Apellidos y Nombres']).strip()).split()
-        if len(nombres_apellidos) > 1:
-            first_name = nombres_apellidos[1]
-            last_name = nombres_apellidos[0]
+        full_name = ftfy.fix_text(str(row['Apellidos y Nombres']).strip())
+
+        # Tomar solo el primer apellido antes de / o ,
+        first_part = full_name
+        if ',' in full_name:
+            first_part = full_name.split(',')[0]
+        if '/' in first_part:
+            first_part = first_part.split('/')[0]
+
+        last_name_clean = re.sub(r'[^A-Za-z]', '', first_part).lower()  # solo letras
+        # Tomar primer nombre
+        if ',' in full_name:
+            first_name_clean = full_name.split(',')[1].strip().split()[0]
         else:
-            first_name = nombres_apellidos[0]
-            last_name = nombres_apellidos[0]
+            parts = full_name.split()
+            first_name_clean = parts[1] if len(parts) > 1 else parts[0]
 
-        # Usuario de alumno: inicial + apellido
-        inicial = first_name[0].lower()
-        usuario_email = f"{inicial}{last_name.lower()}@unsa.edu.pe"
+        # Inicial y email
+        inicial = first_name_clean[0].lower() if first_name_clean else ''
+        usuario_email = f"{inicial}{last_name_clean}@unsa.edu.pe"
 
-        alumno, created = CustomUser.objects.get_or_create(
+        # Crear o actualizar alumno (evita duplicados)
+        alumno, created = CustomUser.objects.update_or_create(
             email=usuario_email,
             defaults={
                 'username': usuario_email,
-                'first_name': first_name,
-                'last_name': last_name,
+                'first_name': first_name_clean,
+                'last_name': first_part.strip(),
                 'user_role': 'ALUMNO',
                 'account_status': 'ACTIVO',
             }
@@ -127,6 +132,7 @@ for f in archivo_alumnos:
         if created:
             alumno.set_password('alumno123')
             alumno.save()
+
         print(f"✅ Alumno: {alumno.get_full_name()} ({usuario_email})")
 
         # Asignar grupo
@@ -136,7 +142,7 @@ for f in archivo_alumnos:
                 grupo = g
                 break
         if grupo:
-            enrollment, created = StudentEnrollment.objects.get_or_create(
+            enrollment, _ = StudentEnrollment.objects.update_or_create(
                 student=alumno,
                 course=grupo.course,
                 defaults={'group': grupo, 'status':'ACTIVO'}
@@ -149,12 +155,12 @@ for f in archivo_alumnos:
 
 # --- 4. Crear evaluaciones por defecto ---
 for curso in Course.objects.filter(semester=semester):
-    Evaluation.objects.get_or_create(
+    Evaluation.objects.update_or_create(
         course=curso,
         name="Examen Parcial 1",
         defaults={'evaluation_type':'EXAMEN','unit':1,'percentage':50}
     )
-    Evaluation.objects.get_or_create(
+    Evaluation.objects.update_or_create(
         course=curso,
         name="Trabajo Práctico 1",
         defaults={'evaluation_type':'CONTINUA','unit':1,'percentage':50}

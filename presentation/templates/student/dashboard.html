@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Alumno{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'presentation:student_dashboard' %}">
+        <i class="bi bi-house-door"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
+        <i class="bi bi-calendar3"></i> Mi Horario
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+        <i class="bi bi-clipboard-data"></i> Mis Notas
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
+        <i class="bi bi-pen"></i> Matrícula Lab
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">¡Bienvenido, {{ user.first_name }}!</h1>
+        <p class="text-muted">Aquí está tu resumen académico</p>
+    </div>
+    <div>
+        <span class="badge bg-primary badge-custom">{{ user.get_user_role_display }}</span>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <i class="bi bi-book" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">{{ total_courses }}</h3>
+            <p>Cursos Matriculados</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <i class="bi bi-clipboard-check" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">{{ avg_attendance }}%</h3>
+            <p>Asistencia Promedio</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <i class="bi bi-calendar-check" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">2024-2</h3>
+            <p>Semestre Actual</p>
+        </div>
+    </div>
+</div>
+
+<!-- Cursos Matriculados -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-book-fill"></i> Mis Cursos
+    </div>
+    <div class="card-body">
+        {% if enrollments %}
+        <div class="table-responsive">
+            <table class="table table-hover table-custom">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Curso</th>
+                        <th>Créditos</th>
+                        <th>Grupo</th>
+                        <th>Laboratorio</th>
+                        <th>Asistencia</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                    <tr>
+                        <td><strong>{{ enrollment.course.course_code }}</strong></td>
+                        <td>{{ enrollment.course.course_name }}</td>
+                        <td>
+                            <span class="badge bg-info badge-custom">{{ enrollment.course.credits }} créditos</span>
+                        </td>
+                        <td>
+                            {% if enrollment.group %}
+                                {{ enrollment.group.group_code }}
+                            {% else %}
+                                <span class="text-muted">N/A</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if enrollment.lab_assignment %}
+                                <span class="badge bg-success badge-custom">
+                                    Lab {{ enrollment.lab_assignment.lab_group.lab_nomenclature }}
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning badge-custom">Sin asignar</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if enrollment.current_attendance_percentage >= 70 %}
+                                <span class="badge bg-success badge-custom">
+                                    {{ enrollment.current_attendance_percentage }}%
+                                </span>
+                            {% elif enrollment.current_attendance_percentage >= 30 %}
+                                <span class="badge bg-warning badge-custom">
+                                    {{ enrollment.current_attendance_percentage }}%
+                                </span>
+                            {% else %}
+                                <span class="badge bg-danger badge-custom">
+                                    {{ enrollment.current_attendance_percentage }}%
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge bg-success badge-custom">{{ enrollment.get_status_display }}</span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No tienes cursos matriculados</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Accesos Rápidos -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <a href="{% url 'presentation:student_schedule' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar3 text-primary" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Ver Horario</h5>
+                    <p class="text-muted">Consulta tu horario semanal</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'presentation:student_grades' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-data text-success" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Ver Notas</h5>
+                    <p class="text-muted">Revisa tus calificaciones</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-4">
+        <a href="{% url 'presentation:student_lab_enrollment' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-pen text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Matrícula Lab</h5>
+                    <p class="text-muted">Inscríbete a laboratorios</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+{% endblock %}

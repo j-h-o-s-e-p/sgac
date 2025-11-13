@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+
+{% block title %}Registrar Asistencia - Profesor{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+        <i class="bi bi-house-door"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+        <i class="bi bi-calendar3"></i> Mi Horario
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'presentation:professor_attendance' %}">
+        <i class="bi bi-clipboard-check"></i> Asistencia
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+        <i class="bi bi-clipboard-data"></i> Notas
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <a href="{% url 'presentation:professor_attendance' %}" class="btn btn-outline-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<div class="card mb-4">
+    <div class="card-header">
+        <h5 class="mb-0">
+            {% if group_type == 'course' %}
+                <i class="bi bi-book"></i> {{ group.course.course_name }} - {{ group.group_code }}
+            {% else %}
+                <i class="bi bi-flask"></i> {{ group.course.course_name }} - Lab {{ group.lab_nomenclature }}
+            {% endif %}
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <p class="mb-2">
+                    <i class="bi bi-calendar3"></i> 
+                    <strong>
+                        {% if group_type == 'course' %}
+                            {{ group.day_of_week }}
+                        {% else %}
+                            {{ group.day_of_week }}
+                        {% endif %}
+                    </strong>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <p class="mb-2">
+                    <i class="bi bi-clock"></i> 
+                    <strong>
+                        {% if group_type == 'course' %}
+                            {{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}
+                        {% else %}
+                            {{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}
+                        {% endif %}
+                    </strong>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <p class="mb-2">
+                    <i class="bi bi-geo-alt"></i> 
+                    <strong>
+                        {% if group_type == 'course' %}
+                            {{ group.room }}
+                        {% else %}
+                            {{ group.room }}
+                        {% endif %}
+                    </strong>
+                </p>
+            </div>
+            <div class="col-md-3">
+                <p class="mb-2">
+                    <i class="bi bi-people"></i> 
+                    <strong>{{ enrollments.count }} estudiantes</strong>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Formulario de Asistencia -->
+<form method="POST" id="attendanceForm">
+    {% csrf_token %}
+    
+    <div class="card mb-4">
+        <div class="card-header">
+            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Sesión</h6>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="session_number" class="form-label">Número de Sesión *</label>
+                    <input type="number" class="form-control" id="session_number" name="session_number" min="1" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="session_date" class="form-label">Fecha *</label>
+                    <input type="date" class="form-control" id="session_date" name="session_date" value="{{ today|date:'Y-m-d' }}" required>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h6 class="mb-0"><i class="bi bi-people"></i> Lista de Estudiantes</h6>
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('P')">
+                    <i class="bi bi-check-all"></i> Todos Presentes
+                </button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('F')">
+                    <i class="bi bi-x-lg"></i> Todos Ausentes
+                </button>
+            </div>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th style="width: 5%;">#</th>
+                            <th>Código</th>
+                            <th>Estudiante</th>
+                            <th style="width: 30%; text-align: center;">Estado</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for enrollment in enrollments %}
+                        <tr>
+                            <td>{{ forloop.counter }}</td>
+                            <td><strong>{{ enrollment.student.username }}</strong></td>
+                            <td>{{ enrollment.student.get_full_name }}</td>
+                            <td>
+                                <div class="btn-group w-100" role="group">
+                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="P_{{ enrollment.enrollment_id }}" value="P" checked>
+                                    <label class="btn btn-outline-success" for="P_{{ enrollment.enrollment_id }}">
+                                        <i class="bi bi-check-lg"></i> Presente
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="F_{{ enrollment.enrollment_id }}" value="F">
+                                    <label class="btn btn-outline-danger" for="F_{{ enrollment.enrollment_id }}">
+                                        <i class="bi bi-x-lg"></i> Falta
+                                    </label>
+
+                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="J_{{ enrollment.enrollment_id }}" value="J">
+                                    <label class="btn btn-outline-warning" for="J_{{ enrollment.enrollment_id }}">
+                                        <i class="bi bi-exclamation-lg"></i> Justificado
+                                    </label>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 d-flex justify-content-between">
+        <a href="{% url 'presentation:professor_attendance' %}" class="btn btn-outline-secondary btn-custom">
+            <i class="bi bi-x-lg"></i> Cancelar
+        </a>
+        <button type="submit" class="btn btn-primary btn-custom">
+            <i class="bi bi-save"></i> Guardar Asistencia
+        </button>
+    </div>
+</form>
+
+<script>
+function markAll(status) {
+    const radios = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
+    radios.forEach(radio => {
+        radio.checked = true;
+    });
+}
+
+// Confirmar antes de enviar
+document.getElementById('attendanceForm').addEventListener('submit', function(e) {
+    if (!confirm('¿Estás seguro de guardar esta asistencia?')) {
+        e.preventDefault();
+    }
+});
+</script>
+{% endblock %}

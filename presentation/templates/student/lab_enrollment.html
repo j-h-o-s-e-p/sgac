@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}Matrícula de Laboratorios - Alumno{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
+        <i class="bi bi-house-door"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
+        <i class="bi bi-calendar3"></i> Mi Horario
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+        <i class="bi bi-clipboard-data"></i> Mis Notas
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'presentation:student_lab_enrollment' %}">
+        <i class="bi bi-pen"></i> Matrícula Lab
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="h3 mb-1"><i class="bi bi-pen"></i> Matrícula de Laboratorios</h1>
+    <p class="text-muted">Selecciona los laboratorios disponibles para tus cursos</p>
+</div>
+
+<!-- Laboratorios ya asignados -->
+{% if enrolled_labs %}
+<div class="card mb-4">
+    <div class="card-header bg-success text-white">
+        <i class="bi bi-check-circle-fill"></i> Laboratorios Asignados
+    </div>
+    <div class="card-body">
+        <div class="row">
+            {% for enrollment in enrolled_labs %}
+            <div class="col-md-6 mb-3">
+                <div class="p-3" style="background-color: #e8f5e9; border-left: 4px solid #4caf50; border-radius: 8px;">
+                    <h6 class="mb-2">
+                        <span class="badge bg-success badge-custom">{{ enrollment.course.course_code }}</span>
+                        {{ enrollment.course.course_name }}
+                    </h6>
+                    <p class="mb-1">
+                        <i class="bi bi-bookmark-fill"></i> 
+                        <strong>Lab {{ enrollment.lab_assignment.lab_group.lab_nomenclature }}</strong>
+                    </p>
+                    <p class="mb-1">
+                        <i class="bi bi-clock"></i> 
+                        {{ enrollment.lab_assignment.lab_group.day_of_week }} 
+                        {{ enrollment.lab_assignment.lab_group.start_time|time:"H:i" }} - 
+                        {{ enrollment.lab_assignment.lab_group.end_time|time:"H:i" }}
+                    </p>
+                    <p class="mb-0">
+                        <i class="bi bi-geo-alt"></i> {{ enrollment.lab_assignment.lab_group.room }}
+                    </p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Cursos disponibles para matrícula -->
+{% if courses_with_labs %}
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-list-check"></i> Laboratorios Disponibles
+    </div>
+    <div class="card-body">
+        {% for course_item in courses_with_labs %}
+        <div class="mb-4 pb-4 border-bottom">
+            <h5 class="mb-3">
+                <span class="badge bg-primary badge-custom">{{ course_item.enrollment.course.course_code }}</span>
+                {{ course_item.enrollment.course.course_name }}
+            </h5>
+            
+            <div class="alert alert-info">
+                <i class="bi bi-info-circle-fill"></i> 
+                Selecciona el laboratorio de tu preferencia. La asignación será automática al cierre del período.
+            </div>
+            
+            <div class="row">
+                {% for lab in course_item.labs %}
+                <div class="col-md-6 mb-3">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h6 class="card-title">
+                                <i class="bi bi-flask"></i> Laboratorio {{ lab.lab_nomenclature }}
+                            </h6>
+                            <hr>
+                            <p class="mb-2">
+                                <i class="bi bi-calendar3"></i> 
+                                <strong>{{ lab.day_of_week }}</strong>
+                            </p>
+                            <p class="mb-2">
+                                <i class="bi bi-clock"></i> 
+                                {{ lab.start_time|time:"H:i" }} - {{ lab.end_time|time:"H:i" }}
+                            </p>
+                            <p class="mb-2">
+                                <i class="bi bi-geo-alt"></i> {{ lab.room }}
+                            </p>
+                            <p class="mb-3">
+                                <i class="bi bi-people"></i> 
+                                Capacidad: <strong>{{ lab.capacity }} estudiantes</strong>
+                            </p>
+                            <button class="btn btn-primary btn-custom w-100" disabled>
+                                <i class="bi bi-lock"></i> Período Cerrado
+                            </button>
+                            <small class="text-muted d-block mt-2 text-center">
+                                La matrícula estará disponible próximamente
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% else %}
+    {% if not enrolled_labs %}
+    <div class="card">
+        <div class="card-body text-center py-5">
+            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No hay laboratorios disponibles para matrícula</p>
+            <p class="text-muted">Todos tus cursos ya tienen laboratorio asignado o no requieren laboratorio</p>
+        </div>
+    </div>
+    {% endif %}
+{% endif %}
+
+<!-- Información adicional -->
+<div class="card mt-4">
+    <div class="card-body">
+        <h6 class="mb-3"><i class="bi bi-question-circle"></i> ¿Cómo funciona la matrícula?</h6>
+        <ol class="mb-0">
+            <li class="mb-2">El período de matrícula se abre una semana después del inicio de clases</li>
+            <li class="mb-2">Tienes 7 días para postular al laboratorio de tu preferencia</li>
+            <li class="mb-2">La asignación es automática: 50% por orden de llegada, 50% por sorteo</li>
+            <li class="mb-0">Recibirás una notificación por email con el resultado</li>
+        </ol>
+    </div>
+</div>
+{% endblock %}

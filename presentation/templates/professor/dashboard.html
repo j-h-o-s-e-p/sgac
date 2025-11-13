@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+
+{% block title %}Dashboard - Profesor{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'presentation:professor_dashboard' %}">
+        <i class="bi bi-house-door"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+        <i class="bi bi-calendar3"></i> Mi Horario
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+        <i class="bi bi-clipboard-check"></i> Asistencia
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+        <i class="bi bi-clipboard-data"></i> Notas
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">¡Bienvenido, Prof. {{ user.last_name }}!</h1>
+        <p class="text-muted">Panel de control docente</p>
+    </div>
+    <div>
+        <span class="badge bg-success badge-custom">{{ user.get_user_role_display }}</span>
+    </div>
+</div>
+
+<!-- Estadísticas -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+            <i class="bi bi-book" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">{{ total_courses }}</h3>
+            <p>Cursos Asignados</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+            <i class="bi bi-people" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">-</h3>
+            <p>Estudiantes Totales</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
+            <i class="bi bi-calendar-check" style="font-size: 2rem; opacity: 0.8;"></i>
+            <h3 class="mt-2">2024-2</h3>
+            <p>Semestre Actual</p>
+        </div>
+    </div>
+</div>
+
+<!-- Mis Cursos (Teoría) -->
+{% if course_groups %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-book-fill"></i> Cursos de Teoría
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Curso</th>
+                        <th>Grupo</th>
+                        <th>Horario</th>
+                        <th>Aula</th>
+                        <th>Capacidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group in course_groups %}
+                    <tr>
+                        <td><strong>{{ group.course.course_code }}</strong></td>
+                        <td>{{ group.course.course_name }}</td>
+                        <td>
+                            <span class="badge bg-primary badge-custom">{{ group.group_code }}</span>
+                        </td>
+                        <td>
+                            {{ group.day_of_week }}<br>
+                            <small class="text-muted">{{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}</small>
+                        </td>
+                        <td>{{ group.room }}</td>
+                        <td>
+                            <span class="badge bg-info badge-custom">{{ group.capacity }} alumnos</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'presentation:professor_record_attendance' group.group_id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-clipboard-check"></i> Asistencia
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Mis Laboratorios -->
+{% if lab_groups %}
+<div class="card mb-4">
+    <div class="card-header">
+        <i class="bi bi-flask"></i> Laboratorios
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-hover table-custom">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Curso</th>
+                        <th>Lab</th>
+                        <th>Horario</th>
+                        <th>Aula</th>
+                        <th>Capacidad</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for lab in lab_groups %}
+                    <tr>
+                        <td><strong>{{ lab.course.course_code }}</strong></td>
+                        <td>{{ lab.course.course_name }}</td>
+                        <td>
+                            <span class="badge bg-success badge-custom">Lab {{ lab.lab_nomenclature }}</span>
+                        </td>
+                        <td>
+                            {{ lab.day_of_week }}<br>
+                            <small class="text-muted">{{ lab.start_time|time:"H:i" }} - {{ lab.end_time|time:"H:i" }}</small>
+                        </td>
+                        <td>{{ lab.room }}</td>
+                        <td>
+                            <span class="badge bg-info badge-custom">{{ lab.capacity }} alumnos</span>
+                        </td>
+                        <td>
+                            <a href="{% url 'presentation:professor_record_attendance' lab.lab_id %}" class="btn btn-sm btn-outline-primary">
+                                <i class="bi bi-clipboard-check"></i> Asistencia
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<!-- Accesos Rápidos -->
+<div class="row">
+    <div class="col-md-3">
+        <a href="{% url 'presentation:professor_attendance' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-check text-primary" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Tomar Asistencia</h5>
+                    <p class="text-muted">Registrar asistencia</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'presentation:professor_grades' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-clipboard-data text-success" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Registrar Notas</h5>
+                    <p class="text-muted">Ingresar calificaciones</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="{% url 'presentation:professor_schedule' %}" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-calendar3 text-warning" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Mi Horario</h5>
+                    <p class="text-muted">Ver horario semanal</p>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-md-3">
+        <a href="#" class="text-decoration-none">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="bi bi-door-open text-info" style="font-size: 3rem;"></i>
+                    <h5 class="mt-3">Reservar Aula</h5>
+                    <p class="text-muted">Próximamente</p>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
+{% if not course_groups and not lab_groups %}
+<div class="card">
+    <div class="card-body text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+        <p class="text-muted mt-3">No tienes cursos asignados en este semestre</p>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Horario - Profesor{% endblock %}
+
+{% block sidebar %}
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+        <i class="bi bi-house-door"></i> Dashboard
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link active" href="{% url 'presentation:professor_schedule' %}">
+        <i class="bi bi-calendar3"></i> Mi Horario
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+        <i class="bi bi-clipboard-check"></i> Asistencia
+    </a>
+</li>
+<li class="nav-item">
+    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+        <i class="bi bi-clipboard-data"></i> Notas
+    </a>
+</li>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1"><i class="bi bi-calendar3"></i> Mi Horario</h1>
+        <p class="text-muted">Semestre 2024-2</p>
+    </div>
+    <button class="btn btn-primary btn-custom" onclick="window.print()">
+        <i class="bi bi-printer"></i> Imprimir
+    </button>
+</div>
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-bordered mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th style="width: 14%; text-align: center;">Día</th>
+                        <th>Clases</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for day, classes in schedule_by_day.items %}
+                    <tr>
+                        <td class="fw-bold text-center align-middle" style="background-color: #f8f9fa;">
+                            {{ day }}
+                        </td>
+                        <td>
+                            {% if classes %}
+                                {% for class in classes %}
+                                <div class="p-3 mb-2" style="background-color: {% if class.type == 'Teoría' %}#e3f2fd{% else %}#e8f5e9{% endif %}; border-left: 4px solid {% if class.type == 'Teoría' %}#2196F3{% else %}#4CAF50{% endif %}; border-radius: 8px;">
+                                    <div class="row">
+                                        <div class="col-md-8">
+                                            <h6 class="mb-1">
+                                                <span class="badge {% if class.type == 'Teoría' %}bg-primary{% else %}bg-success{% endif %} badge-custom">{{ class.code }}</span>
+                                                {{ class.course }}
+                                            </h6>
+                                            <p class="mb-1 text-muted">
+                                                <i class="bi bi-bookmark"></i> {{ class.type }}
+                                                {% if class.group %}
+                                                    - Grupo: <strong>{{ class.group }}</strong>
+                                                {% endif %}
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <p class="mb-1">
+                                                <i class="bi bi-clock"></i> 
+                                                <strong>{{ class.start_time|time:"H:i" }} - {{ class.end_time|time:"H:i" }}</strong>
+                                            </p>
+                                            <p class="mb-0">
+                                                <i class="bi bi-geo-alt"></i> {{ class.room }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <div class="text-center text-muted p-3">
+                                    <i class="bi bi-x-circle"></i> Sin clases
+                                </div>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Resumen Semanal -->
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-primary">-</h3>
+                <p class="text-muted mb-0">Horas Semanales</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-success">-</h3>
+                <p class="text-muted mb-0">Clases Totales</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-body text-center">
+                <h3 class="text-warning">-</h3>
+                <p class="text-muted mb-0">Cursos Diferentes</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    @media print {
+        .sidebar, .navbar, .btn-custom, .row.mt-4 {
+            display: none !important;
+        }
+        body {
+            background-color: white !important;
+        }
+        .card {
+            box-shadow: none !important;
+            border: 1px solid #ddd !important;
+        }
+    }
+</style>
+{% endblock %}
