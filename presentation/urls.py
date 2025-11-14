@@ -1,5 +1,5 @@
 from django.urls import path
-from presentation.views import auth_views, student_views, professor_views
+from presentation.views import auth_views, student_views, professor_views, secretaria_views
 
 app_name = 'presentation'
 
@@ -22,4 +22,15 @@ urlpatterns = [
     path('profesor/notas/', professor_views.grades, name='professor_grades'),
     path('profesor/registrar-notas/<uuid:course_id>/', professor_views.record_grades, name='professor_record_grades'),
     path('profesor/horario/', professor_views.schedule, name='professor_schedule'),
+
+    # Secretaría 
+    path('secretaria/dashboard/', secretaria_views.SecretariaDashboardView.as_view(), name='secretaria_dashboard'),
+    path('secretaria/salones/', secretaria_views.ClassroomListView.as_view(), name='secretaria_classrooms'),
+    path('secretaria/salones/nuevo/', secretaria_views.ClassroomCreateView.as_view(), name='secretaria_classroom_add'),
+    path('secretaria/salones/<uuid:pk>/editar/', secretaria_views.ClassroomUpdateView.as_view(), name='secretaria_classroom_edit'),
+    path('secretaria/salones/<uuid:pk>/eliminar/', secretaria_views.ClassroomDeleteView.as_view(), name='secretaria_classroom_delete'),
+    path('secretaria/programacion/', secretaria_views.CourseScheduleView.as_view(), name='secretaria_schedule'),
+    path('secretaria/carga-masiva/', secretaria_views.BulkUploadView.as_view(), name='secretaria_upload'),
+    path('secretaria/upload/cursos/', secretaria_views.upload_cursos_view, name='secretaria_upload_cursos'),
+    path('secretaria/upload/alumnos/', secretaria_views.upload_alumnos_view, name='secretaria_upload_alumnos'),
 ]

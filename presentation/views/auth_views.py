@@ -13,6 +13,8 @@ def login_view(request):
             return redirect('presentation:student_dashboard')
         elif request.user.user_role == 'PROFESOR':
             return redirect('presentation:professor_dashboard')
+        elif request.user.user_role == 'SECRETARIA':
+            return redirect('presentation:secretaria_dashboard')
         else:
             return redirect('admin:index')
     
@@ -32,6 +34,8 @@ def login_view(request):
                     return redirect('presentation:student_dashboard')
                 elif user.user_role == 'PROFESOR':
                     return redirect('presentation:professor_dashboard')
+                elif user.user_role == 'SECRETARIA':
+                    return redirect('presentation:secretaria_dashboard')
                 else:
                     return redirect('admin:index')
             else:

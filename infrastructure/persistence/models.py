@@ -105,6 +105,30 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.course_code} - {self.course_name}"
 
+class Classroom(models.Model):
+    """Salón/Ambiente físico"""
+    classroom_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    code = models.CharField(max_length=20, unique=True)
+    name = models.CharField(max_length=100)
+    capacity = models.IntegerField()
+    location = models.CharField(max_length=200)
+    classroom_type = models.CharField(max_length=20, choices=[
+        ('AULA', 'Aula'),
+        ('LABORATORIO', 'Laboratorio'),
+    ])
+    equipment = models.TextField(blank=True)
+    is_active = models.BooleanField(default=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'classrooms'
+        verbose_name = 'Salón'
+        verbose_name_plural = 'Salones'
+    
+    def __str__(self):
+        return f"{self.code} - {self.name}"
 
 class CourseGroup(models.Model):
     """Grupo de curso (teoría)"""
@@ -125,7 +149,7 @@ class CourseGroup(models.Model):
     day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    room = models.CharField(max_length=50)
+    room = models.ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True, related_name='course_groups')
     
     professor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='groups_taught', limit_choices_to={'user_role': 'PROFESOR'})
     
@@ -160,7 +184,7 @@ class LaboratoryGroup(models.Model):
     day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    room = models.CharField(max_length=50)
+    room = models.ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True, related_name='lab_groups')
     
     professor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='labs_taught', limit_choices_to={'user_role': 'PROFESOR'})
     
