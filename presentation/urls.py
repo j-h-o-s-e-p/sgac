@@ -19,9 +19,11 @@ urlpatterns = [
     path('profesor/dashboard/', professor_views.dashboard, name='professor_dashboard'),
     path('profesor/asistencia/', professor_views.attendance, name='professor_attendance'),
     path('profesor/registrar-asistencia/<uuid:group_id>/', professor_views.record_attendance, name='professor_record_attendance'),
+    path('profesor/reporte-asistencia/<uuid:group_id>/', professor_views.attendance_report, name='professor_attendance_report'),
     path('profesor/notas/', professor_views.grades, name='professor_grades'),
-    path('profesor/registrar-notas/<uuid:course_id>/', professor_views.record_grades, name='professor_record_grades'),
+    path('profesor/registrar-notas/<uuid:course_id>/', professor_views.consolidated_grades, name='professor_record_grades'),
     path('profesor/horario/', professor_views.schedule, name='professor_schedule'),
+    path('profesor/notas/<uuid:course_id>/cargar-csv/', professor_views.upload_grades_csv, name='professor_upload_grades_csv'),
 
     # Secretaría 
     path('secretaria/dashboard/', secretaria_views.SecretariaDashboardView.as_view(), name='secretaria_dashboard'),
@@ -31,6 +33,6 @@ urlpatterns = [
     path('secretaria/salones/<uuid:pk>/eliminar/', secretaria_views.ClassroomDeleteView.as_view(), name='secretaria_classroom_delete'),
     path('secretaria/programacion/', secretaria_views.CourseScheduleView.as_view(), name='secretaria_schedule'),
     path('secretaria/carga-masiva/', secretaria_views.BulkUploadView.as_view(), name='secretaria_upload'),
-    path('secretaria/upload/cursos/', secretaria_views.upload_cursos_view, name='secretaria_upload_cursos'),
-    path('secretaria/upload/alumnos/', secretaria_views.upload_alumnos_view, name='secretaria_upload_alumnos'),
+    path('secretaria/upload/group/<uuid:group_id>/', secretaria_views.upload_students_to_group_view, name='secretaria_upload_students_to_group'),
+    path('api/schedule/save/', secretaria_views.save_course_group_schedule, name='api_save_schedule'),
 ]
