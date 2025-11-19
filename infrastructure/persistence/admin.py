@@ -1,11 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from .models import (
-    CustomUser, Semester, Course, CourseGroup, LaboratoryGroup,
+    CustomUser,Classroom, Semester, Course, CourseGroup, Schedule, LaboratoryGroup,
     Evaluation, Syllabus, SyllabusSession, LabEnrollmentCampaign,
     StudentPostulation, LabAssignment, StudentEnrollment,
-    AttendanceRecord, GradeRecord, SubstitutoryExamEnrollment,
-    SubstitutoryGradeRecord, AuditLog
+    AttendanceRecord, GradeRecord, AuditLog
 )
 
 @admin.register(CustomUser)
@@ -30,6 +29,12 @@ class CustomUserAdmin(BaseUserAdmin):
         }),
     )
 
+@admin.register(Classroom)
+class ClassroomAdmin(admin.ModelAdmin):
+    list_display = ['name', 'capacity', 'location']
+    search_fields = ['name', 'location']
+    ordering = ['name']
+
 @admin.register(Semester)
 class SemesterAdmin(admin.ModelAdmin):
     list_display = ['name', 'start_date', 'end_date', 'is_active']
@@ -44,12 +49,43 @@ class CourseAdmin(admin.ModelAdmin):
     search_fields = ['course_code', 'course_name']
     ordering = ['cycle', 'course_code']
 
+class ScheduleInline(admin.TabularInline):
+    """
+    Esto permite editar los Horarios (Schedule) 
+    DENTRO de la página de su Grupo de Curso (CourseGroup).
+    """
+    model = Schedule
+
+    fields = ('day_of_week', 'start_time', 'end_time', 'room')
+    raw_id_fields = ('room',) 
+    extra = 1 
+    verbose_name = "Bloque de Horario"
+    verbose_name_plural = "Bloques de Horario"
+
+
 @admin.register(CourseGroup)
 class CourseGroupAdmin(admin.ModelAdmin):
-    list_display = ['group_code', 'course', 'professor', 'capacity', 'day_of_week', 'start_time', 'end_time', 'room']
-    list_filter = ['course__cycle', 'day_of_week']
-    search_fields = ['group_code', 'course__course_name', 'professor__email']
-    raw_id_fields = ['course', 'professor']
+    """
+    Admin para el "Grupo Lógico".
+    """
+    list_display = ('group_code', 'course', 'professor', 'capacity')
+    list_filter = ('course__cycle', 'professor') 
+    search_fields = ('group_code', 'course__course_name', 'professor__email')
+    raw_id_fields = ('course', 'professor')
+    
+    inlines = [ScheduleInline]
+
+
+@admin.register(Schedule)
+class ScheduleAdmin(admin.ModelAdmin):
+    list_display = ('course_group', 'day_of_week', 'start_time', 'end_time', 'room')
+    list_filter = ('day_of_week', 'room')
+    search_fields = (
+        'course_group__course__course_name', 
+        'course_group__group_code',
+        'room__name'
+    )
+    raw_id_fields = ('course_group', 'room')
 
 @admin.register(LaboratoryGroup)
 class LaboratoryGroupAdmin(admin.ModelAdmin):
@@ -123,19 +159,6 @@ class GradeRecordAdmin(admin.ModelAdmin):
     raw_id_fields = ['enrollment', 'evaluation', 'recorded_by']
     readonly_fields = ['recorded_at', 'rounded_score']
 
-@admin.register(SubstitutoryExamEnrollment)
-class SubstitutoryExamEnrollmentAdmin(admin.ModelAdmin):
-    list_display = ['student', 'course', 'unit_to_replace', 'enrolled_at']
-    list_filter = ['unit_to_replace']
-    search_fields = ['student__email', 'course__course_name']
-    raw_id_fields = ['student', 'course']
-
-@admin.register(SubstitutoryGradeRecord)
-class SubstitutoryGradeRecordAdmin(admin.ModelAdmin):
-    list_display = ['exam_enrollment', 'score', 'recorded_by', 'recorded_at']
-    search_fields = ['exam_enrollment__student__email']
-    raw_id_fields = ['exam_enrollment', 'recorded_by']
-    readonly_fields = ['recorded_at']
 
 @admin.register(AuditLog)
 class AuditLogAdmin(admin.ModelAdmin):

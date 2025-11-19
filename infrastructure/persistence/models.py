@@ -1,9 +1,19 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.db.models import Max
+from decimal import Decimal, InvalidOperation
 import uuid
 
 
 # ==================== IDENTITY CONTEXT ====================
+DAY_CHOICES = [
+    ('LUNES', 'Lunes'),
+    ('MARTES', 'Martes'),
+    ('MIERCOLES', 'Miércoles'),
+    ('JUEVES', 'Jueves'),
+    ('VIERNES', 'Viernes'),
+    ('SABADO', 'Sábado'),
+]
 
 class CustomUser(AbstractUser):
     """
@@ -108,7 +118,13 @@ class Course(models.Model):
 class Classroom(models.Model):
     """Salón/Ambiente físico"""
     classroom_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    code = models.CharField(max_length=20, unique=True)
+    code = models.CharField(
+        max_length=10, 
+        unique=True, 
+        editable=False, 
+        blank=True,
+        verbose_name="Código"
+    )
     name = models.CharField(max_length=100)
     capacity = models.IntegerField()
     location = models.CharField(max_length=200)
@@ -126,44 +142,103 @@ class Classroom(models.Model):
         db_table = 'classrooms'
         verbose_name = 'Salón'
         verbose_name_plural = 'Salones'
-    
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            prefix = "A"
+
+            last_obj = self.__class__.objects.aggregate(max_code=Max('code'))
+            max_code = last_obj.get('max_code')
+            
+            new_num = 1
+            if max_code:
+                try:
+                    last_num_str = max_code.replace(prefix, '')
+                    if last_num_str.isdigit():
+                        new_num = int(last_num_str) + 1
+                except ValueError:
+                    pass 
+
+            self.code = f"{prefix}{new_num:03d}"
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.code} - {self.name}"
 
 class CourseGroup(models.Model):
-    """Grupo de curso (teoría)"""
+    """Grupo de curso"""
     group_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='groups')
     group_code = models.CharField(max_length=20)
     capacity = models.IntegerField()
+    professor = models.ForeignKey(
+        CustomUser, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True,
+        related_name='groups_taught', 
+        limit_choices_to={'user_role': 'PROFESOR'}
+    )
     
-    # Horario
-    DAY_CHOICES = [
-        ('LUNES', 'Lunes'),
-        ('MARTES', 'Martes'),
-        ('MIERCOLES', 'Miércoles'),
-        ('JUEVES', 'Jueves'),
-        ('VIERNES', 'Viernes'),
-        ('SABADO', 'Sábado'),
-    ]
-    day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
-    start_time = models.TimeField()
-    end_time = models.TimeField()
-    room = models.ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True, related_name='course_groups')
-    
-    professor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='groups_taught', limit_choices_to={'user_role': 'PROFESOR'})
-    
+    # Timestamps
+    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
     
+    students_loaded = models.BooleanField(
+        default=False,
+        help_text="Indica si ya se ha realizado una carga de alumnos para este grupo."
+    )
+    last_student_upload_at = models.DateTimeField(
+        null=True, 
+        blank=True,
+        help_text="Fecha y hora de la última carga de alumnos."
+    )
+    
     class Meta:
-        db_table = 'course_groups'
-        unique_together = [['course', 'group_code']]
+        db_table = 'course_groups' 
+        unique_together = [['course', 'group_code']] 
         verbose_name = 'Grupo de Curso'
         verbose_name_plural = 'Grupos de Curso'
+        ordering = ['course__course_code', 'group_code'] 
     
     def __str__(self):
         return f"{self.course.course_code} - {self.group_code}"
 
+
+class Schedule(models.Model):
+    schedule_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    
+    course_group = models.ForeignKey(
+        CourseGroup, 
+        on_delete=models.CASCADE, 
+        related_name='schedules' 
+    )
+    
+    day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
+    start_time = models.TimeField()
+    end_time = models.TimeField()
+    room = models.ForeignKey(
+        Classroom, 
+        on_delete=models.SET_NULL, 
+        null=True, 
+        blank=True, 
+        related_name='schedules' 
+    )
+    
+    # Timestamps
+    updated_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'schedules' 
+        verbose_name = 'Bloque de Horario'
+        verbose_name_plural = 'Bloques de Horario'
+        unique_together = [['course_group', 'day_of_week', 'start_time']]
+        ordering = ['day_of_week', 'start_time']
+
+    def __str__(self):
+        return f"{self.course_group} ({self.get_day_of_week_display()} {self.start_time}-{self.end_time})"
 
 class LaboratoryGroup(models.Model):
     """Grupo de laboratorio"""
@@ -379,6 +454,40 @@ class StudentEnrollment(models.Model):
         self.current_attendance_percentage = round(percentage, 2)
         self.save()
         return self.current_attendance_percentage
+    
+    def calculate_final_grade(self):
+        """Calcula y actualiza la nota final ponderada (0-20) del estudiante."""
+        
+        # 1. Obtener todas las evaluaciones definidas para el curso
+        evaluations = self.course.evaluations.all()
+        
+        # 2. Obtener todas las notas registradas para este enrollment en una consulta eficiente
+        grade_records = self.grade_records.filter(evaluation__in=evaluations).select_related('evaluation')
+        
+        final_grade = Decimal('0.00')
+        
+        if not evaluations.exists():
+             self.final_grade = None
+             self.save()
+             return
+
+        # 3. Sumar las notas ponderadas
+        for evaluation in evaluations:
+            # Buscar la nota registrada que corresponde a esta evaluación
+            grade_record = next((gr for gr in grade_records if gr.evaluation_id == evaluation.evaluation_id), None)
+            
+            if grade_record and grade_record.rounded_score is not None:
+                # La nota ya está redondeada (0-20)
+                score = grade_record.rounded_score
+                weight = evaluation.percentage / Decimal(100) # Convertir 10% a 0.10
+                
+                weighted_score = score * weight
+                final_grade += weighted_score
+
+        # 4. Guardar la nota final redondeada a dos decimales
+        self.final_grade = round(final_grade, 2)
+        self.save()
+        return self.final_grade
 
 
 class AttendanceRecord(models.Model):
@@ -442,43 +551,6 @@ class GradeRecord(models.Model):
         else:
             self.rounded_score = int(self.raw_score)
         super().save(*args, **kwargs)
-
-
-class SubstitutoryExamEnrollment(models.Model):
-    """Inscripción a examen sustitutorio"""
-    exam_enrollment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='substitutory_exams', limit_choices_to={'user_role': 'ALUMNO'})
-    course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='substitutory_exams')
-    
-    unit_to_replace = models.IntegerField()  # 1 o 2
-    enrolled_at = models.DateTimeField(auto_now_add=True)
-    
-    class Meta:
-        db_table = 'substitutory_exam_enrollments'
-        unique_together = [['student', 'course']]
-        verbose_name = 'Inscripción Examen Sustitutorio'
-        verbose_name_plural = 'Inscripciones Examen Sustitutorio'
-    
-    def __str__(self):
-        return f"{self.student.get_full_name()} - Sustitutorio Unidad {self.unit_to_replace}"
-
-
-class SubstitutoryGradeRecord(models.Model):
-    """Nota de examen sustitutorio"""
-    record_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    exam_enrollment = models.OneToOneField(SubstitutoryExamEnrollment, on_delete=models.CASCADE, related_name='grade_record')
-    
-    score = models.DecimalField(max_digits=4, decimal_places=2)
-    recorded_at = models.DateTimeField(auto_now_add=True)
-    recorded_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='substitutory_grades_created')
-    
-    class Meta:
-        db_table = 'substitutory_grade_records'
-        verbose_name = 'Nota Examen Sustitutorio'
-        verbose_name_plural = 'Notas Examen Sustitutorio'
-    
-    def __str__(self):
-        return f"Sustitutorio {self.exam_enrollment.student.get_full_name()}: {self.score}"
 
 
 # ==================== AUDITORÍA ====================
