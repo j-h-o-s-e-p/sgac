@@ -1,195 +1,140 @@
 {% extends 'base.html' %}
-
-{% block title %}Registrar Asistencia - Profesor{% endblock %}
+{% load custom_filters %}
+{% block title %}Registro de Asistencia - {{ group.name }}{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:professor_attendance' %}">
-        <i class="bi bi-clipboard-check"></i> Asistencia
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Notas
-    </a>
-</li>
-{% endblock %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}
+
 
 {% block content %}
-<div class="mb-4">
-    <a href="{% url 'presentation:professor_attendance' %}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left"></i> Volver
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Registro de Asistencia</h3>
+    <a href="{% url 'presentation:professor_attendance_report' group.group_id %}" class="btn btn-success">
+        <i class="bi bi-table"></i> Ver Todo / Excel
     </a>
 </div>
 
-<div class="card mb-4">
-    <div class="card-header">
-        <h5 class="mb-0">
-            {% if group_type == 'course' %}
-                <i class="bi bi-book"></i> {{ group.course.course_name }} - {{ group.group_code }}
-            {% else %}
-                <i class="bi bi-flask"></i> {{ group.course.course_name }} - Lab {{ group.lab_nomenclature }}
-            {% endif %}
-        </h5>
-    </div>
+<div class="card mb-4 bg-light">
     <div class="card-body">
-        <div class="row">
-            <div class="col-md-3">
-                <p class="mb-2">
-                    <i class="bi bi-calendar3"></i> 
-                    <strong>
-                        {% if group_type == 'course' %}
-                            {{ group.day_of_week }}
-                        {% else %}
-                            {{ group.day_of_week }}
-                        {% endif %}
-                    </strong>
-                </p>
+        <form method="GET" class="row align-items-end">
+            <div class="col-md-8">
+                <label class="form-label fw-bold">Seleccionar Sesión:</label>
+                <select name="date" class="form-select" onchange="this.form.submit()">
+                    {% for session in all_sessions %}
+                        <option value="{{ session.date|date:'Y-m-d' }}" 
+                            {% if current_session.number == session.number %}selected{% endif %}
+                            class="{% if session.is_today %}fw-bold text-primary{% endif %}">
+                            
+                            Sesión {{ session.number }} - {{ session.day_name|title }} {{ session.date|date:"d M" }}
+                            
+                            {% if session.is_today %}(HOY){% endif %}
+                            {% if session.is_past %}(Pasada){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
             </div>
-            <div class="col-md-3">
-                <p class="mb-2">
-                    <i class="bi bi-clock"></i> 
-                    <strong>
-                        {% if group_type == 'course' %}
-                            {{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}
-                        {% else %}
-                            {{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}
-                        {% endif %}
-                    </strong>
-                </p>
+            <div class="col-md-4">
+                {% if is_editable %}
+                    <div class="alert alert-success mb-0 py-2">
+                        <i class="bi bi-unlock"></i> Habilitado para registro
+                    </div>
+                {% else %}
+                    <div class="alert alert-warning mb-0 py-2">
+                        <i class="bi bi-lock"></i> Solo lectura
+                    </div>
+                {% endif %}
             </div>
-            <div class="col-md-3">
-                <p class="mb-2">
-                    <i class="bi bi-geo-alt"></i> 
-                    <strong>
-                        {% if group_type == 'course' %}
-                            {{ group.room }}
-                        {% else %}
-                            {{ group.room }}
-                        {% endif %}
-                    </strong>
-                </p>
-            </div>
-            <div class="col-md-3">
-                <p class="mb-2">
-                    <i class="bi bi-people"></i> 
-                    <strong>{{ enrollments.count }} estudiantes</strong>
-                </p>
-            </div>
-        </div>
+        </form>
     </div>
 </div>
 
-<!-- Formulario de Asistencia -->
 <form method="POST" id="attendanceForm">
     {% csrf_token %}
     
-    <div class="card mb-4">
-        <div class="card-header">
-            <h6 class="mb-0"><i class="bi bi-info-circle"></i> Información de la Sesión</h6>
-        </div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="session_number" class="form-label">Número de Sesión *</label>
-                    <input type="number" class="form-control" id="session_number" name="session_number" min="1" required>
-                </div>
-                <div class="col-md-6">
-                    <label for="session_date" class="form-label">Fecha *</label>
-                    <input type="date" class="form-control" id="session_date" name="session_date" value="{{ today|date:'Y-m-d' }}" required>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <div class="card">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <h6 class="mb-0"><i class="bi bi-people"></i> Lista de Estudiantes</h6>
-            <div class="btn-group" role="group">
-                <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('P')">
-                    <i class="bi bi-check-all"></i> Todos Presentes
-                </button>
-                <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('F')">
-                    <i class="bi bi-x-lg"></i> Todos Ausentes
-                </button>
+        <div class="card-header d-flex justify-content-between">
+            <span>Lista de Estudiantes ({{ enrollments|length }})</span>
+            {% if is_editable %}
+            <div>
+                <button type="button" class="btn btn-sm btn-outline-success" onclick="markAll('P')">Todos P</button>
+                <button type="button" class="btn btn-sm btn-outline-danger" onclick="markAll('F')">Todos F</button>
             </div>
+            {% endif %}
         </div>
-        <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th style="width: 5%;">#</th>
-                            <th>Código</th>
-                            <th>Estudiante</th>
-                            <th style="width: 30%; text-align: center;">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for enrollment in enrollments %}
+        
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>#</th>
+                        <th>Apellidos y Nombres</th> <th class="text-center">Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enrollment in enrollments %}
+                        {% with status=attendance_map|get_item:enrollment.enrollment_id %} 
                         <tr>
                             <td>{{ forloop.counter }}</td>
-                            <td><strong>{{ enrollment.student.username }}</strong></td>
-                            <td>{{ enrollment.student.get_full_name }}</td>
                             <td>
-                                <div class="btn-group w-100" role="group">
-                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="P_{{ enrollment.enrollment_id }}" value="P" checked>
-                                    <label class="btn btn-outline-success" for="P_{{ enrollment.enrollment_id }}">
-                                        <i class="bi bi-check-lg"></i> Presente
-                                    </label>
+                                <strong>{{ enrollment.student.last_name }}</strong>, {{ enrollment.student.first_name }}<br>
+                                <small class="text-muted">{{ enrollment.student.username }}</small>
+                            </td>
+                            <td class="text-center">
+                                {% if is_editable %}
+                                    <div class="btn-group" role="group">
+                                        <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="P_{{ enrollment.enrollment_id }}" value="P" {% if status == 'P' or not status %}checked{% endif %}>
+                                        <label class="btn btn-outline-success btn-sm" for="P_{{ enrollment.enrollment_id }}">P</label>
 
-                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="F_{{ enrollment.enrollment_id }}" value="F">
-                                    <label class="btn btn-outline-danger" for="F_{{ enrollment.enrollment_id }}">
-                                        <i class="bi bi-x-lg"></i> Falta
-                                    </label>
+                                        <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="F_{{ enrollment.enrollment_id }}" value="F" {% if status == 'F' %}checked{% endif %}>
+                                        <label class="btn btn-outline-danger btn-sm" for="F_{{ enrollment.enrollment_id }}">F</label>
 
-                                    <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="J_{{ enrollment.enrollment_id }}" value="J">
-                                    <label class="btn btn-outline-warning" for="J_{{ enrollment.enrollment_id }}">
-                                        <i class="bi bi-exclamation-lg"></i> Justificado
-                                    </label>
-                                </div>
+                                        <input type="radio" class="btn-check" name="status_{{ enrollment.enrollment_id }}" id="J_{{ enrollment.enrollment_id }}" value="J" {% if status == 'J' %}checked{% endif %}>
+                                        <label class="btn btn-outline-warning btn-sm" for="J_{{ enrollment.enrollment_id }}">J</label>
+                                    </div>
+                                {% else %}
+                                    {% if status == 'P' %} <span class="badge bg-success">Presente</span>
+                                    {% elif status == 'F' %} <span class="badge bg-danger">Falta</span>
+                                    {% elif status == 'J' %} <span class="badge bg-warning text-dark">Justificado</span>
+                                    {% else %} <span class="badge bg-secondary">Sin Registro</span>
+                                    {% endif %}
+                                {% endif %}
                             </td>
                         </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                        {% endwith %}
+                    {% endfor %}
+                </tbody>
+            </table>
         </div>
     </div>
 
-    <div class="mt-4 d-flex justify-content-between">
-        <a href="{% url 'presentation:professor_attendance' %}" class="btn btn-outline-secondary btn-custom">
-            <i class="bi bi-x-lg"></i> Cancelar
-        </a>
-        <button type="submit" class="btn btn-primary btn-custom">
+    {% if is_editable %}
+    <div class="mt-3 text-end">
+        <button type="submit" class="btn btn-primary">
             <i class="bi bi-save"></i> Guardar Asistencia
         </button>
     </div>
+    {% endif %}
 </form>
 
-<script>
-function markAll(status) {
-    const radios = document.querySelectorAll(`input[type="radio"][value="${status}"]`);
-    radios.forEach(radio => {
-        radio.checked = true;
-    });
-}
-
-// Confirmar antes de enviar
-document.getElementById('attendanceForm').addEventListener('submit', function(e) {
-    if (!confirm('¿Estás seguro de guardar esta asistencia?')) {
-        e.preventDefault();
-    }
-});
-</script>
 {% endblock %}

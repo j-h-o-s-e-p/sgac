@@ -3,27 +3,27 @@
 {% block title %}Asistencia - Profesor{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:professor_attendance' %}">
-        <i class="bi bi-clipboard-check"></i> Asistencia
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Notas
-    </a>
-</li>
-{% endblock %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}
 
 {% block content %}
 <div class="mb-4">
@@ -34,7 +34,7 @@
 <!-- Alerta informativa -->
 <div class="alert alert-info alert-custom">
     <i class="bi bi-info-circle-fill"></i>
-    <strong>Importante:</strong> Solo puedes registrar asistencia el día de la clase y dentro de los primeros 15 minutos.
+    <strong>Importante:</strong> Solo puedes registrar asistencia el día de la clase y dentro de la hora de clase.
 </div>
 
 <!-- Cursos de Teoría -->

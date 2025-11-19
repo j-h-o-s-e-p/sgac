@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% load custom_filters %} 
+
+{% block sidebar %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <a href="{% url 'presentation:professor_grades' %}" class="text-decoration-none text-muted mb-2 d-inline-block">
+            <i class="bi bi-arrow-left"></i> Volver a Cursos
+        </a>
+        <h2 class="h4">
+            <span class="badge bg-primary">{{ course.course_code }}</span> 
+            {{ course.course_name }}
+        </h2>
+    </div>
+    <div>
+        <span class="badge bg-light text-dark border">
+            <i class="bi bi-info-circle"></i> Sistema de Ponderación Activo
+        </span>
+    </div>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <!-- Botón para abrir modal de carga CSV -->
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#uploadCSVModal">
+            <i class="bi bi-file-earmark-arrow-up"></i> Cargar CSV
+        </button>
+    </div>
+</div>
+
+</div>
+
+<!-- Modal para cargar CSV -->
+<div class="modal fade" id="uploadCSVModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Cargar Notas desde CSV</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST" action="{% url 'presentation:professor_upload_grades_csv' course.course_id %}" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label class="form-label">Seleccionar Unidad</label>
+                        <select name="unit_number" class="form-select" required>
+                            <option value="">-- Seleccione --</option>
+                            <option value="1">Unidad 1</option>
+                            <option value="2">Unidad 2</option>
+                            <option value="3">Unidad 3</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Archivo CSV</label>
+                        <input type="file" name="csv_file" class="form-control" accept=".csv" required>
+                        <div class="form-text">
+                            Formato: <code>cui,continua1,examen1</code><br>
+                            Ejemplo: <code>20213145,14,15</code>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Cargar Notas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+<form method="POST" id="gradesForm" onsubmit="return confirm('¿Estás seguro? Una vez guardado NO se podrán modificar las notas de esta unidad.');">
+    {% csrf_token %}
+    
+    {# Campo oculto para saber qué unidad estamos guardando #}
+    {% if edit_unit %}
+        <input type="hidden" name="unit_number" value="{{ edit_unit }}">
+    {% endif %}
+
+    <div class="card shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover align-middle mb-0 text-center" style="font-size: 0.9rem;">
+                <thead class="table-light">
+                    <tr>
+                        <th rowspan="2" class="align-middle bg-white" style="width: 250px; position: sticky; left: 0; z-index: 10;">Estudiante</th>
+                        
+                        {% for unit, evals in units_structure.items %}
+                            {% for eval in evals %}
+                                <td class="{% if edit_unit == unit %}bg-warning bg-opacity-10{% endif %}">
+                                    {% with score=row.grades|get_item:eval.evaluation_id %}
+                                        
+                                        {% if edit_unit == unit %}
+                                            {# MODO EDICIÓN: Mostrar Inputs con valores existentes #}
+                                            <input type="number" 
+                                                name="grade_{{ row.enrollment.enrollment_id }}_{{ eval.evaluation_id }}"
+                                                class="form-control form-control-sm text-center fw-bold input-grade"
+                                                min="0" max="20" step="1"
+                                                value="{% if score is not None %}{{ score }}{% endif %}"
+                                                placeholder="-">
+                                        {% else %}
+                                            {# MODO LECTURA #}
+                                            {% if score is not None %}
+                                                <span class="fw-bold {% if score < 11 %}text-danger{% else %}text-primary{% endif %}">
+                                                    {{ score|floatformat:0 }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        {% endif %}
+
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                        {% endfor %}
+                        
+                        <th rowspan="2" class="align-middle bg-light" style="width: 80px;">Prom.<br>Final</th>
+                    </tr>
+                    
+                    <tr>
+                        {% for unit, evals in units_structure.items %}
+                            {% for eval in evals %}
+                                <th class="small bg-light" title="{{ eval.name }} ({{ eval.percentage }}%)" style="width: 90px;">
+                                    {{ eval.get_evaluation_type_display|slice:":4" }}.<br>
+                                    <span class="text-muted" style="font-size: 0.75em;">{{ eval.percentage }}%</span>
+                                </th>
+                            {% endfor %}
+                        {% endfor %}
+                    </tr>
+                </thead>
+                
+                <tbody>
+                    {% for row in matrix_data %}
+                    <tr>
+                        <td class="text-start bg-white" style="position: sticky; left: 0;">
+                            <div class="fw-bold text-truncate" style="max-width: 240px;">
+                                {{ row.student.last_name }}, {{ row.student.first_name }}
+                            </div>
+                            <small class="text-muted">{{ row.student.username }}</small>
+                        </td>
+
+                        {% for unit, evals in units_structure.items %}
+                            {% for eval in evals %}
+                                <td class="{% if edit_unit == unit %}bg-warning bg-opacity-10{% endif %}">
+                                    {# Obtenemos la nota de este alumno para esta eval #}
+                                    {% with score=row.grades|get_item:eval.evaluation_id %}
+                                        
+                                        {% if edit_unit == unit %}
+                                            {# MODO EDICIÓN: Mostrar Inputs #}
+                                            <input type="number" 
+                                                   name="grade_{{ row.enrollment.enrollment_id }}_{{ eval.evaluation_id }}"
+                                                   class="form-control form-control-sm text-center fw-bold input-grade"
+                                                   min="0" max="20" step="1"
+                                                   placeholder="-"
+                                                   required>
+                                        {% else %}
+                                            {# MODO LECTURA: Mostrar Texto #}
+                                            {% if score is not None %}
+                                                <span class="fw-bold {% if score < 11 %}text-danger{% else %}text-primary{% endif %}">
+                                                    {{ score|floatformat:0 }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        {% endif %}
+
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                        {% endfor %}
+
+                        <td class="bg-light fw-bold border-start">
+                            {% if row.final_grade is not None %}
+                                <span class="badge {% if row.final_grade >= 11 %}bg-primary{% else %}bg-danger{% endif %} fs-6">
+                                    {{ row.final_grade }}
+                                </span>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</form>
+
+<script>
+    // Validación básica en cliente para colores y rangos
+    document.querySelectorAll('.input-grade').forEach(input => {
+        input.addEventListener('input', function() {
+            let val = parseFloat(this.value);
+            if(val < 0 || val > 20) {
+                this.classList.add('is-invalid');
+            } else {
+                this.classList.remove('is-invalid');
+                if(val < 11) this.style.color = 'red';
+                else this.style.color = 'blue';
+            }
+        });
+    });
+</script>
+{% endblock %}

@@ -3,33 +3,33 @@
 {% block title %}Mi Horario - Profesor{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:professor_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
-        <i class="bi bi-clipboard-check"></i> Asistencia
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Notas
-    </a>
-</li>
-{% endblock %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}>
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
         <h1 class="h3 mb-1"><i class="bi bi-calendar3"></i> Mi Horario</h1>
-        <p class="text-muted">Semestre 2024-2</p>
+        <p class="text-muted">Semestre 2025-2</p>
     </div>
     <button class="btn btn-primary btn-custom" onclick="window.print()">
         <i class="bi bi-printer"></i> Imprimir
@@ -54,32 +54,38 @@
                         </td>
                         <td>
                             {% if classes %}
-                                {% for class in classes %}
-                                <div class="p-3 mb-2" style="background-color: {% if class.type == 'Teoría' %}#e3f2fd{% else %}#e8f5e9{% endif %}; border-left: 4px solid {% if class.type == 'Teoría' %}#2196F3{% else %}#4CAF50{% endif %}; border-radius: 8px;">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <h6 class="mb-1">
-                                                <span class="badge {% if class.type == 'Teoría' %}bg-primary{% else %}bg-success{% endif %} badge-custom">{{ class.code }}</span>
-                                                {{ class.course }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <i class="bi bi-bookmark"></i> {{ class.type }}
-                                                {% if class.group %}
-                                                    - Grupo: <strong>{{ class.group }}</strong>
-                                                {% endif %}
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <p class="mb-1">
-                                                <i class="bi bi-clock"></i> 
-                                                <strong>{{ class.start_time|time:"H:i" }} - {{ class.end_time|time:"H:i" }}</strong>
-                                            </p>
-                                            <p class="mb-0">
-                                                <i class="bi bi-geo-alt"></i> {{ class.room }}
-                                            </p>
+                                {% for schedule_item in classes %}
+                                    
+                                    {# Aplicamos la lógica directamente en el atributo class #}
+                                    <div class="clase-item {% if schedule_item.type == 'Teoría' %}clase-teoria{% else %}clase-laboratorio{% endif %}">
+                                        <div class="row">
+                                            <div class="col-md-8">
+                                                <h6 class="mb-1">
+                                                    {# Aplicamos la lógica del color del badge aquí también #}
+                                                    <span class="badge {% if schedule_item.type == 'Teoría' %}bg-primary{% else %}bg-success{% endif %} badge-custom">
+                                                        {{ schedule_item.code }}
+                                                    </span>
+                                                    {{ schedule_item.course }}
+                                                </h6>
+                                                <p class="mb-1 text-muted">
+                                                    <i class="bi bi-bookmark"></i> {{ schedule_item.type }}
+                                                    {% if schedule_item.group %}
+                                                        - Grupo: <strong>{{ schedule_item.group }}</strong>
+                                                    {% endif %}
+                                                </p>
+                                            </div>
+                                            <div class="col-md-4 text-end">
+                                                <p class="mb-1">
+                                                    <i class="bi bi-clock"></i> 
+                                                    <strong>{{ schedule_item.start_time|time:"H:i" }} - {{ schedule_item.end_time|time:"H:i" }}</strong>
+                                                </p>
+                                                <p class="mb-0">
+                                                    <i class="bi bi-geo-alt"></i> {{ schedule_item.room }}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+
                                 {% endfor %}
                             {% else %}
                                 <div class="text-center text-muted p-3">
@@ -100,7 +106,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
-                <h3 class="text-primary">-</h3>
+                <h3 class="text-primary">{{ total_horas }}</h3>
                 <p class="text-muted mb-0">Horas Semanales</p>
             </div>
         </div>
@@ -108,7 +114,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
-                <h3 class="text-success">-</h3>
+                <h3 class="text-success">{{ total_clases }}</h3>
                 <p class="text-muted mb-0">Clases Totales</p>
             </div>
         </div>
@@ -116,7 +122,7 @@
     <div class="col-md-4">
         <div class="card">
             <div class="card-body text-center">
-                <h3 class="text-warning">-</h3>
+                <h3 class="text-warning">{{ total_cursos }}</h3>
                 <p class="text-muted mb-0">Cursos Diferentes</p>
             </div>
         </div>
@@ -135,6 +141,22 @@
             box-shadow: none !important;
             border: 1px solid #ddd !important;
         }
+    }
+
+    .clase-item {
+        border-radius: 8px;
+        padding: 1rem; 
+        margin-bottom: 0.5rem; 
+    }
+
+    .clase-teoria {
+        background-color: #e3f2fd; 
+        border-left: 4px solid #2196F3; 
+    }
+
+    .clase-laboratorio {
+        background-color: #e8f5e9; 
+        border-left: 4px solid #4CAF50; 
     }
 </style>
 {% endblock %}

@@ -3,27 +3,27 @@
 {% block title %}Dashboard - Profesor{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:professor_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
-        <i class="bi bi-clipboard-check"></i> Asistencia
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Notas
-    </a>
-</li>
-{% endblock %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}
 
 {% block content %}
 <!-- Header -->
@@ -49,14 +49,14 @@
     <div class="col-md-4">
         <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
             <i class="bi bi-people" style="font-size: 2rem; opacity: 0.8;"></i>
-            <h3 class="mt-2">-</h3>
+            <h3 class="mt-2">{{ total_students }}</h3>
             <p>Estudiantes Totales</p>
         </div>
     </div>
     <div class="col-md-4">
         <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
             <i class="bi bi-calendar-check" style="font-size: 2rem; opacity: 0.8;"></i>
-            <h3 class="mt-2">2024-2</h3>
+            <h3 class="mt-2">2025-2</h3>
             <p>Semestre Actual</p>
         </div>
     </div>
@@ -76,8 +76,6 @@
                         <th>Código</th>
                         <th>Curso</th>
                         <th>Grupo</th>
-                        <th>Horario</th>
-                        <th>Aula</th>
                         <th>Capacidad</th>
                         <th>Acciones</th>
                     </tr>
@@ -90,11 +88,6 @@
                         <td>
                             <span class="badge bg-primary badge-custom">{{ group.group_code }}</span>
                         </td>
-                        <td>
-                            {{ group.day_of_week }}<br>
-                            <small class="text-muted">{{ group.start_time|time:"H:i" }} - {{ group.end_time|time:"H:i" }}</small>
-                        </td>
-                        <td>{{ group.room }}</td>
                         <td>
                             <span class="badge bg-info badge-custom">{{ group.capacity }} alumnos</span>
                         </td>

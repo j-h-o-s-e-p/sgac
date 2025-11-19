@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block sidebar %}
+<ul class="nav flex-column"> <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Notas
+        </a>
+    </li>
+</ul> {% endblock %}
+
+
+{% block content %}
+<div class="d-flex justify-content-between mb-4">
+    <h2>Reporte de Asistencia: {{ group.course.course_name }}</h2>
+    <div>
+        <a href="{% url 'presentation:professor_record_attendance' group.group_id %}" class="btn btn-outline-secondary">Volver</a>
+        <a href="?export=excel" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-bordered table-sm table-hover text-center" style="font-size: 0.9rem;">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-start">Estudiante</th>
+                    <th>%</th>
+                    {% for session in sessions %}
+                        <th title="{{ session.date }}">
+                            S{{ session.number }}<br>
+                            <small style="font-size: 0.7rem">{{ session.date|date:"d/m" }}</small>
+                        </th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for row in matrix %}
+                <tr>
+                    <td class="text-start text-nowrap">
+                        {{ row.student.last_name }}, {{ row.student.first_name }}
+                    </td>
+                    <td class="fw-bold {% if row.enrollment.current_attendance_percentage < 70 %}text-danger{% endif %}">
+                        {{ row.enrollment.current_attendance_percentage|floatformat:0 }}%
+                    </td>
+                    {% for data in row.attendance_data %}
+                        <td>
+                            {% if data.status == 'P' %}<i class="bi bi-check text-success"></i>
+                            {% elif data.status == 'F' %}<span class="text-danger fw-bold">F</span>
+                            {% elif data.status == 'J' %}<span class="text-warning fw-bold">J</span>
+                            {% else %}-{% endif %}
+                        </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
