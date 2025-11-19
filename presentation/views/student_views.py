@@ -1,9 +1,11 @@
+from datetime import time, datetime, timedelta
+from collections import defaultdict
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from infrastructure.persistence.models import (
     StudentEnrollment, CourseGroup, LaboratoryGroup,
-    GradeRecord, AttendanceRecord, Evaluation
+    GradeRecord, AttendanceRecord, Evaluation, Schedule
 )
 from collections import defaultdict
 
@@ -42,60 +44,143 @@ def dashboard(request):
 
 @login_required
 def schedule(request):
-    """Vista de horario del alumno"""
+    """Vista de horario del alumno con grid por bloques horarios"""
     
     if request.user.user_role != 'ALUMNO':
         messages.error(request, 'No tienes permisos para acceder a esta página.')
         return redirect('presentation:login')
     
+    # Definir bloques horarios
+    time_slots = [
+        {'start': '07:00', 'end': '07:50'},
+        {'start': '07:50', 'end': '08:40'},
+        {'start': '08:50', 'end': '09:40'},
+        {'start': '09:40', 'end': '10:30'},
+        {'start': '10:40', 'end': '11:30'},
+        {'start': '11:30', 'end': '12:20'},
+        {'start': '12:20', 'end': '13:10'},
+        {'start': '13:10', 'end': '14:00'},
+        {'start': '14:00', 'end': '14:50'},
+        {'start': '14:50', 'end': '15:40'},
+        {'start': '15:50', 'end': '16:40'},
+        {'start': '16:40', 'end': '17:30'},
+        {'start': '17:40', 'end': '18:30'},
+        {'start': '18:30', 'end': '19:20'},
+        {'start': '19:20', 'end': '20:10'},
+    ]
+    
+    days = ['LUNES', 'MARTES', 'MIERCOLES', 'JUEVES', 'VIERNES']
+    
     # Obtener matrículas del alumno
     enrollments = StudentEnrollment.objects.filter(
         student=request.user,
         status='ACTIVO'
-    ).select_related('course', 'group', 'lab_assignment__lab_group')
+    ).select_related('course', 'group', 'lab_assignment__lab_group__room') # Optimización de consulta
     
-    # Organizar horarios por día
-    schedule_by_day = {
-        'LUNES': [],
-        'MARTES': [],
-        'MIERCOLES': [],
-        'JUEVES': [],
-        'VIERNES': [],
-        'SABADO': [],
-    }
+    # Crear mapeo de colores por curso
+    course_colors = {}
+    color_index = 1
     
     for enrollment in enrollments:
-        # Horario de teoría
-        if enrollment.group:
-            schedule_by_day[enrollment.group.day_of_week].append({
-                'course': enrollment.course.course_name,
-                'code': enrollment.course.course_code,
-                'type': 'Teoría',
-                'start_time': enrollment.group.start_time,
-                'end_time': enrollment.group.end_time,
-                'room': enrollment.group.room,
-                'professor': enrollment.group.professor.get_full_name() if enrollment.group.professor else 'N/A',
-            })
+        if enrollment.course.course_code not in course_colors:
+            course_colors[enrollment.course.course_code] = color_index
+            color_index = (color_index % 10) + 1
+    
+    # Inicializar grid de horarios
+    schedule_grid = defaultdict(lambda: defaultdict(list))
+    courses_legend = []
+    has_collisions = False
+    
+    # Función auxiliar para convertir time a minutos
+    def time_to_minutes(t):
+        if isinstance(t, str):
+            h, m = map(int, t.split(':'))
+            return h * 60 + m
+        return t.hour * 60 + t.minute
+    
+    # Función para encontrar slots ocupados
+    def get_occupied_slots(start_time, end_time):
+        start_minutes = time_to_minutes(start_time)
+        end_minutes = time_to_minutes(end_time)
+        occupied = []
         
-        # Horario de laboratorio
+        for slot in time_slots:
+            slot_start = time_to_minutes(slot['start'])
+            slot_end = time_to_minutes(slot['end'])
+            
+            # Verificar si el curso ocupa este slot
+            if start_minutes <= slot_start and end_minutes > slot_start:
+                occupied.append(slot['start'])
+        
+        return occupied
+    
+    # Procesar horarios de teoría
+    for enrollment in enrollments:
+        if enrollment.group:
+            # Obtener los bloques de horario del grupo incluyendo el salón (room)
+            schedules = enrollment.group.schedules.select_related('room').all()
+            
+            for schedule in schedules:
+                slots = get_occupied_slots(schedule.start_time, schedule.end_time)
+                
+                # AQUÍ OCURRE EL CAMBIO PRINCIPAL: Usamos room.name y course.course_name
+                room_name = schedule.room.name if schedule.room else 'Sin asignar'
+                
+                course_info = {
+                    'code': enrollment.course.course_code,
+                    'name': enrollment.course.course_name,  # Nombre completo del curso
+                    'group': enrollment.group.group_code,   # Solo la letra (A, B...)
+                    'room': room_name,                      # Nombre completo del salón
+                    'type': 'Teoría',
+                    'color_index': course_colors[enrollment.course.course_code],
+                    'start': schedule.start_time,
+                    'end': schedule.end_time
+                }
+                
+                # Agregar a la leyenda
+                if not any(c['code'] == course_info['code'] for c in courses_legend):
+                    courses_legend.append({
+                        'code': course_info['code'],
+                        'name': course_info['name'],
+                        'color_index': course_info['color_index']
+                    })
+                
+                # Colocar en el grid
+                for slot_start in slots:
+                    if schedule_grid[schedule.day_of_week][slot_start]:
+                        has_collisions = True
+                    schedule_grid[schedule.day_of_week][slot_start].append(course_info)
+    
+    # Procesar horarios de laboratorio
+    for enrollment in enrollments:
         if enrollment.lab_assignment:
             lab = enrollment.lab_assignment.lab_group
-            schedule_by_day[lab.day_of_week].append({
-                'course': enrollment.course.course_name,
+            slots = get_occupied_slots(lab.start_time, lab.end_time)
+            
+            room_name = lab.room.name if lab.room else 'Sin asignar'
+            
+            course_info = {
                 'code': enrollment.course.course_code,
-                'type': f'Lab {lab.lab_nomenclature}',
-                'start_time': lab.start_time,
-                'end_time': lab.end_time,
-                'room': lab.room,
-                'professor': lab.professor.get_full_name() if lab.professor else 'N/A',
-            })
-    
-    # Ordenar por hora de inicio
-    for day in schedule_by_day:
-        schedule_by_day[day].sort(key=lambda x: x['start_time'])
+                'name': enrollment.course.course_name,
+                'group': f"Lab {lab.lab_nomenclature}", # Ej: "Lab A"
+                'room': room_name,
+                'type': 'Laboratorio',
+                'color_index': course_colors[enrollment.course.course_code],
+                'start': lab.start_time,
+                'end': lab.end_time
+            }
+            
+            for slot_start in slots:
+                if schedule_grid[lab.day_of_week][slot_start]:
+                    has_collisions = True
+                schedule_grid[lab.day_of_week][slot_start].append(course_info)
     
     context = {
-        'schedule_by_day': schedule_by_day,
+        'time_slots': time_slots,
+        'days': days,
+        'schedule_grid': dict(schedule_grid),
+        'courses_legend': courses_legend,
+        'has_collisions': has_collisions,
     }
     
     return render(request, 'student/schedule.html', context)

@@ -1,137 +1,258 @@
 {% extends 'base.html' %}
-
+{% load custom_filters %} 
 {% block title %}Mi Horario - Alumno{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:student_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Mis Notas
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
-        <i class="bi bi-pen"></i> Matrícula Lab
-    </a>
-</li>
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link active" href="{% url 'presentation:student_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Mis Notas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
+            <i class="bi bi-pen"></i> Matrícula Lab
+        </a>
+    </li>
+</ul>
 {% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between align-items-center mb-4">
-    <div>
-        <h1 class="h3 mb-1"><i class="bi bi-calendar3"></i> Mi Horario</h1>
-        <p class="text-muted">Semestre 2024-2</p>
-    </div>
-    <button class="btn btn-primary btn-custom" onclick="window.print()">
-        <i class="bi bi-printer"></i> Imprimir
-    </button>
-</div>
-
-<div class="card">
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table table-bordered mb-0">
-                <thead class="table-light">
-                    <tr>
-                        <th style="width: 14%; text-align: center;">Día</th>
-                        <th>Horario</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for day, classes in schedule_by_day.items %}
-                    <tr>
-                        <td class="fw-bold text-center align-middle" style="background-color: #f8f9fa;">
-                            {{ day }}
-                        </td>
-                        <td>
-                            {% if classes %}
-                                {% for class in classes %}
-                                <div class="p-3 mb-2" style="background-color: {% cycle '#e3f2fd' '#f3e5f5' '#e8f5e9' '#fff3e0' %}; border-left: 4px solid {% cycle '#2196F3' '#9C27B0' '#4CAF50' '#FF9800' %}; border-radius: 8px;">
-                                    <div class="row">
-                                        <div class="col-md-8">
-                                            <h6 class="mb-1">
-                                                <span class="badge bg-primary badge-custom">{{ class.code }}</span>
-                                                {{ class.course }}
-                                            </h6>
-                                            <p class="mb-1 text-muted">
-                                                <i class="bi bi-bookmark"></i> {{ class.type }}
-                                            </p>
-                                            <p class="mb-0 text-muted">
-                                                <i class="bi bi-person"></i> {{ class.professor }}
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <p class="mb-1">
-                                                <i class="bi bi-clock"></i> 
-                                                <strong>{{ class.start_time|time:"H:i" }} - {{ class.end_time|time:"H:i" }}</strong>
-                                            </p>
-                                            <p class="mb-0">
-                                                <i class="bi bi-geo-alt"></i> {{ class.room }}
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            {% else %}
-                                <div class="text-center text-muted p-3">
-                                    <i class="bi bi-x-circle"></i> Sin clases
-                                </div>
-                            {% endif %}
-                        </td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-    </div>
-</div>
-
-<!-- Leyenda -->
-<div class="card mt-4">
-    <div class="card-body">
-        <h6 class="mb-3"><i class="bi bi-info-circle"></i> Leyenda</h6>
-        <div class="row">
-            <div class="col-md-6">
-                <p class="mb-2">
-                    <span class="badge bg-primary badge-custom">Código</span> - Código del curso
-                </p>
-                <p class="mb-2">
-                    <i class="bi bi-bookmark"></i> - Tipo de clase (Teoría/Lab)
-                </p>
-            </div>
-            <div class="col-md-6">
-                <p class="mb-2">
-                    <i class="bi bi-clock"></i> - Horario de clase
-                </p>
-                <p class="mb-2">
-                    <i class="bi bi-geo-alt"></i> - Aula asignada
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-
 <style>
+    /* --- Estilos Generales (Pantalla) --- */
+    .schedule-table {
+        font-size: 0.85rem;
+        border-collapse: separate;
+        border-spacing: 0;
+        width: 100%;
+    }
+    
+    .schedule-table th {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        font-weight: 600;
+        padding: 8px 4px;
+        text-align: center;
+        border: 1px solid #dee2e6;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    
+    .schedule-table td {
+        padding: 4px;
+        border: 1px solid #dee2e6;
+        text-align: center;
+        vertical-align: middle;
+        background-color: #f8f9fa;
+        height: 60px;
+        min-width: 100px;
+    }
+    
+    .time-cell {
+        background-color: #e9ecef !important;
+        font-weight: 600;
+        color: #495057;
+        width: 60px;
+        font-size: 0.75rem;
+        position: sticky;
+        left: 0;
+        z-index: 5;
+    }
+    
+    .course-block {
+        padding: 4px;
+        border-radius: 4px;
+        color: white;
+        font-weight: 500;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        cursor: pointer;
+        font-size: 0.75rem;
+        transition: transform 0.2s;
+    }
+
+    .course-block:hover {
+        transform: translateY(-2px);
+    }
+    
+    /* --- Colores --- */
+    .color-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+    .color-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+    .color-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+    .color-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+    .color-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+    .color-6 { background: linear-gradient(135deg, #30cfd0, #330867); }
+    .color-7 { background: linear-gradient(135deg, #a8edea, #fed6e3); }
+    .color-8 { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
+    .color-9 { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
+    .color-10 { background: linear-gradient(135deg, #ff6e7f, #bfe9ff); }
+    
+    .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 20px;
+        padding: 10px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
+    .legend-color { width: 20px; height: 20px; border-radius: 4px; }
+    .collision-warning { border: 2px solid #ff6b6b !important; }
+
     @media print {
-        .sidebar, .navbar, .btn-custom, .card:last-child {
-            display: none !important;
+        /* Ocultar todo excepto el área imprimible */
+        body * { visibility: hidden; }
+        
+        /* Mostrar solo el área de impresión */
+        #printable-area, #printable-area * { visibility: visible; }
+        
+        /* Posicionar en la esquina superior izquierda */
+        #printable-area {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            background: white;
         }
-        body {
-            background-color: white !important;
+        
+        /* Tabla ajustada al ancho de papel HORIZONTAL (Landscape) */
+        .schedule-table {
+            width: 100% !important;
+            table-layout: fixed; 
+            font-size: 10px !important; /* Podemos usar una letra un poco más grande que en vertical */
         }
-        .card {
+        
+        /* Ajustar celdas para impresión */
+        .schedule-table td, .schedule-table th {
+            padding: 4px !important; /* Un poco más de padding lateral */
+            min-width: auto !important;
+            height: auto !important; /* Dejar que la altura se ajuste al contenido */
+            border: 1px solid #999 !important;
+            word-wrap: break-word;
+        }
+        
+        /* Reducir altura de bloques vacíos para ahorrar espacio vertical */
+        .schedule-table td:empty {
+            height: 25px !important; 
+        }
+
+        .course-block {
             box-shadow: none !important;
-            border: 1px solid #ddd !important;
+            border: 1px solid #ccc;
+            padding: 2px;
+        }
+
+        /* Asegurar colores de fondo */
+        .course-block, .schedule-table th {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        
+        .no-print, .btn { display: none !important; }
+        
+        /* Configuración de página HORIZONTAL */
+        @page {
+            size: landscape; /* <--- CAMBIO CLAVE */
+            margin: 0.5cm;   /* Márgenes estrechos para aprovechar el espacio */
         }
     }
 </style>
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="h4">
+            <i class="bi bi-calendar-week"></i> Mi Horario Semanal
+        </h2>
+        <p class="text-muted mb-0">Semestre 2025-2</p>
+    </div>
+    <div>
+        <button class="btn btn-outline-primary" onclick="window.print()">
+            <i class="bi bi-printer"></i> Imprimir / Guardar PDF
+        </button>
+    </div>
+</div>
+
+<div id="printable-area">
+    <div class="d-none d-print-block mb-2 text-center">
+        <h3>Horario de Clases - {{ user.get_full_name }}</h3>
+        <p class="mb-0">Semestre 2025-2</p>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="schedule-table table mb-0">
+                    <thead>
+                        <tr>
+                            <th style="width: 80px;">Hora</th>
+                            <th>Lunes</th>
+                            <th>Martes</th>
+                            <th>Miércoles</th>
+                            <th>Jueves</th>
+                            <th>Viernes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for slot in time_slots %}
+                        <tr>
+                            <td class="time-cell">
+                                <strong>{{ slot.start }}</strong> - {{ slot.end }}
+                            </td>
+                            
+                            {% for day in days %}
+                                <td>
+                                    {% with courses=schedule_grid|get_item:day|get_item:slot.start %}
+                                        {% if courses %}
+                                            {% for course_info in courses %}
+                                                <div class="course-block color-{{ course_info.color_index }} {% if courses|length > 1 %}collision-warning{% endif %}">
+                                                    
+                                                    <div class="course-room" style="font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; opacity: 0.95;">
+                                                        <i class="bi bi-geo-alt-fill"></i> 
+                                                        {{ course_info.room }} - {{ course_info.group }}
+                                                    </div>
+
+                                                    <div class="course-name" style="font-size: 0.85rem; font-weight: bold; line-height: 1.1;">
+                                                        {{ course_info.name }}
+                                                    </div>
+
+                                                </div>
+                                            {% endfor %}
+                                        {% endif %}
+                                    {% endwith %}
+                                </td>
+                            {% endfor %}
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if has_collisions %}
+<div class="alert alert-warning mt-3 no-print">
+    <i class="bi bi-exclamation-triangle"></i>
+    <strong>Advertencia:</strong> Se detectaron colisiones de horario. Las celdas con borde rojo indican conflictos.
+</div>
+{% endif %}
+
 {% endblock %}
