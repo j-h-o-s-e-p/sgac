@@ -14,6 +14,10 @@ urlpatterns = [
     path('alumno/horario/', student_views.schedule, name='student_schedule'),
     path('alumno/notas/', student_views.grades, name='student_grades'),
     path('alumno/matricula-lab/', student_views.lab_enrollment, name='student_lab_enrollment'),
+    path('student/syllabus/', student_views.syllabus_list, name='student_syllabus_list'),
+    path('student/syllabus/<uuid:course_id>/', student_views.syllabus_detail, name='student_syllabus_detail'),
+    path('student/attendance/', student_views.attendance_list, name='student_attendance_list'),
+    path('student/attendance/<uuid:course_id>/', student_views.attendance_detail, name='student_attendance_detail'),
     
     # Profesor
     path('profesor/dashboard/', professor_views.dashboard, name='professor_dashboard'),

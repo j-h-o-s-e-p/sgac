@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+
+{% block title %}Sílabo - {{ course.course_code }}{% endblock %}
+
+{% block sidebar %}
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Mis Notas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_syllabus_list' %}">
+            <i class="bi bi-file-earmark-text"></i> Sílabos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_attendance_list' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
+            <i class="bi bi-pen"></i> Matrícula Lab
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<!-- Breadcrumb -->
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'presentation:student_syllabus_list' %}">Sílabos</a></li>
+        <li class="breadcrumb-item active" aria-current="page">{{ course.course_code }}</li>
+    </ol>
+</nav>
+
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1">
+            <i class="bi bi-file-earmark-text"></i> Sílabo - {{ course.course_code }}
+        </h1>
+        <p class="text-muted">{{ course.course_name }}</p>
+    </div>
+    <a href="{% url 'presentation:student_syllabus_list' %}" class="btn btn-secondary">
+        <i class="bi bi-arrow-left"></i> Volver
+    </a>
+</div>
+
+<!-- Estadísticas de Avance -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #667eea, #764ba2); color: white;">
+            <div class="card-body">
+                <i class="bi bi-list-ol" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ total_sessions }}</h3>
+                <p class="mb-0">Total Sesiones</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #11998e, #38ef7d); color: white;">
+            <div class="card-body">
+                <i class="bi bi-check-circle" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ completed_sessions }}</h3>
+                <p class="mb-0">Completadas</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #f093fb, #f5576c); color: white;">
+            <div class="card-body">
+                <i class="bi bi-hourglass-split" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ pending_sessions }}</h3>
+                <p class="mb-0">Pendientes</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-center" style="background: linear-gradient(135deg, #4facfe, #00f2fe); color: white;">
+            <div class="card-body">
+                <i class="bi bi-graph-up" style="font-size: 2rem;"></i>
+                <h3 class="mt-2">{{ progress }}%</h3>
+                <p class="mb-0">Progreso</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Visualizador de PDF -->
+{% if syllabus.syllabus_file %}
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <i class="bi bi-file-pdf"></i> Documento del Sílabo
+    </div>
+    <div class="card-body p-0">
+        <iframe 
+            src="{{ syllabus.syllabus_file.url }}" 
+            style="width: 100%; height: 600px; border: none;"
+            type="application/pdf">
+            <p class="p-4">Tu navegador no soporta visualización de PDFs. 
+                <a href="{{ syllabus.syllabus_file.url }}" target="_blank">Descarga el PDF aquí</a>
+            </p>
+        </iframe>
+    </div>
+    <div class="card-footer">
+        <a href="{{ syllabus.syllabus_file.url }}" target="_blank" class="btn btn-primary">
+            <i class="bi bi-download"></i> Descargar PDF
+        </a>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-warning">
+    <i class="bi bi-exclamation-triangle"></i> No hay archivo PDF cargado para este sílabo.
+</div>
+{% endif %}
+
+<!-- Tabla de Sesiones -->
+<div class="card">
+    <div class="card-header">
+        <i class="bi bi-calendar3"></i> Sesiones Programadas
+    </div>
+    <div class="card-body">
+        {% if sessions %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th width="10%">Sesión</th>
+                        <th width="40%">Tema</th>
+                        <th width="15%">Fecha Planificada</th>
+                        <th width="15%">Fecha Real</th>
+                        <th width="10%">Estado</th>
+                        <th width="10%">Observaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for session in sessions %}
+                    <tr>
+                        <td class="text-center">
+                            <span class="badge bg-secondary">{{ session.session_number }}</span>
+                        </td>
+                        <td>{{ session.topic }}</td>
+                        <td>{{ session.planned_date|date:"d/m/Y" }}</td>
+                        <td>
+                            {% if session.real_date %}
+                                {{ session.real_date|date:"d/m/Y" }}
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.real_date %}
+                                <span class="badge bg-success">
+                                    <i class="bi bi-check-circle"></i> Realizada
+                                </span>
+                            {% else %}
+                                <span class="badge bg-warning">
+                                    <i class="bi bi-clock"></i> Pendiente
+                                </span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if session.observations %}
+                                <button type="button" class="btn btn-sm btn-info" 
+                                        data-bs-toggle="tooltip" 
+                                        title="{{ session.observations }}">
+                                    <i class="bi bi-info-circle"></i>
+                                </button>
+                            {% else %}
+                                <span class="text-muted">-</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="text-center py-4">
+            <i class="bi bi-calendar-x" style="font-size: 3rem; color: #ccc;"></i>
+            <p class="text-muted mt-3">No hay sesiones programadas aún.</p>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Activar tooltips de Bootstrap
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+</script>
+{% endblock %}

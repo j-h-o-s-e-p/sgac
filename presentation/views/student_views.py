@@ -292,3 +292,204 @@ def lab_enrollment(request):
     }
     
     return render(request, 'student/lab_enrollment.html', context)
+
+
+@login_required
+def syllabus_list(request):
+    """Lista de sílabos de los cursos del alumno"""
+    
+    if request.user.user_role != 'ALUMNO':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('presentation:login')
+    
+    # Obtener cursos con sílabo del alumno
+    enrollments = StudentEnrollment.objects.filter(
+        student=request.user,
+        status='ACTIVO',
+        course__syllabus__isnull=False  # Solo cursos que tienen sílabo
+    ).select_related('course', 'course__syllabus')
+    
+    # Construir datos con progreso
+    courses_with_syllabus = []
+    for enrollment in enrollments:
+        syllabus = enrollment.course.syllabus
+        courses_with_syllabus.append({
+            'enrollment': enrollment,
+            'course': enrollment.course,
+            'syllabus': syllabus,
+            'progress': syllabus.get_progress_percentage(),
+        })
+    
+    context = {
+        'courses_with_syllabus': courses_with_syllabus,
+    }
+    
+    return render(request, 'student/syllabus_list.html', context)
+
+
+@login_required
+def syllabus_detail(request, course_id):
+    """Detalle del sílabo de un curso específico"""
+    
+    if request.user.user_role != 'ALUMNO':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('presentation:login')
+    
+    # Verificar que el alumno esté matriculado en el curso
+    try:
+        enrollment = StudentEnrollment.objects.select_related(
+            'course', 
+            'course__syllabus'
+        ).get(
+            student=request.user,
+            course__course_id=course_id,
+            status='ACTIVO'
+        )
+    except StudentEnrollment.DoesNotExist:
+        messages.error(request, 'No estás matriculado en este curso.')
+        return redirect('presentation:student_syllabus_list')
+    
+    # Verificar que el curso tenga sílabo
+    try:
+        syllabus = enrollment.course.syllabus
+    except Syllabus.DoesNotExist:
+        messages.warning(request, 'Este curso aún no tiene sílabo cargado.')
+        return redirect('presentation:student_syllabus_list')
+    
+    # Obtener sesiones del sílabo
+    sessions = syllabus.sessions.all().order_by('session_number')
+    
+    # Calcular estadísticas
+    total_sessions = sessions.count()
+    completed_sessions = sessions.filter(real_date__isnull=False).count()
+    pending_sessions = total_sessions - completed_sessions
+    progress = syllabus.get_progress_percentage()
+    
+    context = {
+        'enrollment': enrollment,
+        'course': enrollment.course,
+        'syllabus': syllabus,
+        'sessions': sessions,
+        'total_sessions': total_sessions,
+        'completed_sessions': completed_sessions,
+        'pending_sessions': pending_sessions,
+        'progress': progress,
+    }
+    
+    return render(request, 'student/syllabus_detail.html', context)
+
+
+@login_required
+def attendance_list(request):
+    """Lista de asistencia por curso del alumno"""
+    
+    if request.user.user_role != 'ALUMNO':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('presentation:login')
+    
+    # Obtener matrículas del alumno
+    enrollments = StudentEnrollment.objects.filter(
+        student=request.user,
+        status='ACTIVO'
+    ).select_related('course')
+    
+    # Construir datos de asistencia
+    attendance_data = []
+    for enrollment in enrollments:
+        total_records = enrollment.attendance_records.count()
+        present_records = enrollment.attendance_records.filter(status__in=['P', 'J']).count()
+        absent_records = enrollment.attendance_records.filter(status='F').count()
+        
+        # Calcular porcentaje
+        if total_records > 0:
+            percentage = round((present_records / total_records) * 100, 2)
+        else:
+            percentage = 0
+        
+        # Determinar estado
+        if percentage >= 70:
+            status_class = 'success'
+            status_text = 'Aprobado'
+        elif percentage >= 30:
+            status_class = 'warning'
+            status_text = 'En Riesgo'
+        else:
+            status_class = 'danger'
+            status_text = 'Crítico'
+        
+        attendance_data.append({
+            'enrollment': enrollment,
+            'course': enrollment.course,
+            'total_sessions': total_records,
+            'present': present_records,
+            'absent': absent_records,
+            'percentage': percentage,
+            'status_class': status_class,
+            'status_text': status_text,
+        })
+    
+    context = {
+        'attendance_data': attendance_data,
+    }
+    
+    return render(request, 'student/attendance_list.html', context)
+
+
+@login_required
+def attendance_detail(request, course_id):
+    """Detalle de asistencia de un curso específico"""
+    
+    if request.user.user_role != 'ALUMNO':
+        messages.error(request, 'No tienes permisos para acceder a esta página.')
+        return redirect('presentation:login')
+    
+    # Verificar que el alumno esté matriculado en el curso
+    try:
+        enrollment = StudentEnrollment.objects.select_related('course').get(
+            student=request.user,
+            course__course_id=course_id,
+            status='ACTIVO'
+        )
+    except StudentEnrollment.DoesNotExist:
+        messages.error(request, 'No estás matriculado en este curso.')
+        return redirect('presentation:student_attendance_list')
+    
+    # Obtener registros de asistencia ordenados
+    attendance_records = enrollment.attendance_records.all().order_by('session_number')
+    
+    # Calcular estadísticas
+    total_sessions = attendance_records.count()
+    present_count = attendance_records.filter(status='P').count()
+    justified_count = attendance_records.filter(status='J').count()
+    absent_count = attendance_records.filter(status='F').count()
+    
+    if total_sessions > 0:
+        percentage = round(((present_count + justified_count) / total_sessions) * 100, 2)
+    else:
+        percentage = 0
+    
+    # Determinar estado
+    if percentage >= 70:
+        status_class = 'success'
+        status_text = 'Aprobado'
+    elif percentage >= 30:
+        status_class = 'warning'
+        status_text = 'En Riesgo'
+    else:
+        status_class = 'danger'
+        status_text = 'Crítico'
+    
+    context = {
+        'enrollment': enrollment,
+        'course': enrollment.course,
+        'attendance_records': attendance_records,
+        'total_sessions': total_sessions,
+        'present_count': present_count,
+        'justified_count': justified_count,
+        'absent_count': absent_count,
+        'percentage': percentage,
+        'status_class': status_class,
+        'status_text': status_text,
+    }
+    
+    return render(request, 'student/attendance_detail.html', context)

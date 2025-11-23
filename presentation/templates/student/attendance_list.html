@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+
+{% block title %}Mi Asistencia - Alumno{% endblock %}
+
+{% block sidebar %}
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Mis Notas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_syllabus_list' %}">
+            <i class="bi bi-file-earmark-text"></i> Sílabos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_attendance_list' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
+            <i class="bi bi-pen"></i> Matrícula Lab
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1"><i class="bi bi-clipboard-check"></i> Mi Asistencia</h1>
+        <p class="text-muted">Consulta tu asistencia por curso</p>
+    </div>
+</div>
+
+<!-- Alerta informativa -->
+<div class="alert alert-info">
+    <i class="bi bi-info-circle"></i> 
+    <strong>Importante:</strong> Necesitas al menos <strong>70%</strong> de asistencia para aprobar cada curso.
+</div>
+
+<!-- Lista de Cursos con Asistencia -->
+<div class="row">
+    {% if attendance_data %}
+        {% for item in attendance_data %}
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-{{ item.status_class }} text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-book"></i> {{ item.course.course_code }}
+                        </h5>
+                        <span class="badge bg-light text-dark">{{ item.status_text }}</span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <h6 class="card-title">{{ item.course.course_name }}</h6>
+                    
+                    <!-- Porcentaje de Asistencia -->
+                    <div class="mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted">Asistencia General</span>
+                            <strong class="text-{{ item.status_class }}">{{ item.percentage }}%</strong>
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <progress class="flex-grow-1" 
+                                    value="{{ item.percentage|default:0 }}" 
+                                    max="100"
+                                    style="height: 25px;">
+                                {{ item.percentage|default:0 }}%
+                            </progress>
+                            <span class="ms-2 fw-bold" style="min-width: 50px;">
+                                {{ item.percentage|default:0 }}%
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Estadísticas -->
+                    <div class="row text-center mb-3">
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <i class="bi bi-calendar3 text-primary"></i>
+                                <h4 class="mb-0 mt-1">{{ item.total_sessions }}</h4>
+                                <small class="text-muted">Total</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <i class="bi bi-check-circle text-success"></i>
+                                <h4 class="mb-0 mt-1">{{ item.present }}</h4>
+                                <small class="text-muted">Presente</small>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded">
+                                <i class="bi bi-x-circle text-danger"></i>
+                                <h4 class="mb-0 mt-1">{{ item.absent }}</h4>
+                                <small class="text-muted">Faltas</small>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Botón para ver detalle -->
+                    <a href="{% url 'presentation:student_attendance_detail' item.course.course_id %}" 
+                       class="btn btn-{{ item.status_class }} w-100">
+                        <i class="bi bi-eye"></i> Ver Detalle de Asistencia
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body text-center py-5">
+                    <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+                    <h5 class="mt-3 text-muted">No hay registros de asistencia</h5>
+                    <p class="text-muted">Tus profesores aún no han registrado asistencia en tus cursos.</p>
+                </div>
+            </div>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
