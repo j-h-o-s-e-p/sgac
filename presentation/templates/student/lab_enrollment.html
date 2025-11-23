@@ -3,26 +3,38 @@
 {% block title %}Matrícula de Laboratorios - Alumno{% endblock %}
 
 {% block sidebar %}
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
-        <i class="bi bi-house-door"></i> Dashboard
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
-        <i class="bi bi-calendar3"></i> Mi Horario
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link" href="{% url 'presentation:student_grades' %}">
-        <i class="bi bi-clipboard-data"></i> Mis Notas
-    </a>
-</li>
-<li class="nav-item">
-    <a class="nav-link active" href="{% url 'presentation:student_lab_enrollment' %}">
-        <i class="bi bi-pen"></i> Matrícula Lab
-    </a>
-</li>
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
+            <i class="bi bi-clipboard-data"></i> Mis Notas
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_syllabus_list' %}">
+            <i class="bi bi-file-earmark-text"></i> Sílabos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_attendance_list' %}">
+            <i class="bi bi-clipboard-check"></i> Asistencia
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
+            <i class="bi bi-pen"></i> Matrícula Lab
+        </a>
+    </li>
+</ul>
 {% endblock %}
 
 {% block content %}
