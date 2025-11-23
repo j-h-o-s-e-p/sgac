@@ -308,6 +308,7 @@ class Syllabus(models.Model):
     """Sílabo del curso"""
     syllabus_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name='syllabus')
+    syllabus_file = models.FileField(upload_to='syllabi/%Y/%m/', blank=True, null=True, verbose_name='Archivo PDF del Sílabo')
     loaded_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
@@ -317,6 +318,14 @@ class Syllabus(models.Model):
     
     def __str__(self):
         return f"Sílabo {self.course.course_code}"
+    
+    def get_progress_percentage(self):
+        """Calcula el porcentaje de avance del curso"""
+        total_sessions = self.sessions.count()
+        if total_sessions == 0:
+            return 0
+        completed_sessions = self.sessions.filter(real_date__isnull=False).count()
+        return round((completed_sessions / total_sessions) * 100, 2)
 
 
 class SyllabusSession(models.Model):
