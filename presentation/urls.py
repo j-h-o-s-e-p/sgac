@@ -22,12 +22,15 @@ urlpatterns = [
     # --- Módulo de Profesor ---
     path('professor/dashboard/', professor_views.dashboard, name='professor_dashboard'),
     path('professor/attendance/', professor_views.attendance, name='professor_attendance'),
+    path('professor/my-courses/', professor_views.my_courses, name='professor_my_courses'),
+    path('professor/upload-syllabus/<uuid:course_id>/', professor_views.upload_syllabus, name='professor_upload_syllabus'),
     path('professor/attendance/record/<uuid:group_id>/', professor_views.record_attendance, name='professor_record_attendance'),
     path('professor/attendance/report/<uuid:group_id>/', professor_views.attendance_report, name='professor_attendance_report'),
     path('professor/grades/', professor_views.grades, name='professor_grades'),
     path('professor/grades/record/<uuid:course_id>/', professor_views.consolidated_grades, name='professor_record_grades'),
     path('professor/schedule/', professor_views.schedule, name='professor_schedule'),
     path('professor/grades/<uuid:course_id>/upload-csv/', professor_views.upload_grades_csv, name='professor_upload_grades_csv'),
+    path('professor/statistics/', professor_views.statistics, name='professor_statistics'),
 
     # --- Módulo de Secretaría ---
     path('secretaria/dashboard/', secretaria_views.SecretariaDashboardView.as_view(), name='secretaria_dashboard'),

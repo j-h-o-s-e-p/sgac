@@ -13,13 +13,13 @@
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
-            <i class="bi bi-clipboard-check"></i> Asistencia
+        <a class="nav-link" href="{% url 'presentation:professor_my_courses' %}">
+            <i class="bi bi-collection"></i> Mis Cursos
         </a>
     </li>
     <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-            <i class="bi bi-clipboard-data"></i> Notas
+        <a class="nav-link" href="{% url 'presentation:professor_statistics' %}">
+            <i class="bi bi-graph-up"></i> Estadísticas
         </a>
     </li>
 </ul> {% endblock %}
@@ -204,7 +204,7 @@
 </form>
 
 <script>
-    // Validación básica en cliente para colores y rangos
+    // Validación para colores y rangos
     document.querySelectorAll('.input-grade').forEach(input => {
         input.addEventListener('input', function() {
             let val = parseFloat(this.value);

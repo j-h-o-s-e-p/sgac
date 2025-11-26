@@ -1,0 +1,164 @@
+{% extends 'base.html' %}
+
+{% block title %}Mis Cursos - Docente{% endblock %}
+
+{% block sidebar %}
+<ul class="nav flex-column"> 
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_my_courses' %}">
+            <i class="bi bi-collection"></i> Mis Cursos
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'presentation:professor_statistics' %}">
+            <i class="bi bi-graph-up"></i> Estadísticas
+        </a>
+    </li>
+</ul>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="h3 text-gray-800">Mis Cursos Asignados</h2>
+        <span class="text-muted"><i class="bi bi-info-circle"></i> Gestiona asistencia, notas y sílabos</span>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if unified_cards %}
+    <div class="row">
+        {% for card in unified_cards %}
+        <div class="col-xl-4 col-md-6 mb-4">
+            <div class="card border-left-primary shadow h-100 py-2 card-hover-effect">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                {% if card.type == 'TEORIA' %}
+                                    <span class="badge bg-primary">Teoría</span>
+                                {% else %}
+                                    <span class="badge bg-info">Laboratorio</span>
+                                {% endif %}
+                                <span class="text-primary ml-2">{{ card.code }}</span>
+                            </div>
+                            
+                            <div class="h5 mb-0 font-weight-bold text-gray-800 text-truncate" title="{{ card.name }}">
+                                {{ card.name }}
+                            </div>
+                            <div class="text-muted small mb-3">{{ card.group_label }}</div>
+
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'presentation:professor_record_attendance' card.id_for_attendance %}" class="btn btn-outline-primary btn-sm text-start">
+                                    <i class="bi bi-clipboard-check me-2"></i> Asistencia
+                                </a>
+
+                                {% if card.type == 'TEORIA' %}
+                                <a href="{% url 'presentation:professor_record_grades' card.id_for_grades %}" class="btn btn-outline-success btn-sm text-start">
+                                    <i class="bi bi-clipboard-data me-2"></i> Registro de Notas
+                                </a>
+                                {% endif %}
+
+                                <div class="btn-group" role="group">
+                                    {% if card.has_syllabus %}
+                                        <a href="{{ card.syllabus_url }}" target="_blank" class="btn btn-success btn-sm w-75 text-start">
+                                            <i class="bi bi-file-earmark-pdf me-2"></i> Ver Sílabo
+                                        </a>
+                                        <button type="button" class="btn btn-outline-secondary btn-sm w-25" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#uploadModal" 
+                                                data-course-id="{{ card.course.course_id }}"
+                                                data-course-name="{{ card.name }}"
+                                                title="Actualizar Sílabo">
+                                            <i class="bi bi-pencil"></i>
+                                        </button>
+                                    {% else %}
+                                        <button type="button" class="btn btn-outline-danger btn-sm w-100 text-start" 
+                                                data-bs-toggle="modal" 
+                                                data-bs-target="#uploadModal" 
+                                                data-course-id="{{ card.course.course_id }}"
+                                                data-course-name="{{ card.name }}">
+                                            <i class="bi bi-upload me-2"></i> Subir Sílabo
+                                        </button>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-journal-bookmark fa-2x text-gray-300" style="font-size: 3rem; opacity: 0.1;"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5">
+        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
+        <p class="mt-3 text-muted">No tienes cursos asignados actualmente.</p>
+    </div>
+    {% endif %}
+</div>
+
+<div class="modal fade" id="uploadModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Gestionar Sílabo</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="syllabusForm" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Subir sílabo para: <strong id="modalCourseName"></strong></p>
+                    <div class="mb-3">
+                        <label for="syllabus_pdf" class="form-label">Seleccionar archivo PDF</label>
+                        <input class="form-control" type="file" id="syllabus_pdf" name="syllabus_pdf" accept="application/pdf" required>
+                    </div>
+                    <div class="alert alert-info small">
+                        <i class="bi bi-info-circle"></i> El archivo reemplazará cualquier versión anterior.
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-primary">Subir Archivo</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    var uploadModal = document.getElementById('uploadModal')
+    uploadModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget
+        var courseId = button.getAttribute('data-course-id')
+        var courseName = button.getAttribute('data-course-name')
+        
+        var modalTitle = uploadModal.querySelector('#modalCourseName')
+        var form = uploadModal.querySelector('#syllabusForm')
+        
+        modalTitle.textContent = courseName
+
+        form.action = "/presentation/professor/upload-syllabus/" + courseId + "/";
+    })
+</script>
+{% endblock %}
