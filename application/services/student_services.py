@@ -1,13 +1,14 @@
 from collections import defaultdict
+from django.core.exceptions import ObjectDoesNotExist
 from infrastructure.persistence.models import (
-    StudentEnrollment, LaboratoryGroup, GradeRecord, Evaluation, Syllabus
+    StudentEnrollment, LaboratoryGroup, GradeRecord, Evaluation, Syllabus, SessionProgress
 )
 
 class StudentService:
     
     @staticmethod
     def get_dashboard_stats(student):
-        """Calcula estadísticas para el dashboard principal"""
+        """Saco los totales de cursos y promedios para el home"""
         enrollments = StudentEnrollment.objects.filter(
             student=student,
             status='ACTIVO'
@@ -28,8 +29,8 @@ class StudentService:
 
     @staticmethod
     def get_student_schedule(student):
-        """Procesa y organiza el horario del estudiante"""
-        # Definición de bloques horarios (Constante de negocio)
+        """Armo el horario cruzando datos de teoría y laboratorio"""
+        # Bloques horarios definidos
         TIME_SLOTS = [
             {'start': '07:00', 'end': '07:50'}, {'start': '07:50', 'end': '08:40'},
             {'start': '08:50', 'end': '09:40'}, {'start': '09:40', 'end': '10:30'},
@@ -46,7 +47,7 @@ class StudentService:
             student=student, status='ACTIVO'
         ).select_related('course', 'group', 'lab_assignment__lab_group__room')
 
-        # Lógica de colores
+        # Asigno colores a los cursos para que se vea bonito
         course_colors = {}
         color_index = 1
         for enrollment in enrollments:
@@ -58,7 +59,7 @@ class StudentService:
         courses_legend = []
         has_collisions = False
 
-        # Helpers internos
+        # Helpers para calcular minutos y choques
         def time_to_minutes(t):
             if isinstance(t, str):
                 h, m = map(int, t.split(':'))
@@ -71,12 +72,11 @@ class StudentService:
             occupied = []
             for slot in TIME_SLOTS:
                 slot_start = time_to_minutes(slot['start'])
-                # Verificar si el curso ocupa este slot
                 if start_minutes <= slot_start and end_minutes > slot_start:
                     occupied.append(slot['start'])
             return occupied
 
-        # Procesar Teoría
+        # 1. Proceso horarios de Teoría
         for enrollment in enrollments:
             if enrollment.group:
                 schedules = enrollment.group.schedules.select_related('room').all()
@@ -95,7 +95,6 @@ class StudentService:
                         'end': schedule.end_time
                     }
 
-                    # Leyenda
                     if not any(c['code'] == course_info['code'] for c in courses_legend):
                         courses_legend.append({
                             'code': course_info['code'],
@@ -103,13 +102,12 @@ class StudentService:
                             'color_index': course_info['color_index']
                         })
 
-                    # Grid
                     for slot_start in slots:
                         if schedule_grid[schedule.day_of_week][slot_start]:
                             has_collisions = True
                         schedule_grid[schedule.day_of_week][slot_start].append(course_info)
 
-        # Procesar Laboratorio
+        # 2. Proceso horarios de Laboratorio
         for enrollment in enrollments:
             if enrollment.lab_assignment:
                 lab = enrollment.lab_assignment.lab_group
@@ -142,10 +140,10 @@ class StudentService:
 
     @staticmethod
     def get_grades_summary(student):
-        """Calcula las notas y promedios por unidad"""
+        """Calculo promedios por unidad y nota final"""
         enrollments = StudentEnrollment.objects.filter(
             student=student, status='ACTIVO'
-        ).select_related('course').prefetch_related('grade_records__evaluation')
+        ).select_related('course','group').prefetch_related('grade_records__evaluation')
         
         courses_data = []
         for enrollment in enrollments:
@@ -161,12 +159,14 @@ class StudentService:
                     'grade': grade,
                 })
             
+            # Calculo ponderado por unidad
             unit_averages = {}
             for unit, evals in units_data.items():
                 total_percentage = 0
                 weighted_sum = 0
                 for item in evals:
                     if item['grade']:
+                        # Nota: el modelo GradeRecord ya tiene rounded_score
                         weighted_sum += float(item['grade'].rounded_score) * float(item['evaluation'].percentage) / 100
                         total_percentage += float(item['evaluation'].percentage)
                 
@@ -182,8 +182,8 @@ class StudentService:
 
     @staticmethod
     def get_lab_enrollment_options(student):
-        """Obtiene laboratorios disponibles y matrículas actuales"""
-        # Sin lab asignado
+        """Veo qué laboratorios puede elegir el alumno"""
+        # Cursos donde le falta matricularse a lab
         enrollments_no_lab = StudentEnrollment.objects.filter(
             student=student, status='ACTIVO', lab_assignment__isnull=True
         ).select_related('course')
@@ -194,7 +194,7 @@ class StudentService:
             if labs.exists():
                 courses_with_labs.append({'enrollment': enrollment, 'labs': labs})
         
-        # Con lab asignado
+        # Labs donde ya tiene cupo
         enrolled_labs = StudentEnrollment.objects.filter(
             student=student, status='ACTIVO', lab_assignment__isnull=False
         ).select_related('course', 'lab_assignment__lab_group')
@@ -203,35 +203,123 @@ class StudentService:
 
     @staticmethod
     def get_attendance_summary(student):
-        """Calcula porcentajes y estados de asistencia"""
+        """Resumen general de asistencia de todos los cursos"""
         enrollments = StudentEnrollment.objects.filter(
             student=student, status='ACTIVO'
-        ).select_related('course')
+        ).select_related('course', 'group')
         
         attendance_data = []
         for enrollment in enrollments:
-            total = enrollment.attendance_records.count()
-            present = enrollment.attendance_records.filter(status__in=['P', 'J']).count()
-            absent = enrollment.attendance_records.filter(status='F').count()
-            
-            percentage = round((present / total) * 100, 2) if total > 0 else 0
-            
-            # Lógica de negocio sobre el estado (esto debería estar aquí, no en la vista)
-            if percentage >= 70:
-                status_class, status_text = 'success', 'Aprobado'
-            elif percentage >= 30:
-                status_class, status_text = 'warning', 'En Riesgo'
-            else:
-                status_class, status_text = 'danger', 'Crítico'
-            
-            attendance_data.append({
+            data = StudentService._calculate_attendance_metrics(enrollment)
+            attendance_data.append(data)
+        return attendance_data
+
+    @staticmethod
+    def get_syllabus_list(student):
+        """Lista los cursos que tienen sílabo cargado"""
+        enrollments = StudentEnrollment.objects.filter(
+            student=student,
+            status='ACTIVO',
+            course__syllabus__isnull=False
+        ).select_related('course', 'course__syllabus', 'group')
+        
+        data = []
+        for enrollment in enrollments:
+            syllabus = enrollment.course.syllabus
+            data.append({
                 'enrollment': enrollment,
                 'course': enrollment.course,
-                'total_sessions': total,
-                'present': present,
-                'absent': absent,
-                'percentage': percentage,
-                'status_class': status_class,
-                'status_text': status_text,
+                'syllabus': syllabus,
+                'progress': syllabus.get_progress_percentage(),
             })
-        return attendance_data
+        return data
+
+    @staticmethod
+    def get_syllabus_detail(student, course_id):
+        """
+        Detalle completo del avance del sílabo.
+        Retorna un dict con datos o None si hay error.
+        """
+        try:
+            enrollment = StudentEnrollment.objects.select_related(
+                'course', 'course__syllabus', 'group'
+            ).get(student=student, course__course_id=course_id, status='ACTIVO')
+        except ObjectDoesNotExist:
+            return {'error': 'not_enrolled'}
+        
+        if not hasattr(enrollment.course, 'syllabus'):
+            return {'error': 'no_syllabus'}
+            
+        syllabus = enrollment.course.syllabus
+        sessions = syllabus.sessions.all().select_related('progress').order_by('session_number')
+        
+        total_sessions = sessions.count()
+        
+        # Cuento las sesiones marcadas como completadas para ESTE grupo
+        completed_sessions = SessionProgress.objects.filter(
+            session__syllabus=syllabus,
+            course_group=enrollment.group
+        ).count()
+        
+        return {
+            'success': True,
+            'enrollment': enrollment,
+            'course': enrollment.course,
+            'syllabus': syllabus,
+            'sessions': sessions,
+            'total_sessions': total_sessions,
+            'completed_sessions': completed_sessions,
+            'pending_sessions': total_sessions - completed_sessions,
+            'progress': syllabus.get_progress_percentage(),
+        }
+
+    @staticmethod
+    def get_attendance_detail(student, course_id):
+        """Detalle de faltas y asistencias de un solo curso"""
+        try:
+            enrollment = StudentEnrollment.objects.select_related('course', 'group').get(
+                student=student, course__course_id=course_id, status='ACTIVO'
+            )
+        except ObjectDoesNotExist:
+            return None # O lanzar excepción controlada
+            
+        # Reutilizo la lógica de cálculo
+        return StudentService._calculate_attendance_metrics(enrollment, include_records=True)
+
+    @staticmethod
+    def _calculate_attendance_metrics(enrollment, include_records=False):
+        """Helper privado para no repetir la lógica del 70% / 30%"""
+        # Si me piden el detalle, traigo los objetos, sino solo cuento
+        records_qs = enrollment.attendance_records.all().order_by('session_number')
+        
+        total = records_qs.count()
+        present = records_qs.filter(status='P').count()
+        justified = records_qs.filter(status='J').count() # La 'J' cuenta como asistencia para el %
+        absent = records_qs.filter(status='F').count()
+        
+        percentage = round(((present + justified) / total) * 100, 2) if total > 0 else 0
+        
+        # Regla de negocio visual
+        if percentage >= 70:
+            status_class, status_text = 'success', 'Aprobado'
+        elif percentage >= 30:
+            status_class, status_text = 'warning', 'En Riesgo'
+        else:
+            status_class, status_text = 'danger', 'Crítico'
+            
+        result = {
+            'enrollment': enrollment,
+            'course': enrollment.course,
+            'total_sessions': total,
+            'present_count': present,
+            'justified_count': justified,
+            'absent_count': absent,
+            'percentage': percentage,
+            'status_class': status_class,
+            'status_text': status_text,
+        }
+        
+        if include_records:
+            result['attendance_records'] = records_qs
+            
+        return result

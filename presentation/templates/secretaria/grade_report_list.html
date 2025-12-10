@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reporte de Notas - Secretaría{% endblock %}
+
+{% block extra_css %}
+    <link href="{% static 'css/secretaria.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block sidebar %}
+    {% include 'includes/secretaria_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="page-header-sec">
+    <h1 class="h3 fw-bold text-dark mb-0">Reporte de Notas</h1>
+    <p class="text-muted mb-0">Descarga de consolidados por grupo académico</p>
+</div>
+
+<div class="card shadow-sm border-0 mb-4 bg-light">
+    <div class="card-body">
+        <div class="input-group">
+            <span class="input-group-text bg-white border-end-0 text-muted">
+                <i class="bi bi-search"></i>
+            </span>
+            <input type="text" id="gradeReportSearch" class="form-control border-start-0 ps-0" 
+                   placeholder="Buscar por código, curso o profesor..." autocomplete="off">
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 rounded-3">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="groupsTable">
+                <thead class="bg-gradient-teal text-white">
+                    <tr>
+                        <th class="ps-4 py-3">Código</th>
+                        <th>Nombre del Curso</th>
+                        <th>Grupo</th>
+                        <th>Docente Responsable</th>
+                        <th class="text-center pe-4">Acción</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white">
+                    {% for group in groups %}
+                    <tr class="group-row">
+                        <td class="ps-4 fw-bold text-primary">{{ group.course.course_code }}</td>
+                        <td class="course-name">{{ group.course.course_name }}</td>
+                        <td>
+                            <span class="badge bg-light text-dark border">
+                                {{ group.group_code }}
+                            </span>
+                        </td>
+                        <td class="prof-name">
+                            {% if group.professor %}
+                                {{ group.professor.get_full_name }}
+                            {% else %}
+                                <span class="text-muted small fst-italic">Sin asignar</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center pe-4">
+                            <a href="{% url 'presentation:secretaria_download_grades' group.group_id %}" 
+                               class="btn btn-sm btn-success fw-bold shadow-sm">
+                                <i class="bi bi-file-earmark-excel me-1"></i> Excel
+                            </a>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-5 text-muted">
+                            <i class="bi bi-inbox fs-1 d-block mb-2 opacity-25"></i>
+                            No hay grupos registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <div id="noResultsMessage" class="text-center py-5 d-none">
+                <p class="text-muted fw-bold">No se encontraron resultados para tu búsqueda.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+    <script src="{% static 'js/secretaria.js' %}"></script>
+{% endblock %}

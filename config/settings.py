@@ -1,14 +1,27 @@
 import os
 from pathlib import Path
 from decouple import config
+from django.contrib.messages import constants as messages
 
+# ==================== RUTAS BASE ====================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ==================== SEGURIDAD ====================
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key')
 DEBUG = config('DEBUG', default=True, cast=bool)
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,web').split(',')
 
+# Orígenes confiables para protección CSRF (Importante para despliegue)
+CSRF_TRUSTED_ORIGINS = [
+    "http://localhost:8000", "http://127.0.0.1:8000",
+    "https://localhost:8000", "https://127.0.0.1:8000",
+]
+
+X_FRAME_OPTIONS = 'SAMEORIGIN'
+
+# ==================== APLICACIONES ====================
 INSTALLED_APPS = [
+    # Apps nativas
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -16,22 +29,23 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     
-    # Third-party
+    # Librerías de terceros
     'rest_framework',
     'rest_framework.authtoken',
-    'drf_spectacular',
-    'corsheaders',
+    'drf_spectacular', # Documentación API
+    'corsheaders',     # Manejo de CORS
     
-    # Infrastructure (para models)
-    'infrastructure.persistence',
-
+    # --- Arquitectura Limpia (Apps Locales) ---
+    # Infraestructura: Persistencia y modelos de datos
+    'infrastructure.persistence.apps.PersistenceConfig', 
+    # Presentación: Web, Vistas, Templates
     'presentation',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'whitenoise.middleware.WhiteNoiseMiddleware',
-    'corsheaders.middleware.CorsMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', # Servir estáticos optimizados
+    'corsheaders.middleware.CorsMiddleware',      # Headers CORS antes de respuestas comunes
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -45,7 +59,7 @@ ROOT_URLCONF = 'config.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'presentation' / 'templates'], 
+        'DIRS': [BASE_DIR / 'presentation' / 'templates'], # Ruta explícita a templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -60,7 +74,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# Database
+# ==================== BASE DE DATOS ====================
+# Configuración vía variables de entorno (DB_*)
 DATABASES = {
     'default': {
         'ENGINE': config('DB_ENGINE', default='django.db.backends.postgresql'),
@@ -72,16 +87,19 @@ DATABASES = {
     }
 }
 
-# Redis
+# Modelo de Usuario Personalizado (Esencial definirlo al inicio del proyecto)
+AUTH_USER_MODEL = 'persistence.CustomUser'
+
+# ==================== CACHE & CELERY (REDIS) ====================
 REDIS_URL = config('REDIS_URL', default='redis://localhost:6379/0')
 
-# Celery
+# Configuración Celery
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 
-# Cache
+# Configuración Caché (Usando Redis)
 CACHES = {
     'default': {
         'BACKEND': 'django_redis.cache.RedisCache',
@@ -92,7 +110,7 @@ CACHES = {
     }
 }
 
-# Password validation
+# ==================== VALIDACIÓN DE PASSWORD ====================
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator', 'OPTIONS': {'min_length': 8}},
@@ -100,25 +118,39 @@ AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
 ]
 
-# Internationalization
+# ==================== LOCALIZACIÓN ====================
 LANGUAGE_CODE = 'es-pe'
 TIME_ZONE = 'America/Lima'
 USE_I18N = True
 USE_TZ = True
 
-# Static files
+# ==================== ESTÁTICOS Y MEDIA ====================
+# URLs
 STATIC_URL = '/static/'
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-STATICFILES_DIRS = []
-
-
-
 MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
+
+# Rutas físicas
+STATIC_ROOT = BASE_DIR / 'staticfiles' # Donde WhiteNoise recolecta los estáticos
+MEDIA_ROOT = BASE_DIR / 'media'        # Archivos subidos por usuario
+
+# Carpetas adicionales de estáticos (desarrollo)
+STATICFILES_DIRS = [
+    BASE_DIR / 'presentation' / 'static',
+]
+
+# Motores de almacenamiento (Whitenoise para producción)
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-# REST Framework
+# ==================== DRF & API ====================
 REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
     'DEFAULT_AUTHENTICATION_CLASSES': [
@@ -132,7 +164,6 @@ REST_FRAMEWORK = {
     'PAGE_SIZE': 50,
 }
 
-# DRF Spectacular (OpenAPI)
 SPECTACULAR_SETTINGS = {
     'TITLE': 'SGAC API',
     'DESCRIPTION': 'Sistema de Gestión Académica Complementario',
@@ -140,28 +171,24 @@ SPECTACULAR_SETTINGS = {
     'SERVE_INCLUDE_SCHEMA': False,
 }
 
-# CORS
+# Configuración CORS (Permitir frontend React/Vue/etc)
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
 ]
-
 CORS_ALLOW_CREDENTIALS = True
 
+# ==================== LOGGING ====================
+# Crea carpeta logs si no existe
 LOG_DIR = BASE_DIR / 'logs'
 os.makedirs(LOG_DIR, exist_ok=True)
 
-# Logging
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
             'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
-            'style': '{',
-        },
-        'simple': {
-            'format': '{levelname} {message}',
             'style': '{',
         },
     },
@@ -172,9 +199,9 @@ LOGGING = {
         },
         'file': {
             'class': 'logging.handlers.RotatingFileHandler',
-            'filename': BASE_DIR / 'logs' / 'sgac.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB
-            'backupCount': 5,
+            'filename': LOG_DIR / 'sgac.log',
+            'maxBytes': 1024 * 1024 * 5,  # 5 MB por archivo
+            'backupCount': 5,              # Mantener 5 archivos de backup
             'formatter': 'verbose',
         },
     },
@@ -182,33 +209,14 @@ LOGGING = {
         'handlers': ['console', 'file'],
         'level': 'INFO',
     },
-    'loggers': {
-        'django': {
-            'handlers': ['console', 'file'],
-            'level': 'INFO',
-            'propagate': False,
-        },
-    },
 }
 
-# Custom User Model
-AUTH_USER_MODEL = 'persistence.CustomUser'
-
-
-# Whitenoise configuration
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
+# ==================== UI HELPERS ====================
+# Mapeo de etiquetas de mensajes de Django a clases de Bootstrap 5
+MESSAGE_TAGS = {
+    messages.DEBUG: 'secondary',
+    messages.INFO: 'info',
+    messages.SUCCESS: 'success',
+    messages.WARNING: 'warning', 
+    messages.ERROR: 'danger',   
 }
-
-CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000",
-    "http://127.0.0.1:8000",
-    "https://fantastic-succotash-jw6qj5gw4v43px7w-8000.app.github.dev",
-    "https://localhost:8000",
-    "https://127.0.0.1:8000",
-]

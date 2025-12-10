@@ -1,107 +1,95 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Estadísticas Académicas{% endblock %}
 
 {% block sidebar %}
-<ul class="nav flex-column"> 
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-            <i class="bi bi-house-door"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-            <i class="bi bi-calendar3"></i> Mi Horario
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_my_courses' %}">
-            <i class="bi bi-collection"></i> Mis Cursos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_statistics' %}">
-            <i class="bi bi-graph-up"></i> Estadísticas
-        </a>
-    </li>
-</ul>
+    {% include 'includes/professor_sidebar.html' %}
 {% endblock %}
 
 {% block content %}
-<div class="container-fluid">
+<div class="container-fluid px-0">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h2 class="h3 text-gray-800">Análisis de Rendimiento</h2>
-            <p class="text-muted mb-0">Visión general del semestre actual</p>
+            <h2 class="h3 fw-bold text-dark mb-1"><i class="bi bi-graph-up me-2"></i>Análisis de Rendimiento</h2>
+            <p class="text-muted mb-0 small">Visión general del semestre y métricas de riesgo.</p>
         </div>
-        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm">
-            <i class="bi bi-printer"></i> Imprimir Reporte
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm shadow-sm d-print-none">
+            <i class="bi bi-printer me-2"></i> Imprimir Reporte
         </button>
     </div>
 
     {% if no_data %}
-        <div class="alert alert-info">No hay datos suficientes para generar estadísticas. Asegúrate de tener alumnos matriculados.</div>
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Sin datos suficientes.</strong>
+                <p class="mb-0 small">Asegúrate de tener alumnos matriculados y notas registradas para generar las estadísticas.</p>
+            </div>
+        </div>
     {% else %}
 
-    <div class="row mb-4">
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-primary shadow h-100 py-2">
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-primary shadow-sm h-100 py-2 card-hover-effect">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">Promedio Global</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ global_stats.promedio_general|floatformat:2 }} / 20</div>
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Promedio Global</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.promedio_general|floatformat:2 }} / 20</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-calculator fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                            <i class="bi bi-calculator text-gray-300 fs-1 opacity-25"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-success shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-success shadow-sm h-100 py-2 card-hover-effect">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">Asistencia Global</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ global_stats.asistencia_promedio|floatformat:1 }}%</div>
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Asistencia Global</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.asistencia_promedio|floatformat:1 }}%</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-person-check fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                            <i class="bi bi-person-check text-gray-300 fs-1 opacity-25"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-info shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-info shadow-sm h-100 py-2 card-hover-effect">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">Total Alumnos</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ global_stats.total_alumnos }}</div>
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Total Alumnos</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.total_alumnos }}</div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-people fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                            <i class="bi bi-people text-gray-300 fs-1 opacity-25"></i>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="col-xl-3 col-md-6 mb-4">
-            <div class="card border-left-warning shadow h-100 py-2">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-warning shadow-sm h-100 py-2 card-hover-effect">
                 <div class="card-body">
                     <div class="row no-gutters align-items-center">
                         <div class="col mr-2">
-                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">Aprobados</div>
-                            <div class="h5 mb-0 font-weight-bold text-gray-800">{{ aprobados_count }} <span class="small text-muted">de {{ global_stats.total_alumnos }}</span></div>
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Aprobados</div>
+                            <div class="h5 mb-0 fw-bold text-dark">
+                                {{ aprobados_count }} <span class="small text-muted fw-normal">de {{ global_stats.total_alumnos }}</span>
+                            </div>
                         </div>
                         <div class="col-auto">
-                            <i class="bi bi-award fa-2x text-gray-300" style="font-size: 2rem;"></i>
+                            <i class="bi bi-award text-gray-300 fs-1 opacity-25"></i>
                         </div>
                     </div>
                 </div>
@@ -109,14 +97,14 @@
         </div>
     </div>
 
-    <div class="row mb-4">
+    <div class="row g-4 mb-4">
         <div class="col-lg-8">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Rendimiento por Curso</h6>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Rendimiento por Curso</h6>
                 </div>
                 <div class="card-body">
-                    <div style="position: relative; height: 300px; width: 100%;">
+                    <div class="chart-container-lg">
                         <canvas id="courseChart"></canvas>
                     </div>
                 </div>
@@ -124,20 +112,20 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Estado Académico</h6>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Estado Académico</h6>
                 </div>
-                <div class="card-body">
-                    <div style="position: relative; height: 250px; width: 100%;">
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div class="chart-container-sm mx-auto">
                         <canvas id="statusChart"></canvas>
                     </div>
                     
                     <div class="mt-4 text-center small">
-                        <span class="mr-2">
+                        <span class="me-3">
                             <i class="bi bi-circle-fill text-success"></i> Aprobados
                         </span>
-                        <span class="mr-2">
+                        <span>
                             <i class="bi bi-circle-fill text-danger"></i> Desaprobados
                         </span>
                     </div>
@@ -146,44 +134,47 @@
         </div>
     </div>
 
-    <div class="row">
+    <div class="row g-4">
         <div class="col-lg-7">
-            <div class="card shadow mb-4">
-                <div class="card-header py-3">
-                    <h6 class="m-0 font-weight-bold text-primary">Detalle por Curso</h6>
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Detalle por Curso</h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-bordered table-sm" width="100%" cellspacing="0">
+                        <table class="table table-bordered table-striped align-middle mb-0 table-sm" style="font-size: 0.9rem;">
                             <thead class="table-light">
                                 <tr>
-                                    <th>Curso</th>
-                                    <th>Promedio</th>
-                                    <th>Mejor</th>
-                                    <th>Peor</th>
-                                    <th>Asistencia</th>
+                                    <th class="ps-3">Curso</th>
+                                    <th class="text-center">Prom.</th>
+                                    <th class="text-center">Mejor</th>
+                                    <th class="text-center">Peor</th>
+                                    <th class="pe-3" style="width: 30%;">Asistencia</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for c in course_performance %}
                                 <tr>
-                                    <td>{{ c.course_name }} <span class="badge bg-light text-dark border">{{ c.group_code }}</span></td>
-                                    <td class="{% if c.avg_grade < 10.5 %}text-danger fw-bold{% else %}text-success{% endif %}">
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ c.course_name }}</div>
+                                        <span class="badge bg-light text-dark border">{{ c.group_code }}</span>
+                                    </td>
+                                    <td class="text-center {% if c.avg_grade < 10.5 %}text-danger fw-bold{% else %}text-success fw-bold{% endif %}">
                                         {{ c.avg_grade }}
                                     </td>
-                                    <td>{{ c.max_grade }}</td>
-                                    <td class="text-danger">{{ c.min_grade }}</td>
-                                    <td>
+                                    <td class="text-center text-primary">{{ c.max_grade }}</td>
+                                    <td class="text-center text-danger">{{ c.min_grade }}</td>
+                                    <td class="pe-3">
                                         <div class="d-flex align-items-center">
                                             <progress 
                                                 max="100" 
                                                 value="{{ c.avg_attendance|stringformat:'.1f' }}"
                                                 class="flex-grow-1 me-2 html5-progress"
-                                                style="height: 20px; --progress-color: {% if c.avg_attendance < 70 %}var(--bs-danger){% else %}var(--bs-info){% endif %};">
+                                                style="height: 8px; --progress-color: {% if c.avg_attendance < 70 %}var(--danger-color){% else %}var(--info-color){% endif %};">
                                                 {{ c.avg_attendance }}%
                                             </progress>
                                             
-                                            <span class="small fw-bold {% if c.avg_attendance < 70 %}text-danger{% else %}text-info{% endif %}">
+                                            <span class="small fw-bold {% if c.avg_attendance < 70 %}text-danger{% else %}text-info{% endif %}" style="min-width: 35px; text-align: right;">
                                                 {{ c.avg_attendance }}%
                                             </span>
                                         </div>
@@ -198,40 +189,54 @@
         </div>
 
         <div class="col-lg-5">
-            <div class="card shadow mb-4 border-left-danger">
-                <div class="card-header py-3 d-flex justify-content-between align-items-center">
-                    <h6 class="m-0 font-weight-bold text-danger">
-                        <i class="bi bi-exclamation-triangle-fill"></i> Alumnos en Riesgo (Top 10)
+            <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
+                <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Alumnos en Riesgo (Top 10)
                     </h6>
                 </div>
-                <div class="card-body">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-sm">
-                            <thead>
+                        <table class="table table-hover align-middle mb-0 table-sm" style="font-size: 0.9rem;">
+                            <thead class="table-light">
                                 <tr>
-                                    <th>Alumno</th>
-                                    <th>Nota</th>
-                                    <th>Asist.</th>
+                                    <th class="ps-3">Alumno</th>
+                                    <th>Contexto</th>
+                                    <th class="text-end pe-3">Motivo</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for student in at_risk_students %}
                                 <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ student.student.get_full_name }}</div>
+                                        <div class="text-muted small"><i class="bi bi-envelope me-1"></i>{{ student.student.email }}</div>
+                                    </td>
                                     <td>
-                                        {{ student.student.get_full_name }}
-                                        <div class="small text-muted">{{ student.course.course_code }}</div>
+                                        <div class="small fw-bold text-dark text-truncate" style="max-width: 120px;">
+                                            {{ student.course.course_name }}
+                                        </div>
+                                        <span class="badge bg-secondary badge-custom" style="font-size: 0.65rem;">Grp {{ student.group.group_code }}</span>
                                     </td>
-                                    <td class="{% if student.final_grade < 10.5 %}text-danger fw-bold{% endif %}">
-                                        {{ student.final_grade|default:"-" }}
-                                    </td>
-                                    <td class="{% if student.current_attendance_percentage < 70 %}text-danger fw-bold{% endif %}">
-                                        {{ student.current_attendance_percentage }}%
+                                    <td class="text-end pe-3">
+                                        {% if student.final_grade < 10.5 %}
+                                            <div class="badge bg-danger bg-opacity-10 text-danger border border-danger mb-1">
+                                                Nota: {{ student.final_grade|default:"-" }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if student.current_attendance_percentage < 70 %}
+                                            <div class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                                Asist: {{ student.current_attendance_percentage }}%
+                                            </div>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% empty %}
                                 <tr>
-                                    <td colspan="3" class="text-center text-success py-3">
-                                        <i class="bi bi-check-circle"></i> ¡No hay alumnos en riesgo crítico!
+                                    <td colspan="3" class="text-center py-5">
+                                        <i class="bi bi-check-circle-fill text-success fs-1 opacity-50"></i>
+                                        <p class="text-success fw-bold mt-2">¡No hay alumnos en riesgo crítico!</p>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -245,34 +250,9 @@
 
     {% endif %}
 </div>
+{% endblock %}
 
-<style>
-
-    .html5-progress {
-        -webkit-appearance: none;
-        appearance: none;
-        border: none;
-        border-radius: 4px; 
-        background-color: #e9ecef; 
-        overflow: hidden;
-    }
-
-    .html5-progress::-webkit-progress-bar {
-        background-color: #e9ecef;
-    }
-
-    .html5-progress::-webkit-progress-value {
-        background-color: var(--progress-color); 
-        transition: width 0.6s ease;
-    }
-
-    
-    .html5-progress::-moz-progress-bar {
-        background-color: var(--progress-color);
-        transition: width 0.6s ease;
-    }
-</style>
-
+{% block extra_js %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 {{ chart_labels|json_script:"data-labels" }}
@@ -283,138 +263,6 @@
     {
         "aprobados": {{ aprobados_count|default:0 }},
         "desaprobados": {{ desaprobados_count|default:0 }}
-    }
-</script>
-
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script>
-    document.addEventListener("DOMContentLoaded", function() {
-        // --- LEER DATOS ---
-        // Parseamos el contenido de los scripts JSON definidos arriba
-        const labels = JSON.parse(document.getElementById('data-labels').textContent);
-        const gradesData = JSON.parse(document.getElementById('data-grades').textContent);
-        const attendanceData = JSON.parse(document.getElementById('data-attendance').textContent);
-        const countsData = JSON.parse(document.getElementById('data-counts').textContent);
-
-        // --- GRÁFICO 1: BARRAS (CURSOS) ---
-        const ctxCourse = document.getElementById('courseChart');
-        
-        if (ctxCourse && labels.length > 0) {
-            new Chart(ctxCourse.getContext('2d'), {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        {
-                            label: 'Nota Promedio',
-                            data: gradesData,
-                            backgroundColor: 'rgba(78, 115, 223, 0.7)',
-                            borderColor: 'rgba(78, 115, 223, 1)',
-                            borderWidth: 1,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: '% Asistencia',
-                            data: attendanceData,
-                            type: 'line',
-                            borderColor: 'rgba(28, 200, 138, 1)',
-                            backgroundColor: 'rgba(28, 200, 138, 0.1)',
-                            borderWidth: 2,
-                            pointRadius: 3,
-                            yAxisID: 'y1'
-                        }
-                    ]
-                },
-                options: {
-                    maintainAspectRatio: false, 
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            max: 20,
-                            title: { display: true, text: 'Nota (0-20)' }
-                        },
-                        y1: {
-                            beginAtZero: true,
-                            max: 100,
-                            position: 'right',
-                            grid: { drawOnChartArea: false },
-                            title: { display: true, text: '% Asistencia' }
-                        }
-                    }
-                }
-            });
-        } else if (ctxCourse) {
-            // Mensaje si no hay datos
-            drawNoDataMessage(ctxCourse);
-        }
-
-        // --- GRÁFICO 2: DONA (ESTADO) ---
-        const ctxStatus = document.getElementById('statusChart');
-        const totalAlumnos = countsData.aprobados + countsData.desaprobados;
-
-        if (ctxStatus && totalAlumnos > 0) {
-            new Chart(ctxStatus.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Aprobados', 'Desaprobados'],
-                    datasets: [{
-                        data: [countsData.aprobados, countsData.desaprobados],
-                        backgroundColor: ['#1cc88a', '#e74a3b'],
-                        hoverBackgroundColor: ['#17a673', '#2c9faf'],
-                        hoverBorderColor: "rgba(234, 236, 244, 1)",
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    responsive: true,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { display: false },
-                        tooltip: {
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.label || '';
-                                    let value = context.raw || 0;
-                                    let percentage = ((value / totalAlumnos) * 100).toFixed(1) + '%';
-                                    return label + ': ' + value + ' (' + percentage + ')';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        } else if (ctxStatus) {
-            // Mostrar dona gris vacía si no hay alumnos
-            new Chart(ctxStatus.getContext('2d'), {
-                type: 'doughnut',
-                data: {
-                    labels: ['Sin datos'],
-                    datasets: [{
-                        data: [1],
-                        backgroundColor: ['#e3e6f0'],
-                        hoverBackgroundColor: ['#e3e6f0'],
-                        borderWidth: 0
-                    }]
-                },
-                options: {
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: { legend: { display: false }, tooltip: { enabled: false } }
-                }
-            });
-        }
-    });
-
-    // Función auxiliar para escribir en el canvas si está vacío
-    function drawNoDataMessage(canvasElement) {
-        const ctx = canvasElement.getContext('2d');
-        ctx.font = "14px Arial";
-        ctx.fillStyle = "#858796";
-        ctx.textAlign = "center";
-        ctx.fillText("No hay datos suficientes para graficar", canvasElement.width / 2, canvasElement.height / 2);
     }
 </script>
 {% endblock %}

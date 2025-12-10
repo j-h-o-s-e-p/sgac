@@ -1,0 +1,230 @@
+/* ==========================================================
+   SECCIÓN 1: CÓDIGO ORIGINAL (BASE COMPARTIDA / ALUMNO)
+   ========================================================== */
+
+/* VARIABLES Y GENERAL */
+:root { --primary-color: #2563eb; --secondary-color: #1e40af; --success-color: #10b981; --danger-color: #ef4444; --warning-color: #f59e0b; --info-color: #3b82f6; --dark-color: #1f2937; --light-color: #f3f4f6; }
+body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f8f9fa; min-height: 100vh; display: flex; flex-direction: column; }
+
+/* NAVBAR */
+.navbar-custom { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); box-shadow: 0 2px 4px rgba(0,0,0,.1); }
+.navbar-custom .navbar-brand, .navbar-custom .nav-link { color: white !important; font-weight: 500; }
+.navbar-custom .nav-link:hover { background-color: rgba(255,255,255,.1); border-radius: 5px; }
+
+/* SIDEBAR */
+.sidebar { min-height: calc(100vh - 56px); background-color: white; box-shadow: 2px 0 5px rgba(0,0,0,.05); padding: 20px 0; }
+.sidebar .nav-link { color: var(--dark-color); padding: 12px 20px; margin: 5px 15px; border-radius: 8px; transition: all 0.3s; display: flex; align-items: center; gap: 10px; }
+.sidebar .nav-link:hover { background-color: var(--light-color); color: var(--primary-color); }
+.sidebar .nav-link.active { background-color: var(--primary-color); color: white; }
+.sidebar .nav-link i { font-size: 1.2rem; }
+
+/* COMPONENTES */
+.card { border: none; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,.08); transition: transform 0.2s; }
+.card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,.12); }
+.card-header { background-color: white; border-bottom: 2px solid var(--light-color); font-weight: 600; padding: 15px 20px; }
+.content-wrapper { padding: 30px; flex-grow: 1;}
+.alert-custom { border-radius: 8px; border: none; padding: 15px 20px; }
+
+/* LOGIN ESPECIFICO */
+.login-container {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+}
+
+@media (max-width: 768px) { .sidebar { min-height: auto; } .content-wrapper { padding: 15px; } }
+
+/* ESTILOS DEL MÓDULO ALUMNO */
+
+/* 1. Tarjetas de Estadísticas (Stat Cards) */
+.stat-card {
+    color: white; border-radius: 12px; padding: 25px; position: relative; overflow: hidden; height: 100%; box-shadow: 0 4px 6px rgba(0,0,0,0.1); transition: transform 0.3s ease;
+}
+.stat-card:hover { transform: translateY(-5px); }
+.stat-card i { position: absolute; right: 20px; top: 20px; font-size: 2.5rem; opacity: 0.3; }
+.stat-card h3 { font-weight: 700; margin-bottom: 5px; font-size: 2rem; }
+.stat-card p { margin: 0; opacity: 0.9; font-size: 0.9rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* 2. Gradientes Definidos */
+.bg-gradient-purple { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+.bg-gradient-pink   { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
+.bg-gradient-cyan   { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
+
+/* 3. Tarjetas Interactivas */
+.card-hover { transition: all 0.3s ease; }
+.card-hover:hover {
+    transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1) !important; border-color: var(--primary-color) !important;
+}
+
+/* 4. Badges y Tablas */
+.badge-custom { padding: 0.5em 0.8em; border-radius: 6px; font-weight: 500; }
+.fw-500 { font-weight: 500; }
+
+/* ESTILOS DEL HORARIO */
+.schedule-table { font-size: 0.85rem; border-collapse: separate; border-spacing: 0; width: 100%; }
+.schedule-table th { background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)); color: white; font-weight: 600; padding: 10px; text-align: center; border: 1px solid #dee2e6; position: sticky; top: 0; z-index: 10; }
+.schedule-table td { padding: 4px; border: 1px solid #dee2e6; text-align: center; vertical-align: middle; background-color: white; height: 80px; min-width: 120px; }
+.time-cell { background-color: #f8f9fa !important; font-weight: 700; color: var(--dark-color); width: 80px; font-size: 0.75rem; position: sticky; left: 0; z-index: 5; }
+.course-block { padding: 6px; border-radius: 6px; color: white; font-weight: 500; height: 100%; display: flex; flex-direction: column; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.15); transition: transform 0.2s; text-shadow: 0 1px 2px rgba(0,0,0,0.2); }
+.course-block:hover { transform: translateY(-3px); z-index: 20; position: relative; }
+.course-block.collision-warning { border: 2px solid #ff4444; animation: pulse 2s infinite; }
+
+/* Paleta de Colores para Cursos */
+.color-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
+.color-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.color-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
+.color-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
+.color-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
+
+/* ESTILOS DE IMPRESIÓN (Para el Alumno) */
+@media print {
+    /* Aquí mantenemos la lógica de ocultar para el Horario del Alumno si usa #printable-area */
+    /* Pero añadimos una excepción para que NO oculte el body si NO hay #printable-area */
+    
+    /* Esta regla solo aplica si existe #printable-area en la página */
+    body:has(#printable-area) * { visibility: hidden; }
+    body:has(#printable-area) #printable-area, 
+    body:has(#printable-area) #printable-area * { visibility: visible; }
+    
+    #printable-area { position: absolute; left: 0; top: 0; width: 100%; margin: 0; padding: 0; }
+    
+    .schedule-table { width: 100% !important; table-layout: fixed; font-size: 10px !important; }
+    .schedule-table td { height: auto !important; border: 1px solid #999 !important; }
+    .course-block { box-shadow: none !important; border: 1px solid #666; color: black !important; background: white !important; }
+    
+    .no-print, .btn, .sidebar, .navbar { display: none !important; }
+    @page { size: landscape; margin: 0.5cm; }
+}
+
+/* OTROS ESTILOS ORIGINALES */
+.bg-gradient-teal { background: linear-gradient(135deg, #11998e, #38ef7d); }
+.bg-gradient-orange { background: linear-gradient(135deg, #fa709a, #fee140); }
+.bg-gradient-red { background: linear-gradient(135deg, #f093fb, #f5576c); }
+.pdf-viewer-container { height: 600px; width: 100%; }
+.progress-custom { height: 15px; border-radius: 10px; background-color: #e9ecef; }
+.progress-bar-custom { border-radius: 10px; transition: width 0.6s ease; }
+
+/* TARJETAS DE CURSOS DOCENTE */
+.card-watermark { position: absolute; top: 10px; right: 15px; font-size: 4rem; opacity: 0.1; color: #858796; transform: rotate(-15deg); pointer-events: none; z-index: 0; }
+.card-content-wrapper { position: relative; z-index: 1; }
+.card-hover-effect { transition: transform 0.2s ease, box-shadow 0.2s ease; border-left: 5px solid var(--primary-color) !important; }
+.card-hover-effect:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.15); }
+
+/* TIMELINE PROGRESO */
+.timeline-wrapper { position: relative; padding-left: 20px; }
+.timeline-wrapper::before { content: ''; position: absolute; top: 0; bottom: 0; left: 24px; width: 3px; background: #e3e6f0; border-radius: 2px; }
+.timeline-unit-title { background: #fff; display: inline-block; padding: 5px 15px; border-radius: 20px; border: 1px solid #d1d3e2; font-weight: 700; color: var(--primary-color); position: relative; z-index: 2; margin-bottom: 20px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.timeline-item { position: relative; margin-bottom: 25px; padding-left: 45px; }
+.timeline-marker { position: absolute; left: 10px; top: 0; width: 30px; height: 30px; border-radius: 50%; text-align: center; line-height: 24px; z-index: 2; background: #fff; border: 3px solid #e3e6f0; color: #b7b9cc; transition: all 0.3s ease; }
+.timeline-content { background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 .15rem 1.75rem 0 rgba(58,59,69,.15); border-left: 4px solid #e3e6f0; transition: transform 0.2s; }
+.timeline-content:hover { transform: translateY(-2px); }
+.timeline-item.completed .timeline-marker { background: var(--success-color); border-color: var(--success-color); color: white; }
+.timeline-item.completed .timeline-content { border-left-color: var(--success-color); }
+.timeline-item.completed h6 { color: var(--success-color); }
+
+/* TABLA DE NOTAS */
+.table-grades-header th { vertical-align: middle; }
+.sticky-col { position: sticky; left: 0; z-index: 10; background-color: #fff; box-shadow: 2px 0 5px rgba(0,0,0,0.05); }
+.input-grade { min-width: 50px; font-weight: 700; }
+.input-grade:focus { border-color: var(--primary-color); box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25); }
+
+
+/* ==========================================================
+   SECCIÓN 2: NUEVOS ESTILOS (MÓDULO PROFESOR)
+   ========================================================== */
+
+/* ASISTENCIA (ATTENDANCE) */
+.bg-attendance-success { background-color: rgba(25, 135, 84, 0.08) !important; transition: background-color 0.2s; }
+.bg-attendance-danger  { background-color: rgba(220, 53, 69, 0.08) !important; transition: background-color 0.2s; }
+.bg-attendance-warning { background-color: rgba(255, 193, 7, 0.08) !important; transition: background-color 0.2s; }
+.bg-attendance-success:hover { background-color: rgba(25, 135, 84, 0.15) !important; }
+.bg-attendance-danger:hover  { background-color: rgba(220, 53, 69, 0.15) !important; }
+.bg-attendance-warning:hover { background-color: rgba(255, 193, 7, 0.15) !important; }
+.input-attendance { cursor: pointer; width: 1.2em; height: 1.2em; }
+.col-w-100 { width: 100px; min-width: 100px; }
+
+/* PANEL DE TEMAS STICKY */
+.sticky-topics-card { position: sticky; top: 90px; z-index: 5; max-height: calc(100vh - 110px); display: flex; flex-direction: column; }
+.topics-list-container { overflow-y: auto; max-height: 400px; flex-grow: 1; }
+.custom-scrollbar::-webkit-scrollbar { width: 6px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: #f8f9fa; border-radius: 3px; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e0; border-radius: 3px; }
+
+/* HORARIO DEL PROFESOR (Diferente al del Alumno) */
+.schedule-item { border-radius: 8px; padding: 12px 16px; background-color: white; transition: transform 0.2s ease; border: 1px solid rgba(0,0,0,0.05); }
+.schedule-item:hover { transform: translateX(5px); }
+.schedule-theory { background-color: #f8fbff; border-left: 4px solid var(--primary-color); }
+.schedule-lab { background-color: #f0fdf4; border-left: 4px solid var(--success-color); }
+@media (min-width: 768px) { .border-start-md { border-left: 1px solid #dee2e6; } }
+
+/* TABLAS COMPLEJAS (REPORTES PROFESOR) */
+.table-grades, .sticky-table { font-size: 0.9rem; }
+.name-truncate { max-width: 230px; }
+.col-grade-header { width: 90px; cursor: help; }
+.col-final-grade { width: 80px; }
+
+/* Tabla Scroll Drag */
+:root { --col-1-width: 250px; --col-2-width: 70px; }
+.table-drag-scroll { overflow-x: auto; overflow-y: hidden; position: relative; max-width: 100%; cursor: grab; user-select: none; }
+.table-drag-scroll:active { cursor: grabbing; }
+.table-drag-scroll::-webkit-scrollbar { height: 10px; }
+.table-drag-scroll::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+.table-drag-scroll::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 4px; }
+
+/* Columnas Sticky (Superposición a lo anterior) */
+.sticky-col { position: sticky; z-index: 10; background-color: #fff; box-shadow: 2px 0 5px -2px rgba(0,0,0,0.1); }
+.sticky-col-1, .sticky-col-start { left: 0; min-width: var(--col-1-width); max-width: var(--col-1-width); border-right: 1px solid #dee2e6; }
+.sticky-col-2 { left: var(--col-1-width); min-width: var(--col-2-width); border-right: 2px solid #dee2e6; }
+.sticky-table thead th { position: sticky; top: 0; z-index: 11; background-color: #f8f9fa; box-shadow: 0 2px 5px -2px rgba(0,0,0,0.05); }
+.sticky-table thead th.sticky-col { z-index: 12; }
+.session-header, .session-cell { min-width: 50px; }
+
+/* ESTADÍSTICAS (GRÁFICOS) */
+.chart-container-lg { position: relative; height: 350px; width: 100%; }
+.chart-container-sm { position: relative; height: 250px; width: 100%; }
+.html5-progress { -webkit-appearance: none; appearance: none; border: none; border-radius: 10px; background-color: #e9ecef; overflow: hidden; }
+.html5-progress::-webkit-progress-bar { background-color: #e9ecef; }
+.html5-progress::-webkit-progress-value { background-color: var(--progress-color); transition: width 0.6s ease; border-radius: 10px; }
+.html5-progress::-moz-progress-bar { background-color: var(--progress-color); transition: width 0.6s ease; border-radius: 10px; }
+:root { --danger-color: #e74a3b; --info-color: #36b9cc; }
+
+/* IMPRESIÓN MEJORADA */
+/* Aplica para el módulo de Profesor y estadísticas */
+@media print {
+    /* Reglas generales que no rompen lo anterior */
+    body:not(:has(#printable-area)) {
+        background: white !important; font-size: 12pt; color: black !important;
+    }
+    
+    body:not(:has(#printable-area)) .sidebar, 
+    body:not(:has(#printable-area)) .navbar, 
+    body:not(:has(#printable-area)) .btn, 
+    body:not(:has(#printable-area)) .d-print-none, 
+    body:not(:has(#printable-area)) footer, 
+    body:not(:has(#printable-area)) .modal {
+        display: none !important;
+    }
+
+    body:not(:has(#printable-area)) .content-wrapper, 
+    body:not(:has(#printable-area)) .container-fluid {
+        padding: 0 !important; margin: 0 !important; width: 100% !important; max-width: 100% !important;
+    }
+
+    /* Gráficos y colores */
+    * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+
+    /* Layout Estadísticas */
+    body:not(:has(#printable-area)) .col-xl-3, 
+    body:not(:has(#printable-area)) .col-md-6 { flex: 0 0 25% !important; max-width: 25% !important; }
+    body:not(:has(#printable-area)) .col-lg-8 { flex: 0 0 66% !important; max-width: 66% !important; }
+    body:not(:has(#printable-area)) .col-lg-4 { flex: 0 0 33% !important; max-width: 33% !important; }
+
+    canvas { max-width: 100% !important; width: 100% !important; height: auto !important; }
+    
+    /* Horario Profesor */
+    .schedule-theory { background-color: #f8fbff !important; -webkit-print-color-adjust: exact; }
+    .schedule-lab { background-color: #f0fdf4 !important; -webkit-print-color-adjust: exact; }
+}

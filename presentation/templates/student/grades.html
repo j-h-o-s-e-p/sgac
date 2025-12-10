@@ -4,166 +4,107 @@
 {% block title %}Mis Notas - Alumno{% endblock %}
 
 {% block sidebar %}
-<ul class="nav flex-column">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
-            <i class="bi bi-house-door"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
-            <i class="bi bi-calendar3"></i> Mi Horario
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
-            <i class="bi bi-clipboard-data"></i> Mis Notas
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_syllabus_list' %}">
-            <i class="bi bi-file-earmark-text"></i> Sílabos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_attendance_list' %}">
-            <i class="bi bi-clipboard-check"></i> Asistencia
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
-            <i class="bi bi-pen"></i> Matrícula Laboratorios
-        </a>
-    </li>
-</ul>
+    {% include 'includes/student_sidebar.html' %}
 {% endblock %}
 
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1"><i class="bi bi-clipboard-data"></i> Mis Notas</h1>
-        <p class="text-muted">Consulta tus calificaciones por curso</p>
+        <h1 class="h3 mb-0 text-primary fw-bold"><i class="bi bi-clipboard-data me-2"></i>Mis Notas</h1>
+        <p class="text-muted small mb-0">Consulta detallada de calificaciones por curso</p>
     </div>
 </div>
 
 {% if courses_data %}
     {% for course_item in courses_data %}
-    <div class="card mb-4">
-        <div class="card-header d-flex justify-content-between align-items-center">
-            <div>
-                <h5 class="mb-0">
-                    <span class="badge bg-primary badge-custom">{{ course_item.enrollment.course.course_code }}</span>
-                    {{ course_item.enrollment.course.course_name }}
-                </h5>
-            </div>
-            <div>
-                <span class="badge bg-info badge-custom">{{ course_item.enrollment.course.credits }} Créditos</span>
-            </div>
-        </div>
-        <div class="card-body">
-            <!-- Unidades -->
-            {% for unit in "123" %}
-            {% with unit_num=unit|add:"0" %}
-            {% if course_item.units_data|get_item:unit_num %}
-            <h6 class="mb-3">
-                <i class="bi bi-bookmark-fill text-primary"></i> Unidad {{ unit }}
-                {% if course_item.unit_averages|get_item:unit_num %}
-                    <span class="badge bg-{% if course_item.unit_averages|get_item:unit_num >= 11 %}success{% else %}danger{% endif %} badge-custom float-end">
-                        Promedio: {{ course_item.unit_averages|get_item:unit_num }}
-                    </span>
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center border-bottom border-light">
+            <h5 class="mb-0 text-dark">
+                <span class="badge bg-primary me-2">{{ course_item.enrollment.course.course_code }}</span>
+                {{ course_item.enrollment.course.course_name }}
+                
+                {% if course_item.enrollment.group %}
+                    <small class="text-muted ms-2 fs-6">Grupo {{ course_item.enrollment.group.group_code }}</small>
+                {% else %}
+                    <small class="text-muted ms-2 fs-6 fst-italic">Sin Grupo</small>
                 {% endif %}
-            </h6>
-            
-            <div class="table-responsive mb-4">
-                <table class="table table-sm table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Evaluación</th>
-                            <th style="width: 15%;">Tipo</th>
-                            <th style="width: 15%;">Peso</th>
-                            <th style="width: 15%; text-align: center;">Nota</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for eval_item in course_item.units_data|get_item:unit_num %}
-                        <tr>
-                            <td>{{ eval_item.evaluation.name }}</td>
-                            <td>
-                                <span class="badge {% if eval_item.evaluation.evaluation_type == 'EXAMEN' %}bg-danger{% else %}bg-info{% endif %} badge-custom">
-                                    {{ eval_item.evaluation.get_evaluation_type_display }}
+            </h5>
+            <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                {{ course_item.enrollment.course.credits }} Créditos
+            </span>
+        </div>
+
+        <div class="card-body">
+            {% for unit in "123" %}
+                {% with unit_num=unit|add:"0" %}
+                    {% if course_item.units_data|get_item:unit_num %}
+                    <div class="mb-4">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="fw-bold text-secondary border-start border-4 border-primary ps-2">
+                                Unidad {{ unit }}
+                            </h6>
+                            
+                            {% if course_item.unit_averages|get_item:unit_num %}
+                                {% with avg=course_item.unit_averages|get_item:unit_num %}
+                                <span class="badge {% if avg >= 11 %}bg-success{% else %}bg-danger{% endif %} badge-custom">
+                                    Promedio: {{ avg }}
                                 </span>
-                            </td>
-                            <td>{{ eval_item.evaluation.percentage }}%</td>
-                            <td style="text-align: center;">
-                                {% if eval_item.grade %}
-                                    <span class="badge {% if eval_item.grade.rounded_score >= 11 %}bg-success{% else %}bg-danger{% endif %} badge-custom" style="font-size: 1rem;">
-                                        {{ eval_item.grade.rounded_score }}
-                                    </span>
-                                {% else %}
-                                    <span class="text-muted">-</span>
-                                {% endif %}
-                            </td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            {% endif %}
-            {% endwith %}
+                                {% endwith %}
+                            {% endif %}
+                        </div>
+                        
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th scope="col">Evaluación</th>
+                                        <th scope="col" style="width: 15%;">Tipo</th>
+                                        <th scope="col" style="width: 15%;">Peso</th>
+                                        <th scope="col" style="width: 15%;" class="text-center">Nota</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for eval_item in course_item.units_data|get_item:unit_num %}
+                                    <tr>
+                                        <td>{{ eval_item.evaluation.name }}</td>
+                                        <td>
+                                            <span class="badge {% if eval_item.evaluation.evaluation_type == 'EXAMEN' %}bg-danger bg-opacity-75{% else %}bg-info bg-opacity-75{% endif %} rounded-pill fw-normal">
+                                                {{ eval_item.evaluation.get_evaluation_type_display }}
+                                            </span>
+                                        </td>
+                                        <td class="text-muted small">{{ eval_item.evaluation.percentage }}%</td>
+                                        <td class="text-center">
+                                            {% if eval_item.grade %}
+                                                <span class="fw-bold {% if eval_item.grade.rounded_score >= 11 %}text-success{% else %}text-danger{% endif %}">
+                                                    {{ eval_item.grade.rounded_score }}
+                                                </span>
+                                            {% else %}
+                                                <span class="text-muted">-</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endwith %}
             {% endfor %}
             
-            <!-- Promedio Final -->
             {% if course_item.enrollment.final_grade %}
-            <div class="alert alert-{% if course_item.enrollment.final_grade >= 11 %}success{% else %}danger{% endif %} text-center">
-                <h5 class="mb-0">
-                    <i class="bi bi-trophy-fill"></i> 
-                    Nota Final: <strong>{{ course_item.enrollment.final_grade }}</strong>
-                </h5>
+            <div class="alert {% if course_item.enrollment.final_grade >= 11 %}alert-success{% else %}alert-danger{% endif %} d-flex justify-content-between align-items-center mt-3 mb-0 py-2">
+                <span class="fw-bold"><i class="bi bi-trophy-fill me-2"></i>Promedio Final</span>
+                <span class="fs-4 fw-bold">{{ course_item.enrollment.final_grade }}</span>
             </div>
             {% endif %}
         </div>
     </div>
     {% endfor %}
 {% else %}
-    <div class="card">
-        <div class="card-body text-center py-5">
-            <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-            <p class="text-muted mt-3">No tienes notas registradas aún</p>
-        </div>
+    <div class="text-center py-5">
+        <i class="bi bi-journal-x display-1 text-muted opacity-25"></i>
+        <p class="text-muted mt-3">Aún no se han registrado notas para este semestre.</p>
     </div>
 {% endif %}
-
-<!-- Leyenda -->
-<div class="card">
-    <div class="card-body">
-        <h6 class="mb-3"><i class="bi bi-info-circle"></i> Información</h6>
-        <div class="row">
-            <div class="col-md-6">
-                <p class="mb-2">
-                    <span class="badge bg-success badge-custom">11-20</span> - Aprobado
-                </p>
-                <p class="mb-2">
-                    <span class="badge bg-danger badge-custom">0-10</span> - Desaprobado
-                </p>
-            </div>
-            <div class="col-md-6">
-                <p class="mb-2">
-                    <span class="badge bg-danger badge-custom">Examen</span> - Evaluación de Unidad
-                </p>
-                <p class="mb-2">
-                    <span class="badge bg-info badge-custom">Continua</span> - Práctica/Tarea/Lab
-                </p>
-            </div>
-        </div>
-    </div>
-</div>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-    .table th {
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-</style>
 {% endblock %}

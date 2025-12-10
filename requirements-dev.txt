@@ -1,9 +1,14 @@
+# Hereda todas las dependencias de producción
 -r requirements.txt
-pytest==8.0.2
-pytest-django==4.8.0
-pytest-cov==4.1.0
-factory-boy==3.3.0
-faker==23.2.1
-black==24.2.0
-flake8==7.0.0
-isort==5.13.2
+
+# --- Testing (Pruebas Automatizadas) ---
+pytest==8.0.2               # Framework de testing moderno (más potente que el nativo)
+pytest-django==4.8.0        # Plugin para que pytest entienda Django
+pytest-cov==4.1.0           # Genera reportes de cuánto código estás probando (% cobertura)
+factory-boy==3.3.0          # Crea objetos de prueba (Factories) en lugar de Fixtures estáticos
+faker==23.2.1               # Genera datos falsos realistas (Nombres, emails, direcciones)
+
+# --- Calidad de Código (Linters & Formatters) ---
+black==24.2.0               # Formateador de código automático (deja todo bonito)
+flake8==7.0.0               # Revisa errores de estilo y sintaxis (PEP 8)
+isort==5.13.2               # Ordena los imports alfabéticamente y por secciones

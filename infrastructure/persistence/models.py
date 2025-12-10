@@ -1,54 +1,47 @@
+import uuid
+from decimal import Decimal
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.db.models import Max
-from decimal import Decimal, InvalidOperation
-import uuid
 
+# --- IMPORTACIONES DE MI CAPA DE DOMINIO ---
+# Traigo mis reglas de negocio para no tenerlas hardcodeadas aquí
+from domain.shared.constants import DAY_CHOICES
+from domain.identity.constants import ROLE_CHOICES, USER_STATUS_CHOICES
+from domain.academic_structure.constants import (
+    COURSE_TYPE_CHOICES, CLASSROOM_TYPE_CHOICES, EVALUATION_TYPE_CHOICES,
+    POSTULATION_STATUS_CHOICES, ASSIGNMENT_METHOD_CHOICES,
+    ENROLLMENT_STATUS_CHOICES, ATTENDANCE_STATUS_CHOICES
+)
 
-# ==================== IDENTITY CONTEXT ====================
-DAY_CHOICES = [
-    ('LUNES', 'Lunes'),
-    ('MARTES', 'Martes'),
-    ('MIERCOLES', 'Miércoles'),
-    ('JUEVES', 'Jueves'),
-    ('VIERNES', 'Viernes'),
-    ('SABADO', 'Sábado'),
-]
+# ==================== IDENTIDAD Y USUARIOS ====================
 
 class CustomUser(AbstractUser):
     """
-    Usuario extendido del sistema.
-    Mapeado desde domain.identity.User
+    Mi usuario personalizado. Uso UUID para que sea más seguro y el email
+    como identificador principal en lugar del username.
     """
     user_id = models.UUIDField(default=uuid.uuid4, editable=False, unique=True)
     email = models.EmailField(unique=True, verbose_name='Email Institucional')
+    
+    # Para cuando piden recuperar contraseña
     temporal_password = models.CharField(max_length=255, blank=True, null=True)
     temporal_password_expires_at = models.DateTimeField(blank=True, null=True)
     
-    ROLE_CHOICES = [
-        ('ADMIN', 'Administrador'),
-        ('PROFESOR', 'Profesor'),
-        ('ALUMNO', 'Alumno'),
-        ('SECRETARIA', 'Secretaría'),
-    ]
+    # Aquí uso las constantes que definí en el dominio
     user_role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='ALUMNO')
+    account_status = models.CharField(max_length=20, choices=USER_STATUS_CHOICES, default='INACTIVO')
     
-    STATUS_CHOICES = [
-        ('INACTIVO', 'Inactivo'),
-        ('ACTIVO', 'Activo'),
-        ('BLOQUEADO', 'Bloqueado'),
-    ]
-    account_status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='INACTIVO')
-    
+    # Seguridad básica
     failed_login_attempts = models.IntegerField(default=0)
     last_login_ip = models.GenericIPAddressField(blank=True, null=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
-    # Campo para usar email como username
+    # Le digo a Django que use el email para loguear
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username']  # username será autogenerado
+    REQUIRED_FIELDS = ['username']
     
     class Meta:
         db_table = 'users'
@@ -59,18 +52,40 @@ class CustomUser(AbstractUser):
         return f"{self.get_full_name()} ({self.get_user_role_display()})"
     
     def save(self, *args, **kwargs):
-        # Si no tiene username, usar el email
+        # Si no me pasan username, uso el email por defecto
         if not self.username:
             self.username = self.email
         super().save(*args, **kwargs)
 
 
-# ==================== ACADEMIC STRUCTURE CONTEXT ====================
+class ExternalProfessor(models.Model):
+    """
+    Profes que vienen de fuera solo a dictar laboratorios. 
+    No entran al sistema, solo necesito sus datos.
+    """
+    external_prof_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    full_name = models.CharField(max_length=200, verbose_name='Nombre Completo')
+    email = models.EmailField(blank=True, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True)
+    specialization = models.CharField(max_length=200, blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        db_table = 'external_professors'
+        verbose_name = 'Profesor Externo'
+        verbose_name_plural = 'Profesores Externos'
+    
+    def __str__(self):
+        return self.full_name
+
+
+# ==================== ESTRUCTURA ACADÉMICA ====================
 
 class Semester(models.Model):
-    """Semestre académico"""
     semester_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    name = models.CharField(max_length=50)  # Ej: "2024-1"
+    name = models.CharField(max_length=50) # Ej: 2025-1
     start_date = models.DateField()
     end_date = models.DateField()
     is_active = models.BooleanField(default=False)
@@ -89,18 +104,15 @@ class Semester(models.Model):
 
 
 class Course(models.Model):
-    """Curso"""
     course_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Relación con semestre: si borro semestre, chau cursos
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE, related_name='courses')
     course_code = models.CharField(max_length=20, unique=True)
     course_name = models.CharField(max_length=200)
     credits = models.IntegerField()
-    cycle = models.IntegerField()  # 1-10
+    cycle = models.IntegerField()
     
-    COURSE_TYPE_CHOICES = [
-        ('TEORIA', 'Teoría'),
-        ('PRACTICA', 'Práctica'),
-    ]
+    # Uso mis constantes de dominio
     course_type = models.CharField(max_length=20, choices=COURSE_TYPE_CHOICES)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -115,24 +127,15 @@ class Course(models.Model):
     def __str__(self):
         return f"{self.course_code} - {self.course_name}"
 
+
 class Classroom(models.Model):
-    """Salón/Ambiente físico"""
     classroom_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    code = models.CharField(
-        max_length=10, 
-        unique=True, 
-        editable=False, 
-        blank=True,
-        verbose_name="Código"
-    )
+    code = models.CharField(max_length=10, unique=True, editable=False, blank=True, verbose_name="Código")
     name = models.CharField(max_length=100)
     capacity = models.IntegerField()
     location = models.CharField(max_length=200)
-    classroom_type = models.CharField(max_length=20, choices=[
-        ('AULA', 'Aula'),
-        ('LABORATORIO', 'Laboratorio'),
-    ])
-    equipment = models.TextField(blank=True)
+    classroom_type = models.CharField(max_length=20, choices=CLASSROOM_TYPE_CHOICES)
+    equipment = models.TextField(blank=True) # Proyector, PC, etc.
     is_active = models.BooleanField(default=True)
     
     created_at = models.DateTimeField(auto_now_add=True)
@@ -144,12 +147,11 @@ class Classroom(models.Model):
         verbose_name_plural = 'Salones'
 
     def save(self, *args, **kwargs):
+        # Lógica para autogenerar códigos tipo A001, A002...
         if not self.code:
             prefix = "A"
-
             last_obj = self.__class__.objects.aggregate(max_code=Max('code'))
             max_code = last_obj.get('max_code')
-            
             new_num = 1
             if max_code:
                 try:
@@ -158,46 +160,34 @@ class Classroom(models.Model):
                         new_num = int(last_num_str) + 1
                 except ValueError:
                     pass 
-
             self.code = f"{prefix}{new_num:03d}"
-
         super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.code} - {self.name}"
 
+
 class CourseGroup(models.Model):
-    """Grupo de curso"""
+    """Son las secciones, ej: Grupo A, Grupo B"""
     group_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='groups')
     group_code = models.CharField(max_length=20)
     capacity = models.IntegerField()
+    # Solo puede ser un usuario con rol PROFESOR
     professor = models.ForeignKey(
-        CustomUser, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True,
-        related_name='groups_taught', 
-        limit_choices_to={'user_role': 'PROFESOR'}
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='groups_taught', limit_choices_to={'user_role': 'PROFESOR'}
     )
     
-    # Timestamps
-    updated_at = models.DateTimeField(auto_now=True)
+    # Flags para saber si secretaría ya cargó los alumnos
+    students_loaded = models.BooleanField(default=False)
+    last_student_upload_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    
-    students_loaded = models.BooleanField(
-        default=False,
-        help_text="Indica si ya se ha realizado una carga de alumnos para este grupo."
-    )
-    last_student_upload_at = models.DateTimeField(
-        null=True, 
-        blank=True,
-        help_text="Fecha y hora de la última carga de alumnos."
-    )
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = 'course_groups' 
-        unique_together = [['course', 'group_code']] 
+        unique_together = [['course', 'group_code']] # No puede haber dos grupos 'A' en el mismo curso
         verbose_name = 'Grupo de Curso'
         verbose_name_plural = 'Grupos de Curso'
         ordering = ['course__course_code', 'group_code'] 
@@ -207,28 +197,16 @@ class CourseGroup(models.Model):
 
 
 class Schedule(models.Model):
+    """Horarios de teoría"""
     schedule_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    
-    course_group = models.ForeignKey(
-        CourseGroup, 
-        on_delete=models.CASCADE, 
-        related_name='schedules' 
-    )
-    
+    course_group = models.ForeignKey(CourseGroup, on_delete=models.CASCADE, related_name='schedules')
     day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
-    room = models.ForeignKey(
-        Classroom, 
-        on_delete=models.SET_NULL, 
-        null=True, 
-        blank=True, 
-        related_name='schedules' 
-    )
+    room = models.ForeignKey(Classroom, on_delete=models.SET_NULL, null=True, blank=True, related_name='schedules')
     
-    # Timestamps
-    updated_at = models.DateTimeField(auto_now=True)
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = 'schedules' 
@@ -240,28 +218,28 @@ class Schedule(models.Model):
     def __str__(self):
         return f"{self.course_group} ({self.get_day_of_week_display()} {self.start_time}-{self.end_time})"
 
+
 class LaboratoryGroup(models.Model):
-    """Grupo de laboratorio"""
+    """Grupos específicos para labs (pueden tener otro profe)"""
     lab_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='laboratories')
-    lab_nomenclature = models.CharField(max_length=5)  # A, B, C
+    lab_nomenclature = models.CharField(max_length=5) # Ej: A, B, C
     capacity = models.IntegerField()
     
-    # Horario
-    DAY_CHOICES = [
-        ('LUNES', 'Lunes'),
-        ('MARTES', 'Martes'),
-        ('MIERCOLES', 'Miércoles'),
-        ('JUEVES', 'Jueves'),
-        ('VIERNES', 'Viernes'),
-        ('SABADO', 'Sábado'),
-    ]
     day_of_week = models.CharField(max_length=20, choices=DAY_CHOICES)
     start_time = models.TimeField()
     end_time = models.TimeField()
     room = models.ForeignKey(Classroom, on_delete=models.PROTECT, null=True, blank=True, related_name='lab_groups')
     
-    professor = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='labs_taught', limit_choices_to={'user_role': 'PROFESOR'})
+    # Puede ser profe del sistema o uno externo
+    professor = models.ForeignKey(
+        CustomUser, on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='labs_taught', limit_choices_to={'user_role': 'PROFESOR'}
+    )
+    external_professor = models.ForeignKey(
+        'ExternalProfessor', on_delete=models.SET_NULL, null=True, blank=True,
+        related_name='labs_taught', verbose_name='Profesor Externo'
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -273,24 +251,30 @@ class LaboratoryGroup(models.Model):
     
     def __str__(self):
         return f"{self.course.course_code} - Lab {self.lab_nomenclature}"
+    
+    def get_professor_name(self):
+        # Helper para sacar el nombre sin importar de donde venga
+        if self.professor:
+            return self.professor.get_full_name()
+        elif self.external_professor:
+            return self.external_professor.full_name
+        return "Sin asignar"
 
+
+# ==================== SÍLABOS Y EVALUACIONES ====================
 
 class Evaluation(models.Model):
-    """Evaluación de curso"""
+    """Configuración de pesos y notas"""
     evaluation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='evaluations')
     
-    name = models.CharField(max_length=100)
-    
-    EVALUATION_TYPE_CHOICES = [
-        ('CONTINUA', 'Evaluación Continua'),
-        ('EXAMEN', 'Examen'),
-    ]
+    name = models.CharField(max_length=100) # Ej: Examen 1
     evaluation_type = models.CharField(max_length=20, choices=EVALUATION_TYPE_CHOICES)
     
-    unit = models.IntegerField()  # 1, 2, 3
-    percentage = models.DecimalField(max_digits=5, decimal_places=2)  # 0-100
+    unit = models.IntegerField()
+    percentage = models.DecimalField(max_digits=5, decimal_places=2) # Peso en nota final
     due_date = models.DateField(blank=True, null=True)
+    order = models.IntegerField(default=0)
     
     created_at = models.DateTimeField(auto_now_add=True)
     
@@ -298,18 +282,28 @@ class Evaluation(models.Model):
         db_table = 'evaluations'
         verbose_name = 'Evaluación'
         verbose_name_plural = 'Evaluaciones'
-        ordering = ['unit', 'name']
+        ordering = ['order', 'unit', 'name']
     
     def __str__(self):
-        return f"{self.course.course_code} - {self.name}"
+        return f"{self.course.course_code} - {self.name} ({self.percentage}%)"
 
 
 class Syllabus(models.Model):
-    """Sílabo del curso"""
+    """El documento oficial del curso"""
     syllabus_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    # Un curso tiene UN solo sílabo activo
     course = models.OneToOneField(Course, on_delete=models.CASCADE, related_name='syllabus')
-    syllabus_file = models.FileField(upload_to='syllabi/%Y/%m/', blank=True, null=True, verbose_name='Archivo PDF del Sílabo')
+    syllabus_file = models.FileField(upload_to='syllabi/%Y/%m/', blank=True, null=True, verbose_name='PDF del Sílabo')
+    
+    # Metadata sacada automáticamente al leer el PDF
+    credits_extracted = models.IntegerField(null=True, blank=True, verbose_name='Créditos extraídos')
+    theory_hours = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    practice_hours = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    lab_hours = models.DecimalField(max_digits=4, decimal_places=2, null=True, blank=True)
+    
+    evaluations_configured = models.BooleanField(default=False, help_text="Indica si evaluaciones configuradas")
     loaded_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
         db_table = 'syllabuses'
@@ -320,23 +314,52 @@ class Syllabus(models.Model):
         return f"Sílabo {self.course.course_code}"
     
     def get_progress_percentage(self):
-        """Calcula el porcentaje de avance del curso"""
+        # Calcula cuánto del sílabo se ha avanzado
         total_sessions = self.sessions.count()
         if total_sessions == 0:
             return 0
-        completed_sessions = self.sessions.filter(real_date__isnull=False).count()
+        completed_sessions = SessionProgress.objects.filter(
+            session__syllabus=self,
+            session__isnull=False
+        ).count()
         return round((completed_sessions / total_sessions) * 100, 2)
 
 
+class SyllabusUnit(models.Model):
+    unit_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='units')
+    unit_number = models.IntegerField()
+    unit_name = models.CharField(max_length=200)
+    description = models.TextField(blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'syllabus_units'
+        unique_together = [['syllabus', 'unit_number']]
+        ordering = ['unit_number']
+        verbose_name = 'Unidad Temática'
+        verbose_name_plural = 'Unidades Temáticas'
+    
+    def __str__(self):
+        return f"Unidad {self.unit_number}: {self.unit_name}"
+
+
 class SyllabusSession(models.Model):
-    """Sesión del sílabo"""
     session_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     syllabus = models.ForeignKey(Syllabus, on_delete=models.CASCADE, related_name='sessions')
+    unit = models.ForeignKey(SyllabusUnit, on_delete=models.CASCADE, null=True, blank=True, related_name='sessions')
+    
     session_number = models.IntegerField()
+    week_number = models.IntegerField(null=True, blank=True)
     topic = models.TextField()
-    planned_date = models.DateField()
-    real_date = models.DateField(blank=True, null=True)
-    observations = models.TextField(blank=True)
+    
+    planned_date = models.DateField(null=True, blank=True)
+    real_date = models.DateField(null=True, blank=True, verbose_name="Fecha Real de Ejecución")
+    
+    accumulated_percentage = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
     
     class Meta:
         db_table = 'syllabus_sessions'
@@ -346,19 +369,37 @@ class SyllabusSession(models.Model):
     
     def __str__(self):
         return f"Sesión {self.session_number} - {self.syllabus.course.course_code}"
+    
+    def is_completed(self):
+        return hasattr(self, 'progress')
 
 
-# ==================== LAB ENROLLMENT CONTEXT ====================
+class SessionProgress(models.Model):
+    """Marca qué profesor avanzó qué tema y cuándo"""
+    progress_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    session = models.OneToOneField(SyllabusSession, on_delete=models.CASCADE, related_name='progress')
+    course_group = models.ForeignKey(CourseGroup, on_delete=models.CASCADE, related_name='session_progress')
+    
+    completed_date = models.DateField()
+    marked_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='sessions_marked')
+    notes = models.TextField(blank=True, verbose_name='Observaciones')
+    created_at = models.DateTimeField(auto_now_add=True)
+    
+    class Meta:
+        db_table = 'session_progress'
+        verbose_name = 'Progreso de Sesión'
+        verbose_name_plural = 'Progreso de Sesiones'
+        ordering = ['completed_date']
+
+# ==================== MATRÍCULA Y LABORATORIOS ====================
 
 class LabEnrollmentCampaign(models.Model):
-    """Campaña de matrícula de laboratorios"""
+    """Periodo donde los alumnos pueden elegir sus laboratorios"""
     campaign_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='lab_campaigns')
-    
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     is_closed = models.BooleanField(default=False)
-    
     created_at = models.DateTimeField(auto_now_add=True)
     closed_at = models.DateTimeField(blank=True, null=True)
     
@@ -372,42 +413,29 @@ class LabEnrollmentCampaign(models.Model):
 
 
 class StudentPostulation(models.Model):
-    """Postulación de estudiante a laboratorio"""
+    """El alumno dice: 'Yo quiero este horario'"""
     postulation_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     campaign = models.ForeignKey(LabEnrollmentCampaign, on_delete=models.CASCADE, related_name='postulations')
     student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='lab_postulations', limit_choices_to={'user_role': 'ALUMNO'})
     lab_group = models.ForeignKey(LaboratoryGroup, on_delete=models.CASCADE, related_name='postulations')
-    
     timestamp = models.DateTimeField(auto_now_add=True)
     
-    STATUS_CHOICES = [
-        ('PENDIENTE', 'Pendiente'),
-        ('ASIGNADO', 'Asignado'),
-        ('NO_ASIGNADO', 'No Asignado'),
-    ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='PENDIENTE')
+    status = models.CharField(max_length=20, choices=POSTULATION_STATUS_CHOICES, default='PENDIENTE')
     
     class Meta:
         db_table = 'student_postulations'
         unique_together = [['campaign', 'student']]
         verbose_name = 'Postulación Lab'
         verbose_name_plural = 'Postulaciones Lab'
-    
-    def __str__(self):
-        return f"{self.student.get_full_name()} -> Lab {self.lab_group.lab_nomenclature}"
 
 
 class LabAssignment(models.Model):
-    """Asignación de laboratorio a estudiante"""
+    """El resultado final: Tú te quedas en este lab"""
     assignment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     postulation = models.OneToOneField(StudentPostulation, on_delete=models.CASCADE, related_name='assignment')
     student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='lab_assignments', limit_choices_to={'user_role': 'ALUMNO'})
     lab_group = models.ForeignKey(LaboratoryGroup, on_delete=models.CASCADE, related_name='assignments')
     
-    ASSIGNMENT_METHOD_CHOICES = [
-        ('AUTOMATIC', 'Automático'),
-        ('LOTTERY', 'Sorteo'),
-    ]
     assignment_method = models.CharField(max_length=20, choices=ASSIGNMENT_METHOD_CHOICES)
     assigned_at = models.DateTimeField(auto_now_add=True)
     
@@ -416,31 +444,21 @@ class LabAssignment(models.Model):
         unique_together = [['student', 'lab_group']]
         verbose_name = 'Asignación Lab'
         verbose_name_plural = 'Asignaciones Lab'
-    
-    def __str__(self):
-        return f"{self.student.get_full_name()} asignado a Lab {self.lab_group.lab_nomenclature}"
 
-
-# ==================== ACADEMIC PERFORMANCE CONTEXT ====================
+# ==================== RENDIMIENTO ACADÉMICO ====================
 
 class StudentEnrollment(models.Model):
-    """Matrícula de estudiante en curso"""
+    """La matrícula oficial del alumno en un curso"""
     enrollment_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='enrollments', limit_choices_to={'user_role': 'ALUMNO'})
     course = models.ForeignKey(Course, on_delete=models.CASCADE, related_name='enrollments')
     group = models.ForeignKey(CourseGroup, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrollments')
     lab_assignment = models.ForeignKey(LabAssignment, on_delete=models.SET_NULL, null=True, blank=True, related_name='enrollment')
     
-    STATUS_CHOICES = [
-        ('ACTIVO', 'Activo'),
-        ('RETIRADO', 'Retirado'),
-        ('COMPLETADO', 'Completado'),
-    ]
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='ACTIVO')
+    status = models.CharField(max_length=20, choices=ENROLLMENT_STATUS_CHOICES, default='ACTIVO')
     
     current_attendance_percentage = models.DecimalField(max_digits=5, decimal_places=2, default=0)
     final_grade = models.DecimalField(max_digits=4, decimal_places=2, blank=True, null=True)
-    
     enrolled_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -454,66 +472,58 @@ class StudentEnrollment(models.Model):
         return f"{self.student.get_full_name()} en {self.course.course_code}"
     
     def calculate_attendance_percentage(self):
-        """Calcula el porcentaje de asistencia"""
-        total = self.attendance_records.count()
-        if total == 0:
-            return 0
-        present = self.attendance_records.filter(status__in=['P', 'J']).count()
-        percentage = (present / total) * 100
-        self.current_attendance_percentage = round(percentage, 2)
+        """
+        Calcula y actualiza el porcentaje de asistencia.
+        Lógica: Cuenta Presentes y Justificadas sobre el total.
+        """
+        total_sessions = self.attendance_records.count()
+        
+        if total_sessions > 0:
+            attended = self.attendance_records.filter(status__in=['P', 'J']).count()
+            percentage = (attended / total_sessions) * 100
+            self.current_attendance_percentage = round(percentage, 2)
+        else:
+            self.current_attendance_percentage = 0
+            
         self.save()
         return self.current_attendance_percentage
-    
+
     def calculate_final_grade(self):
-        """Calcula y actualiza la nota final ponderada (0-20) del estudiante."""
-        
-        # 1. Obtener todas las evaluaciones definidas para el curso
+        """
+        Calcula nota final basándose en los pesos de las evaluaciones.
+        """
         evaluations = self.course.evaluations.all()
-        
-        # 2. Obtener todas las notas registradas para este enrollment en una consulta eficiente
         grade_records = self.grade_records.filter(evaluation__in=evaluations).select_related('evaluation')
         
         final_grade = Decimal('0.00')
-        
         if not evaluations.exists():
              self.final_grade = None
              self.save()
              return
 
-        # 3. Sumar las notas ponderadas
         for evaluation in evaluations:
-            # Buscar la nota registrada que corresponde a esta evaluación
+            # Busco si el alumno tiene nota en esta evaluación
             grade_record = next((gr for gr in grade_records if gr.evaluation_id == evaluation.evaluation_id), None)
-            
             if grade_record and grade_record.rounded_score is not None:
-                # La nota ya está redondeada (0-20)
                 score = grade_record.rounded_score
-                weight = evaluation.percentage / Decimal(100) # Convertir 10% a 0.10
-                
-                weighted_score = score * weight
-                final_grade += weighted_score
+                weight = evaluation.percentage / Decimal(100)
+                final_grade += score * weight
 
-        # 4. Guardar la nota final redondeada a dos decimales
         self.final_grade = round(final_grade, 2)
         self.save()
         return self.final_grade
 
 
 class AttendanceRecord(models.Model):
-    """Registro de asistencia"""
     record_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     enrollment = models.ForeignKey(StudentEnrollment, on_delete=models.CASCADE, related_name='attendance_records')
     session_number = models.IntegerField()
     session_date = models.DateField()
     
-    STATUS_CHOICES = [
-        ('P', 'Presente'),
-        ('F', 'Falta'),
-        ('J', 'Falta Justificada'),
-    ]
-    status = models.CharField(max_length=1, choices=STATUS_CHOICES)
+    status = models.CharField(max_length=1, choices=ATTENDANCE_STATUS_CHOICES)
     justification = models.TextField(blank=True)
     
+    # Seguridad: guardo desde dónde marcó el profe
     professor_ip = models.GenericIPAddressField()
     geo_latitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
     geo_longitude = models.DecimalField(max_digits=9, decimal_places=6, blank=True, null=True)
@@ -526,20 +536,15 @@ class AttendanceRecord(models.Model):
         unique_together = [['enrollment', 'session_number']]
         verbose_name = 'Registro de Asistencia'
         verbose_name_plural = 'Registros de Asistencia'
-        ordering = ['session_number']
-    
-    def __str__(self):
-        return f"Asistencia Sesión {self.session_number} - {self.enrollment.student.get_full_name()}"
 
 
 class GradeRecord(models.Model):
-    """Registro de nota"""
     record_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     enrollment = models.ForeignKey(StudentEnrollment, on_delete=models.CASCADE, related_name='grade_records')
     evaluation = models.ForeignKey(Evaluation, on_delete=models.CASCADE, related_name='grade_records')
-    
-    raw_score = models.DecimalField(max_digits=4, decimal_places=2)  # 0-20
-    rounded_score = models.DecimalField(max_digits=4, decimal_places=2)  # 0-20
+    is_locked = models.BooleanField(default=False)
+    raw_score = models.DecimalField(max_digits=4, decimal_places=2)
+    rounded_score = models.DecimalField(max_digits=4, decimal_places=2)
     
     recorded_at = models.DateTimeField(auto_now_add=True)
     recorded_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='grade_records_created')
@@ -550,11 +555,8 @@ class GradeRecord(models.Model):
         verbose_name = 'Registro de Nota'
         verbose_name_plural = 'Registros de Notas'
     
-    def __str__(self):
-        return f"{self.enrollment.student.get_full_name()} - {self.evaluation.name}: {self.rounded_score}"
-    
     def save(self, *args, **kwargs):
-        # Redondear automáticamente
+        # Lógica de redondeo: .5 sube al inmediato superior
         if self.raw_score >= int(self.raw_score) + 0.5:
             self.rounded_score = int(self.raw_score) + 1
         else:
@@ -565,7 +567,7 @@ class GradeRecord(models.Model):
 # ==================== AUDITORÍA ====================
 
 class AuditLog(models.Model):
-    """Log de auditoría"""
+    """El chismoso del sistema: guarda quién hizo qué"""
     log_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, related_name='audit_logs')
     action = models.CharField(max_length=200)
