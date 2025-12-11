@@ -15,6 +15,10 @@ ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,web').split
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000", "http://127.0.0.1:8000",
     "https://localhost:8000", "https://127.0.0.1:8000",
+    "https://*.github.dev",
+    "https://*.app.github.dev",
+    "https://*.app.github.dev/admin/logout/",
+    "https://*.app.github.dev/admin",
 ]
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
