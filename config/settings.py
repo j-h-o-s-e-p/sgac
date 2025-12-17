@@ -10,28 +10,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key')
 DEBUG = config('DEBUG', default=True, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,web').split(',')
+# Permitir todo en desarrollo
+ALLOWED_HOSTS = ["*"]
 
-# Lógica automática para Codespaces (detecta el entorno y permite el host)
-CODESPACE_NAME = os.getenv('CODESPACE_NAME')
-CODESPACE_DOMAIN = os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')
-
-if CODESPACE_NAME and CODESPACE_DOMAIN:
-    host = f"{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}"
-    if host not in ALLOWED_HOSTS:
-        ALLOWED_HOSTS.append(host)
-
-# Orígenes confiables para protección CSRF
+# Orígenes confiables 
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000", 
+    "http://localhost:8000",
+    "https://localhost:8000",
     "http://127.0.0.1:8000",
-    "https://*.github.dev",    
-    "https://*.app.github.dev",  
+    "https://127.0.0.1:8000",
+    "https://*.github.dev",
+    "https://*.app.github.dev",
 ]
 
-# Si detectamos codespace, lo agregamos explícitamente también por seguridad
-if CODESPACE_NAME and CODESPACE_DOMAIN:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}")
+# Configuración de Proxy (Vital para Codespaces)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Le decimos a Django: "No exijas HTTPS para las cookies, acéptalas como vengan"
+CSRF_COOKIE_SECURE = False
+SESSION_COOKIE_SECURE = False
+
+# Evita que el navegador bloquee la cookie por ser "terceros" en el iframe de Codespaces
+CSRF_COOKIE_SAMESITE = 'Lax' 
+SESSION_COOKIE_SAMESITE = 'Lax'
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
