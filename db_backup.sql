@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict lp4tIxj4XiYJcPMLHjsl9LWXfGv9y0kpPXD0gwmxWnO8j0x9ID2fmmxWh9Lm3n4
+\restrict jHHR4gfVtqj4eHfKOocYiRoGaF9ANrWXIdwUOEHo0XlS8LPyGDwjecJ7AHVB7kj
 
 -- Dumped from database version 15.15
 -- Dumped by pg_dump version 15.15
@@ -2628,6 +2628,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 31	persistence	0009_externalprofessor_alter_attendancerecord_options_and_more	2025-11-30 05:07:23.338489+00
 32	persistence	0010_alter_syllabus_credits_extracted_and_more	2025-11-30 05:33:18.288874+00
 33	persistence	0011_graderecord_is_locked_and_more	2025-12-04 00:46:28.568957+00
+34	persistence	0002_alter_studentpostulation_options_and_more	2025-12-14 05:14:46.006594+00
 \.
 
 
@@ -2636,8 +2637,8 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 --
 
 COPY public.django_session (session_key, session_data, expire_date) FROM stdin;
-dv022vd0z5x2tor78ldknree7ea4q8fh	.eJxVjEEOwiAQRe_C2pABBigu3XsGMnSoVA0kpV0Z765NutDtf-_9l4i0rSVuPS9xZnEWyovT75hofOS6E75TvTU5trouc5K7Ig_a5bVxfl4O9--gUC_fejJu8E6hdyaBM1pxRmQK7AKlwRrF1qAFqwFMIo-kQOsJAytwgJzF-wPT-jaf:1vTZHN:24qqlQK_CnmLF7zGyNxiLzkVYcd1kVZ8YmLzF99xp-Y	2025-12-25 05:31:53.146647+00
 r4q5lbmrzctu6ur8tayt8ulgn4wbjrno	.eJxVjEEOwiAQRe_C2pABBigu3XsGMnSoVA0kpV0Z765NutDtf-_9l4i0rSVuPS9xZnEWyovT75hofOS6E75TvTU5trouc5K7Ig_a5bVxfl4O9--gUC_fejJu8E6hdyaBM1pxRmQK7AKlwRrF1qAFqwFMIo-kQOsJAytwgJzF-wPT-jaf:1vTAX8:FkZK8FbxflAoQvukADzXxj_mhORTdxvDwqHKMJ1dFwo	2025-12-24 03:06:30.953044+00
+ylnbqs98e8y9tx1n6c27rs161jz8823b	.eJxVjEEOwiAQAP_C2ZDCUgoevfcNZHcBqRqalPZk_Lsh6UGvM5N5i4DHXsLR0haWKK7CaHH5hYT8TLWb-MB6XyWvdd8Wkj2Rp21yXmN63c72b1Cwlf71kbw1mQ2hN2oCSGNksgCZwYJzyDipIRFr6zWDiqP2Q7ZGZeWcRfH5Ag1wN9s:1vVjWm:4PGMiHVxuH82yWDJoAXzQsdtid2BP0B8Aj3XPsTwtnA	2025-12-31 04:52:44.076236+00
 zvn8na8ymxi00wu4s7q4uy4x0rz7jkb1	.eJxVjDEOgzAQBP_iOrJsg32QMj1vQHfnIyaJsIShivL3GIkiabbYmd23GnHf0rgXWcc5qqtqQV1-S0J-ynKQ-MDlnjXnZVtn0oeiT1r0kKO8bqf7d5CwpLpG39oJXBuDR-49EMcowNABSFMTyZE3toHQCAlb79xkqxZ6w0ymU58vECY4EQ:1vLZQE:shlvZAdHdKKCfVNiTAl_W6lGKF0ksSovECeI9BKBWAc	2025-12-03 04:03:58.81848+00
 \.
 
@@ -3037,6 +3038,7 @@ COPY public.lab_assignments (assignment_id, assignment_method, assigned_at, lab_
 --
 
 COPY public.lab_enrollment_campaigns (campaign_id, start_date, end_date, is_closed, created_at, closed_at, course_id) FROM stdin;
+c9fc8e2a-692d-4654-a779-c1ab97db78b8	2025-12-14 05:29:32.485752+00	2025-12-21 05:29:32.485752+00	f	2025-12-14 05:29:32.486073+00	\N	e9ebd666-6ff1-4798-af36-b3fe6c079986
 \.
 
 
@@ -3280,6 +3282,7 @@ af15a93a-ddc9-45e3-b296-121c41e3db2a	ACTIVO	83.78	14.40	2025-12-02 05:11:28.9990
 --
 
 COPY public.student_postulations (postulation_id, "timestamp", status, campaign_id, lab_group_id, student_id) FROM stdin;
+0d531e05-831f-4ca0-bd44-24ffc283b526	2025-12-14 06:02:42.930913+00	PENDIENTE	c9fc8e2a-692d-4654-a779-c1ab97db78b8	08e36447-6899-43e9-9996-d26d0d838c72	47
 \.
 
 
@@ -3359,7 +3362,7 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 29	pbkdf2_sha256$600000$ESGWJqxjBkb5EQR5DV5Eqw$pCqddbQ5gC/wOPI9afq9FDtcqXIqjRHYOYMIoUuKyr0=	\N	f	jgutierrezca@unsa.edu.pe	Juan Carlos	Gutierrez Caceres	f	t	2025-11-15 06:34:24.149579+00	fe449730-2e04-47a9-8feb-4a285315fa15	jgutierrezca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.269898+00	2025-11-15 06:34:24.269902+00
 30	pbkdf2_sha256$600000$IuglCyu4YK0v3kfYg9xU9R$9i/BUuxpCfDQnHy3ZvdHnQgB888YeNiTIQMr2ztIw6U=	\N	f	wramos@unsa.edu.pe	Wilber Roberto	Ramos Lovon	f	t	2025-11-15 06:34:24.274482+00	aca3e397-45dd-4a37-a00f-bd8e3cd19c29	wramos@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.401155+00	2025-11-15 06:34:24.401159+00
 2	pbkdf2_sha256$600000$QAf1nHls0u8cN6mhAOYBrn$DWsrCLUP9b8GQHgHGvYQ0xBD6gok3higHdPQyB5V5vk=	2025-11-15 07:42:44.898013+00	f	rlinaresd@unsa.edu.pe	Rolando	Linares Delgado	f	t	2025-11-15 06:34:20.781548+00	1fc1ad18-3738-4820-85a4-80d4f7a4ceea	rlinaresd@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:20.902138+00	2025-11-15 06:34:20.902147+00
-17	pbkdf2_sha256$600000$dnvl1yXhxuzZeLPmgYd9rP$8TQOC3hVF9fO5xPHZi62rADiQzM+bToe5EW6V9QArCY=	2025-12-11 05:31:53.144855+00	f	esarmientoca@unsa.edu.pe	Edgar	Sarmiento Calisaya	f	t	2025-11-15 06:34:22.636157+00	de50ae51-b886-4a8b-8996-e226011112e5	esarmientoca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.754862+00	2025-11-15 06:34:22.754866+00
+17	pbkdf2_sha256$600000$dnvl1yXhxuzZeLPmgYd9rP$8TQOC3hVF9fO5xPHZi62rADiQzM+bToe5EW6V9QArCY=	2025-12-17 04:46:57.630967+00	f	esarmientoca@unsa.edu.pe	Edgar	Sarmiento Calisaya	f	t	2025-11-15 06:34:22.636157+00	de50ae51-b886-4a8b-8996-e226011112e5	esarmientoca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.754862+00	2025-11-15 06:34:22.754866+00
 97	pbkdf2_sha256$600000$BDpCUae7bEV3e46brUYLAf$I87TUQPWfu7IOOwrrs92L1TyXhTfvgRFlLAZVj8GJv0=	\N	f	20190652	Nelzon Jorge	Apaza Apaza	f	t	2025-11-18 00:25:58.710884+00	5a40401b-b53e-4159-a836-6844c331ecab	napaza@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:58.71115+00	2025-12-02 05:11:28.908627+00
 31	pbkdf2_sha256$600000$I2KvPwx8cSHusAPMb6Vnuq$3j7YtpxKneHb2POYGP566af3tNsU0beIEVWNmRs1UNE=	\N	f	eadriazola@unsa.edu.pe	Eliana Maria	Adriazola Herrera	f	t	2025-11-15 06:34:24.414162+00	1d496cce-cbe8-4d3f-91a7-6e39c86c89b5	eadriazola@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.534471+00	2025-11-15 06:34:24.534477+00
 32	pbkdf2_sha256$600000$c7DkDh4J1F2UtbruuM8eWn$JAjH8Kjryqex/uvNYCTToo4AJfQSlFwwjthfz8hNKyk=	\N	f	egutierrezro@unsa.edu.pe	Eddy Augusto	Gutierrez Rodriguez	f	t	2025-11-15 06:34:24.539305+00	68c4f4c2-8e96-41ed-bd0c-7922a4377dfe	egutierrezro@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.65826+00	2025-11-15 06:34:24.658265+00
@@ -3371,13 +3374,13 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 39	pbkdf2_sha256$600000$tn68aToz3YV69Z29G6qHa6$vHhKuT/4sCUSvES097bamwF/VhFMQiUZvpnGnHHOEdQ=	\N	f	dmonroyc@unsa.edu.pe	Daniel Jesus	Monroy Carnero	f	t	2025-11-15 06:34:25.410224+00	afad6e3e-ff22-40e0-8d24-6f51155d4a52	dmonroyc@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.531048+00	2025-11-15 06:34:25.531052+00
 40	pbkdf2_sha256$600000$5zqRWKFtLhGhls8ZnC92AR$vTqzvIDxxOxBxZpjXUn/30NxnFvYxh9lcvqvIp5FnNk=	\N	f	ltacca@unsa.edu.pe	Lorenzo Wilbert	Tacca Quispe	f	t	2025-11-15 06:34:25.537423+00	8248ed50-795c-47db-8a46-7638b66253d8	ltacca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.658183+00	2025-11-15 06:34:25.658186+00
 41	pbkdf2_sha256$600000$6AzlpHMETJ7u06SM9I4dAP$MXj7vMWBrnGWSoXViQl/fC/38+qrm+tkc5i/WbLgjMI=	\N	f	storresg@unsa.edu.pe	Selene Belen	Torres Gonzales	f	t	2025-11-15 06:34:25.660461+00	61acd5e9-06cf-42b7-933f-9894c88dee3d	storresg@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.779785+00	2025-11-15 06:34:25.779789+00
+42	pbkdf2_sha256$600000$Gsai0frsH4rmB5ykEF5Ahj$0GdyKudWSKND+kI+YuO1h0iGwPz4lMRXkruVyj+50Jk=	2025-12-17 04:52:44.066499+00	f	secretaria@unsa.edu.pe	Raquel	Gonzales	f	t	2025-11-15 07:14:22+00	8aec098c-fb2b-42f4-8087-a07057f6eabb	secretaria@unsa.edu.pe	\N	\N	SECRETARIA	ACTIVO	0	\N	2025-11-15 07:14:22.332688+00	2025-11-15 07:15:08.714023+00
 23	pbkdf2_sha256$600000$nGuWuanrAITD7utSdRzVTY$DtcMb9mrdAVtUGPRTwnhXDuEFFNJn/aqY7F+d3Lnez4=	2025-11-15 07:40:35.421932+00	f	amamaniali@unsa.edu.pe	Alvaro Henry	Mamani Aliaga	f	t	2025-11-15 06:34:23.379007+00	4fcfe094-a6c9-4314-a17a-d0c082941984	amamaniali@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:23.501783+00	2025-11-15 06:34:23.50179+00
 99	pbkdf2_sha256$600000$2wGdyaIc1fh4xHZUddqHgQ$jiaMaFS7d4yESf/c3E4DKbB/C3WRwLYRaezCQsotMQE=	\N	f	20204682	Jayan Michael	Caceres Cuba	f	t	2025-11-18 00:25:58.964223+00	284f578b-f38b-4fda-9a6b-d6a336f8c8fd	jcaceres@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:58.964407+00	2025-12-02 05:11:28.91429+00
 100	pbkdf2_sha256$600000$3mRRrKDvfx2E4uMlrAq6ld$yeBIuxgW2zUF6cEkl4AN7d95JWUopTmeg0FVIDR3wGA=	\N	f	20190755	Alessander Jesus	Carazas Quispe	f	t	2025-11-18 00:25:59.087979+00	6f4f609d-2131-4b85-adff-628e5b889b03	acarazas@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:59.088171+00	2025-12-02 05:11:28.928671+00
 101	pbkdf2_sha256$600000$dHqzfc35IDGf64wRJy0wdK$qDM7kDf55u4gCUkujnuMR7+a1lKS2r3zuYYaykEkZV0=	\N	f	20180102	Sergio Ahmed	Castillo Sancho	f	t	2025-11-18 00:25:59.210845+00	3ee82221-187d-4e25-b02e-7965ad9ea669	scastillo@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:59.211028+00	2025-12-02 05:11:28.940783+00
 34	pbkdf2_sha256$600000$oOMWnbHp8OTsn8CMltZXGc$1rpa58A6v2WIEMxMNZV1B2MSewmRJWdn8hAR2wGjsZg=	2025-12-02 01:31:14.688181+00	f	rjacobe@unsa.edu.pe	Rocio	Jacobe Aguirre	f	t	2025-11-15 06:34:24.783654+00	1dfec295-6273-4280-b200-910bcfb1a49b	rjacobe@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.905598+00	2025-11-15 06:34:24.905602+00
 102	pbkdf2_sha256$600000$fr6g8gjjU1phCYsVnoXEmp$JXkTPNPIJy9+TpWudPvOWOG9bR2JyQQ/b58pVSGYo6Q=	\N	f	20173456	Luis Alberto	Ccalluchi Lopez	f	t	2025-11-18 00:25:59.335221+00	0494ea34-370d-4189-8e68-e19b36bff2c9	lccalluchi@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:59.335387+00	2025-12-02 05:11:28.943974+00
-42	pbkdf2_sha256$600000$Gsai0frsH4rmB5ykEF5Ahj$0GdyKudWSKND+kI+YuO1h0iGwPz4lMRXkruVyj+50Jk=	2025-12-11 02:25:19.072546+00	f	secretaria@unsa.edu.pe	Raquel	Gonzales	f	t	2025-11-15 07:14:22+00	8aec098c-fb2b-42f4-8087-a07057f6eabb	secretaria@unsa.edu.pe	\N	\N	SECRETARIA	ACTIVO	0	\N	2025-11-15 07:14:22.332688+00	2025-11-15 07:15:08.714023+00
 72	pbkdf2_sha256$600000$ie8BVy5hqCePW5pJfBJNhj$I+g233SeC1PsOZ3oqmaOIq4RNRj/esTszviit9IntVI=	\N	f	20230580	Ivan Alexander	Lopez Zegarra	f	t	2025-11-15 09:11:22.325419+00	dd1eeb8b-e5cd-4a6b-909b-d92058f1b2e7	ilopez@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:22.325599+00	2025-11-18 01:49:21.000784+00
 73	pbkdf2_sha256$600000$ZacMDvuJVGexzlDijlDvj6$XJC+SlrGMrX/dF2H8rtTh4B9N1Ju1X0lOGv1zcn8Seg=	\N	f	20231535	Arthur Patrick	Meza Pareja	f	t	2025-11-15 09:11:22.446032+00	d3fd6421-605b-4da8-9892-67e6380a15a6	ameza@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:22.446165+00	2025-11-18 01:49:21.003447+00
 74	pbkdf2_sha256$600000$HR1HAVABYIzCx4qUsLhVT9$C7vpJqPD2qkyfzOxzQVgozLdoq2vGz11izb67aMPcaQ=	\N	f	20233581	Roni Ezequiel	Montaã‘ez Pacco	f	t	2025-11-15 09:11:22.564711+00	70b15848-9f70-4c4b-8450-bac3760bb027	rmontaã‘ez@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:22.56483+00	2025-11-18 01:49:21.006087+00
@@ -3400,8 +3403,8 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 56	pbkdf2_sha256$600000$JTL3zvd06k4SbWJT5XiNV7$zWqlyvEWkQM157ueqBp/hWjnta/OuwhlIf4bi0Z9cOg=	\N	f	20233589	Anthony Richar	Condorios Chambi	f	t	2025-11-15 09:11:20.38123+00	603a2f43-eaa5-4073-9f39-a8b923913a65	acondorios@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.381417+00	2025-12-02 05:11:28.959027+00
 57	pbkdf2_sha256$600000$9QStSuLDngX8MQIYI7pyUW$hwBXbcyjFg8hoHnqGf3g2l+Fl8BdKR8ypYHO2GQDd0E=	\N	f	20232279	Mauricio Andres	Cornejo Alvarez	f	t	2025-11-15 09:11:20.502728+00	cd427cc8-7d37-4162-883e-0de29fe78a23	mcornejo@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.502906+00	2025-12-02 05:11:28.961922+00
 58	pbkdf2_sha256$600000$hpLC7VgCo9nFQNOWvAYnt1$zikh03TYmn/zHYVS5MbezH6TikAmx3W7fXNwolfrQR0=	\N	f	20200364	Kathia Yerardine	Cuevas Apaza	f	t	2025-11-15 09:11:20.626552+00	2637b698-2142-48d9-a238-a7995bcdddbf	kcuevas@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.626711+00	2025-12-02 05:11:28.967905+00
-47	pbkdf2_sha256$600000$AXhc8MMYPWsnCOIlfzwIks$l+zI2tmKGbT+Ktmc/q2mG5hwdQiTrqr4rD3ZqYIksTM=	2025-12-11 02:48:28.241681+00	f	20213145	Jhosep Angel	Cacsire Sanchez	f	t	2025-11-15 09:11:19.27794+00	7e4e0b12-59cd-4e39-a795-d7f648cdb0e9	jcacsire@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.278138+00	2025-12-07 03:35:11.320814+00
 44	pbkdf2_sha256$600000$EUs0oyeK1IHJl0BHgQyE5o$bWJsl4bF3tfPNE67RVoL6Hbv8HbajMpIUzbMUtU08cg=	\N	f	20233590	Diego Daniel	Abensur Romero	f	t	2025-11-15 09:11:18.895384+00	ee196c44-93a0-41ae-9c36-c7b0bab87f15	dabensur@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:18.895676+00	2025-12-02 05:11:28.898055+00
+47	pbkdf2_sha256$600000$AXhc8MMYPWsnCOIlfzwIks$l+zI2tmKGbT+Ktmc/q2mG5hwdQiTrqr4rD3ZqYIksTM=	2025-12-17 04:15:39.743025+00	f	20213145	Jhosep Angel	Cacsire Sanchez	f	t	2025-11-15 09:11:19.27794+00	7e4e0b12-59cd-4e39-a795-d7f648cdb0e9	jcacsire@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.278138+00	2025-12-07 03:35:11.320814+00
 45	pbkdf2_sha256$600000$5T3k9LUipZNGowHwnBmyOP$61Mi+a6ppDan63O6sDVlergnNSF+q5LIepgF7T+mgQA=	\N	f	20232284	Diogo Andres	Alcazar Medina	f	t	2025-11-15 09:11:19.02509+00	05d580e1-909d-40bc-9416-4de2a6dc6fcf	dalcazar@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.025295+00	2025-12-02 05:11:28.902932+00
 46	pbkdf2_sha256$600000$CpcY9mPZ2Z4KTz9xJq8fh1$0jKKP0PY5IOJ80eWasBZZ3RooXa6xYwJ8/1UYI0yNvQ=	\N	f	20230573	Jose Javier	Alva Cornejo	f	t	2025-11-15 09:11:19.151592+00	94df95c6-d318-4131-aff0-fdc4997491c4	jalva@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.151788+00	2025-12-02 05:11:28.905829+00
 18	pbkdf2_sha256$600000$dg0unf4OhCDi8javzwiUVE$gqoRTzYtuhGdVe8GDhlpN9/+qCD9/ITG3Gghbjjrrjc=	2025-12-04 03:05:59.175276+00	f	yyarira@unsa.edu.pe	Yessenia Deysi	Yari Ramos	f	t	2025-11-15 06:34:22.759636+00	718c6776-5833-45f9-bc81-0b06f1e89efd	yyarira@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.878282+00	2025-11-15 06:34:22.878287+00
@@ -3513,7 +3516,7 @@ SELECT pg_catalog.setval('public.django_content_type_id_seq', 29, true);
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sgac_user
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 33, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 34, true);
 
 
 --
@@ -4026,6 +4029,13 @@ CREATE INDEX authtoken_token_key_10f0b77e_like ON public.authtoken_token USING b
 
 
 --
+-- Name: campaign_course_closed_idx; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX campaign_course_closed_idx ON public.lab_enrollment_campaigns USING btree (course_id, is_closed);
+
+
+--
 -- Name: classrooms_code_85ae9b8a_like; Type: INDEX; Schema: public; Owner: sgac_user
 --
 
@@ -4163,6 +4173,13 @@ CREATE INDEX laboratory_groups_professor_id_c6847835 ON public.laboratory_groups
 --
 
 CREATE INDEX laboratory_groups_room_id_1d9aaad9 ON public.laboratory_groups USING btree (room_id);
+
+
+--
+-- Name: postul_campaign_lab_status_idx; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX postul_campaign_lab_status_idx ON public.student_postulations USING btree (campaign_id, lab_group_id, status);
 
 
 --
@@ -4661,5 +4678,5 @@ ALTER TABLE ONLY public.users_user_permissions
 -- PostgreSQL database dump complete
 --
 
-\unrestrict lp4tIxj4XiYJcPMLHjsl9LWXfGv9y0kpPXD0gwmxWnO8j0x9ID2fmmxWh9Lm3n4
+\unrestrict jHHR4gfVtqj4eHfKOocYiRoGaF9ANrWXIdwUOEHo0XlS8LPyGDwjecJ7AHVB7kj
 

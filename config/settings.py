@@ -9,17 +9,29 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # ==================== SEGURIDAD ====================
 SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-key')
 DEBUG = config('DEBUG', default=True, cast=bool)
+
 ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1,web').split(',')
 
-# Orígenes confiables para protección CSRF (Importante para despliegue)
+# Lógica automática para Codespaces (detecta el entorno y permite el host)
+CODESPACE_NAME = os.getenv('CODESPACE_NAME')
+CODESPACE_DOMAIN = os.getenv('GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN')
+
+if CODESPACE_NAME and CODESPACE_DOMAIN:
+    host = f"{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}"
+    if host not in ALLOWED_HOSTS:
+        ALLOWED_HOSTS.append(host)
+
+# Orígenes confiables para protección CSRF
 CSRF_TRUSTED_ORIGINS = [
-    "http://localhost:8000", "http://127.0.0.1:8000",
-    "https://localhost:8000", "https://127.0.0.1:8000",
-    "https://*.github.dev",
-    "https://*.app.github.dev",
-    "https://*.app.github.dev/admin/logout/",
-    "https://*.app.github.dev/admin",
+    "http://localhost:8000", 
+    "http://127.0.0.1:8000",
+    "https://*.github.dev",    
+    "https://*.app.github.dev",  
 ]
+
+# Si detectamos codespace, lo agregamos explícitamente también por seguridad
+if CODESPACE_NAME and CODESPACE_DOMAIN:
+    CSRF_TRUSTED_ORIGINS.append(f"https://{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}")
 
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
