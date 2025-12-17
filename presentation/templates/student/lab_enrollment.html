@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}Matrícula de Laboratorios - Alumno{% endblock %}
 
@@ -9,7 +10,9 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-0 text-primary fw-bold"><i class="bi bi-pen me-2"></i>Matrícula de Laboratorios</h1>
+        <h1 class="h3 mb-0 text-primary fw-bold">
+            <i class="bi bi-pen me-2"></i>Matrícula de Laboratorios
+        </h1>
         <p class="text-muted small mb-0">Selecciona los laboratorios disponibles para tus cursos</p>
     </div>
 </div>
@@ -17,21 +20,46 @@
 {% if enrolled_labs %}
 <div class="card mb-4 shadow-sm border-0 border-start border-success border-4">
     <div class="card-header bg-white py-3">
-        <h5 class="mb-0 text-success"><i class="bi bi-check-circle-fill me-2"></i>Laboratorios Asignados</h5>
+        <h5 class="mb-0 text-success">
+            <i class="bi bi-check-circle-fill me-2"></i>Laboratorios Asignados
+        </h5>
     </div>
     <div class="card-body">
         <div class="row g-3">
             {% for enrollment in enrolled_labs %}
             <div class="col-md-6 col-lg-4">
                 <div class="p-3 bg-light rounded border h-100">
-                    <h6 class="mb-2 fw-bold text-dark">
-                        {{ enrollment.course.course_name }}
-                    </h6>
-                    <span class="badge bg-success mb-2">Lab {{ enrollment.lab_assignment.lab_group.lab_nomenclature }}</span>
+                    <div class="d-flex justify-content-between align-items-start mb-2">
+                        <h6 class="mb-0 fw-bold text-dark">
+                            {{ enrollment.course.course_code }}
+                        </h6>
+                        <span class="badge enrolled-badge text-white">
+                            <i class="bi bi-check-circle me-1"></i>Confirmado
+                        </span>
+                    </div>
+                    <p class="text-muted small mb-2">{{ enrollment.course.course_name }}</p>
+                    <span class="badge bg-success mb-2">
+                        Lab {{ enrollment.lab_assignment.lab_group.lab_nomenclature }}
+                    </span>
                     
-                    <ul class="list-unstyled small text-muted mb-0">
-                        <li class="mb-1"><i class="bi bi-clock me-2"></i>{{ enrollment.lab_assignment.lab_group.day_of_week }} {{ enrollment.lab_assignment.lab_group.start_time|time:"H:i" }}</li>
-                        <li><i class="bi bi-geo-alt me-2"></i>{{ enrollment.lab_assignment.lab_group.room }}</li>
+                    <ul class="list-unstyled small text-muted mb-0 mt-2">
+                        <li class="mb-1">
+                            <i class="bi bi-calendar3 me-2"></i>
+                            <strong>{{ enrollment.lab_assignment.lab_group.get_day_of_week_display }}</strong>
+                        </li>
+                        <li class="mb-1">
+                            <i class="bi bi-clock me-2"></i>
+                            {{ enrollment.lab_assignment.lab_group.start_time|time:"H:i" }} - 
+                            {{ enrollment.lab_assignment.lab_group.end_time|time:"H:i" }}
+                        </li>
+                        <li>
+                            <i class="bi bi-geo-alt me-2"></i>
+                            {% if enrollment.lab_assignment.lab_group.room %}
+                                {{ enrollment.lab_assignment.lab_group.room.name }}
+                            {% else %}
+                                Por asignar
+                            {% endif %}
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -41,47 +69,198 @@
 </div>
 {% endif %}
 
-{% if courses_with_labs %}
-<div class="card shadow-sm border-0">
+{% if postulations %}
+<div class="card mb-4 shadow-sm border-0 border-start border-warning border-4">
     <div class="card-header bg-white py-3">
-        <h5 class="mb-0 text-primary"><i class="bi bi-list-check me-2"></i>Laboratorios Disponibles</h5>
+        <h5 class="mb-0 text-warning">
+            <i class="bi bi-hourglass-split me-2"></i>Mis Postulaciones
+        </h5>
     </div>
     <div class="card-body">
-        {% for course_item in courses_with_labs %}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light">
+                    <tr>
+                        <th>Curso</th>
+                        <th>Laboratorio</th>
+                        <th>Horario</th>
+                        <th>Fecha</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in postulations %}
+                    <tr>
+                        <td>
+                            <strong>{{ item.postulation.campaign.course.course_code }}</strong><br>
+                            <small class="text-muted">{{ item.postulation.campaign.course.course_name }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary">
+                                Lab {{ item.postulation.lab_group.lab_nomenclature }}
+                            </span>
+                        </td>
+                        <td>
+                            <small>
+                                {{ item.postulation.lab_group.get_day_of_week_display }}<br>
+                                {{ item.postulation.lab_group.start_time|time:"H:i" }} - 
+                                {{ item.postulation.lab_group.end_time|time:"H:i" }}
+                            </small>
+                        </td>
+                        <td>
+                            <small class="text-muted">
+                                {{ item.postulation.timestamp|date:"d/m/Y H:i" }}
+                            </small>
+                        </td>
+                        <td>
+                            <span class="badge bg-{{ item.status_info.class }}">
+                                <i class="bi bi-{{ item.status_info.icon }} me-1"></i>
+                                {{ item.status_info.text }}
+                            </span>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% if campaigns_data %}
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3">
+        <h5 class="mb-0 text-primary">
+            <i class="bi bi-list-check me-2"></i>Laboratorios Disponibles
+        </h5>
+    </div>
+    <div class="card-body">
+        {% for campaign_item in campaigns_data %}
         <div class="mb-5">
-            <h5 class="d-flex align-items-center mb-3">
-                <span class="badge bg-primary me-2">{{ course_item.enrollment.course.course_code }}</span>
-                {{ course_item.enrollment.course.course_name }}
-            </h5>
-            
-            <div class="alert alert-info py-2 px-3 small mb-3">
-                <i class="bi bi-info-circle-fill me-2"></i>
-                Selecciona tu preferencia. La asignación final dependerá del sorteo/orden de llegada.
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div>
+                    <h5 class="d-flex align-items-center mb-1">
+                        <span class="badge bg-primary me-2">
+                            {{ campaign_item.enrollment.course.course_code }}
+                        </span>
+                        {{ campaign_item.enrollment.course.course_name }}
+                    </h5>
+                    <small class="text-muted">
+                        <i class="bi bi-calendar-check me-1"></i>
+                        Inscripción hasta: {{ campaign_item.campaign.end_date|date:"d/m/Y H:i" }}
+                    </small>
+                </div>
+                
+                {% if campaign_item.already_postulated %}
+                <span class="badge pending-badge text-white px-3 py-2">
+                    <i class="bi bi-hourglass-split me-1"></i>Ya Postulaste
+                </span>
+                {% endif %}
             </div>
             
+            {% if not campaign_item.can_postulate %}
+            <div class="alert alert-warning py-2 px-3 small mb-3">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Ya postulaste a un laboratorio. Espera la confirmación de asignación.
+            </div>
+            {% else %}
+            <div class="alert alert-info py-2 px-3 small mb-3">
+                <i class="bi bi-info-circle-fill me-2"></i>
+                Selecciona tu laboratorio preferido. La asignación final se confirmará al cierre de inscripciones.
+            </div>
+            {% endif %}
+            
             <div class="row g-3">
-                {% for lab in course_item.labs %}
+                {% for lab_item in campaign_item.labs %}
                 <div class="col-md-6 col-lg-4">
-                    <div class="card h-100 border-secondary border-opacity-25 hover-shadow transition-all">
+                    <div class="card h-100 lab-card {% if lab_item.has_conflict or not campaign_item.can_postulate or lab_item.is_full %}disabled-card{% endif %}">
                         <div class="card-body">
                             <div class="d-flex justify-content-between align-items-start mb-3">
                                 <h6 class="card-title fw-bold text-dark mb-0">
-                                    <i class="bi bi-flask me-1 text-primary"></i> Lab {{ lab.lab_nomenclature }}
+                                    <i class="bi bi-flask me-1 text-primary"></i> 
+                                    Lab {{ lab_item.lab.lab_nomenclature }}
                                 </h6>
-                                <span class="badge bg-light text-dark border">
-                                    <i class="bi bi-people me-1"></i> {{ lab.capacity }}
-                                </span>
+                                <div>
+                                    <span class="badge bg-light text-dark border">
+                                        <i class="bi bi-people me-1"></i>
+                                        {{ lab_item.enrolled_count }}/{{ lab_item.lab.capacity }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            <div class="mb-3">
+                                {% if lab_item.has_conflict %}
+                                    <span class="badge conflict-badge text-white mb-1">
+                                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                                        Cruce de horario
+                                    </span>
+                                {% endif %}
+                                
+                                {% if lab_item.is_full %}
+                                    <span class="badge bg-danger text-white mb-1">
+                                        <i class="bi bi-x-circle-fill me-1"></i>
+                                        Cupos llenos
+                                    </span>
+                                {% elif lab_item.available_spots <= 3 %}
+                                    <span class="badge bg-warning text-dark mb-1">
+                                        <i class="bi bi-exclamation-circle me-1"></i>
+                                        {{ lab_item.available_spots }} cupos
+                                    </span>
+                                {% endif %}
                             </div>
                             
                             <ul class="list-unstyled text-muted small mb-4">
-                                <li class="mb-2"><i class="bi bi-calendar3 me-2"></i><strong>{{ lab.day_of_week }}</strong></li>
-                                <li class="mb-2"><i class="bi bi-clock me-2"></i>{{ lab.start_time|time:"H:i" }} - {{ lab.end_time|time:"H:i" }}</li>
-                                <li><i class="bi bi-geo-alt me-2"></i>{{ lab.room }}</li>
+                                <li class="mb-2">
+                                    <i class="bi bi-calendar3 me-2"></i>
+                                    <strong>{{ lab_item.lab.get_day_of_week_display }}</strong>
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-clock me-2"></i>
+                                    {{ lab_item.lab.start_time|time:"H:i" }} - 
+                                    {{ lab_item.lab.end_time|time:"H:i" }}
+                                </li>
+                                <li class="mb-2">
+                                    <i class="bi bi-geo-alt me-2"></i>
+                                    {% if lab_item.lab.room %}
+                                        {{ lab_item.lab.room.name }}
+                                    {% else %}
+                                        Por asignar
+                                    {% endif %}
+                                </li>
+                                <li>
+                                    <i class="bi bi-person me-2"></i>
+                                    {% if lab_item.lab.professor %}
+                                        {{ lab_item.lab.professor.get_full_name }}
+                                    {% elif lab_item.lab.external_professor %}
+                                        {{ lab_item.lab.external_professor.full_name }}
+                                    {% else %}
+                                        Por asignar
+                                    {% endif %}
+                                </li>
                             </ul>
 
-                            <button class="btn btn-outline-secondary w-100 disabled" disabled>
-                                <i class="bi bi-lock-fill me-2"></i>Matrícula Cerrada
-                            </button>
+                            {% if lab_item.has_conflict %}
+                                <button class="btn btn-outline-danger w-100" disabled>
+                                    <i class="bi bi-x-circle me-2"></i>No compatible
+                                </button>
+                            {% elif not campaign_item.can_postulate %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="bi bi-check-circle me-2"></i>Ya postulaste
+                                </button>
+                            {% elif lab_item.is_full %}
+                                <button class="btn btn-outline-secondary w-100" disabled>
+                                    <i class="bi bi-lock-fill me-2"></i>Cupos llenos
+                                </button>
+                            {% else %}
+                                <button class="btn btn-primary w-100 btn-postulate"
+                                        data-campaign-id="{{ campaign_item.campaign.campaign_id }}"
+                                        data-lab-id="{{ lab_item.lab.lab_id }}"
+                                        data-lab-name="Lab {{ lab_item.lab.lab_nomenclature }}"
+                                        data-course-name="{{ campaign_item.enrollment.course.course_name }}"
+                                        data-url-details="{% url 'presentation:student_lab_details' 0 %}">
+                                    <i class="bi bi-check-circle me-2"></i>Postular
+                                </button>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -93,21 +272,93 @@
     </div>
 </div>
 {% else %}
-    {% if not enrolled_labs %}
+    {% if not enrolled_labs and not postulations %}
     <div class="text-center py-5">
         <i class="bi bi-check-circle display-1 text-success opacity-25"></i>
         <p class="text-muted mt-3 fw-bold">¡Todo listo!</p>
-        <p class="text-muted small">Tus cursos actuales no requieren matrícula de laboratorio o ya han sido asignados.</p>
+        <p class="text-muted small">
+            No hay inscripciones de laboratorio disponibles en este momento.
+        </p>
     </div>
     {% endif %}
 {% endif %}
 
 <div class="mt-4 p-3 bg-light rounded border text-muted small">
-    <h6 class="fw-bold"><i class="bi bi-question-circle-fill me-2"></i>¿Cómo funciona?</h6>
-    <ul class="mb-0 list-inline">
-        <li class="list-inline-item me-3">1. Revisa los horarios disponibles.</li>
-        <li class="list-inline-item me-3">2. Postula durante la semana de inscripciones.</li>
-        <li class="list-inline-item">3. Recibe la confirmación por correo.</li>
+    <h6 class="fw-bold">
+        <i class="bi bi-question-circle-fill me-2"></i>¿Cómo funciona?
+    </h6>
+    <ul class="mb-0">
+        <li class="mb-2">
+            <strong>1. Revisa los horarios:</strong> Asegúrate de no tener cruces con tus clases.
+        </li>
+        <li class="mb-2">
+            <strong>2. Postula a tu preferencia:</strong> Selecciona el laboratorio que mejor se ajuste a tu horario.
+        </li>
+        <li class="mb-2">
+            <strong>3. Espera la asignación:</strong> Al cierre de inscripciones, se procesarán las postulaciones.
+        </li>
+        <li>
+            <strong>4. Recibe confirmación:</strong> Verás tu asignación final en "Laboratorios Asignados".
+        </li>
     </ul>
 </div>
+
+<div class="modal fade" id="confirmPostulationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fs-6 fw-bold">
+                    <i class="bi bi-check-circle me-2"></i>Confirmar Postulación
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-4">
+                <p class="mb-3">¿Confirmas tu postulación a este laboratorio?</p>
+                
+                <div class="bg-light p-3 rounded mb-3">
+                    <h6 class="fw-bold mb-2" id="modalCourseName"></h6>
+                    <h5 class="text-primary mb-3" id="modalLabName"></h5>
+                    
+                    <ul class="list-unstyled small mb-0">
+                        <li class="mb-2">
+                            <i class="bi bi-calendar3 me-2 text-muted"></i>
+                            <span id="modalLabDay"></span>
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-clock me-2 text-muted"></i>
+                            <span id="modalLabTime"></span>
+                        </li>
+                        <li>
+                            <i class="bi bi-geo-alt me-2 text-muted"></i>
+                            <span id="modalLabRoom"></span>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="alert alert-warning py-2 px-3 small mb-0">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <strong>Importante:</strong> Solo puedes postular a un laboratorio por curso. 
+                    La asignación final se confirmará al cierre de inscripciones.
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center bg-light border-0">
+                <button type="button" class="btn btn-secondary btn-sm px-4" data-bs-dismiss="modal">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary btn-sm px-4 fw-bold" 
+                        id="btnConfirmPostulation"
+                        data-url-postulate="{% url 'presentation:student_lab_postulate' %}">
+                    <i class="bi bi-check-circle me-1"></i>Sí, Postular
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <script src="{% static 'js/student_enrollment.js' %}"></script>
 {% endblock %}

@@ -1,7 +1,10 @@
 from collections import defaultdict
+from django.db import transaction
+from django.utils import timezone
 from django.core.exceptions import ObjectDoesNotExist
 from infrastructure.persistence.models import (
-    StudentEnrollment, LaboratoryGroup, GradeRecord, Evaluation, Syllabus, SessionProgress
+    StudentEnrollment, LaboratoryGroup, GradeRecord, Evaluation, Schedule,
+    Syllabus, SessionProgress, LabEnrollmentCampaign, StudentPostulation
 )
 
 class StudentService:
@@ -323,3 +326,297 @@ class StudentService:
             result['attendance_records'] = records_qs
             
         return result
+
+    # ==================== INSCRIPCIÓN DE LABORATORIOS ====================
+    
+    @staticmethod
+    def get_available_lab_campaigns(student):
+        """
+        Obtiene las campañas activas donde el alumno puede inscribirse
+        Retorna: Lista de cursos con labs disponibles y sus campañas
+        """
+        # 1. Cursos activos del estudiante SIN lab asignado
+        enrollments_no_lab = StudentEnrollment.objects.filter(
+            student=student,
+            status='ACTIVO',
+            lab_assignment__isnull=True
+        ).select_related('course')
+        
+        campaigns_data = []
+        
+        for enrollment in enrollments_no_lab:
+            # 2. Verificar si hay campaña activa para este curso
+            campaign = LabEnrollmentCampaign.objects.filter(
+                course=enrollment.course,
+                is_closed=False
+            ).first()
+            
+            if not campaign:
+                continue 
+            
+            # 3. Verificar si ya postuló
+            already_postulated = StudentPostulation.objects.filter(
+                campaign=campaign,
+                student=student
+            ).first()
+            
+            # 4. Obtener todos los labs del curso
+            labs = LaboratoryGroup.objects.filter(
+                course=enrollment.course
+            ).select_related('room', 'professor', 'external_professor')
+            
+            # 5. Por cada lab, verificar conflictos de horario
+            labs_with_status = []
+            for lab in labs:
+                has_conflict = StudentService._check_student_lab_conflict(student, lab)
+                
+                # Contar cuántos ya están inscritos
+                enrolled_count = StudentPostulation.objects.filter(
+                    campaign=campaign,
+                    lab_group=lab
+                ).count()
+                
+                labs_with_status.append({
+                    'lab': lab,
+                    'has_conflict': has_conflict,
+                    'enrolled_count': enrolled_count,
+                    'is_full': enrolled_count >= lab.capacity,
+                    'available_spots': max(0, lab.capacity - enrolled_count)
+                })
+            
+            campaigns_data.append({
+                'enrollment': enrollment,
+                'campaign': campaign,
+                'labs': labs_with_status,
+                'already_postulated': already_postulated,
+                'can_postulate': not already_postulated
+            })
+        
+        return campaigns_data
+    
+    @staticmethod
+    def get_enrolled_labs(student):
+        """
+        Labs donde el alumno YA tiene asignación (confirmada)
+        """
+        return StudentEnrollment.objects.filter(
+            student=student,
+            status='ACTIVO',
+            lab_assignment__isnull=False
+        ).select_related(
+            'course',
+            'lab_assignment__lab_group__room',
+            'lab_assignment__lab_group__professor',
+            'lab_assignment__lab_group__external_professor'
+        )
+    
+    @staticmethod
+    def _check_student_lab_conflict(student, lab_group):
+        """
+        Verifica si el alumno tiene cruce de horario con este lab
+        Revisa: 
+        - Horarios de teoría de TODOS sus cursos
+        - Otros labs ya asignados
+        - Otras postulaciones pendientes en otras campañas
+        """
+        def overlap(s1, e1, s2, e2):
+            return s1 < e2 and s2 < e1
+        
+        # 1. Obtener todas las matrículas activas del alumno
+        enrollments = StudentEnrollment.objects.filter(
+            student=student,
+            status='ACTIVO'
+        ).select_related('course', 'group')
+        
+        for enrollment in enrollments:
+            # 2. Verificar horarios de teoría
+            if enrollment.group:
+                schedules = Schedule.objects.filter(course_group=enrollment.group)
+                for sch in schedules:
+                    if sch.day_of_week == lab_group.day_of_week:
+                        if overlap(
+                            lab_group.start_time, lab_group.end_time,
+                            sch.start_time, sch.end_time
+                        ):
+                            return True
+            
+            # 3. Verificar labs ya asignados
+            if enrollment.lab_assignment:
+                other_lab = enrollment.lab_assignment.lab_group
+                if other_lab.lab_id != lab_group.lab_id:
+                    if other_lab.day_of_week == lab_group.day_of_week:
+                        if overlap(
+                            lab_group.start_time, lab_group.end_time,
+                            other_lab.start_time, other_lab.end_time
+                        ):
+                            return True
+        
+        # 4. Verificar otras postulaciones pendientes (en otras campañas activas)
+        other_postulations = StudentPostulation.objects.filter(
+            student=student,
+            status='PENDIENTE'
+        ).select_related('lab_group')
+        
+        for post in other_postulations:
+            if post.lab_group.lab_id != lab_group.lab_id:
+                if post.lab_group.day_of_week == lab_group.day_of_week:
+                    if overlap(
+                        lab_group.start_time, lab_group.end_time,
+                        post.lab_group.start_time, post.lab_group.end_time
+                    ):
+                        return True
+        
+        return False
+    
+    @staticmethod
+    @transaction.atomic
+    def postulate_to_lab(student, campaign_id, lab_id):
+        """
+        El alumno postula a un laboratorio específico
+        """
+        result = {'success': False, 'errors': []}
+        
+        try:
+            # 1. Validar que la campaña existe y está activa
+            campaign = LabEnrollmentCampaign.objects.filter(
+                campaign_id=campaign_id,
+                is_closed=False
+            ).first()
+            
+            if not campaign:
+                result['errors'].append('La campaña de inscripción no está disponible.')
+                return result
+            
+            # 2. Verificar que el alumno está matriculado en el curso
+            enrollment = StudentEnrollment.objects.filter(
+                student=student,
+                course=campaign.course,
+                status='ACTIVO'
+            ).first()
+            
+            if not enrollment:
+                result['errors'].append('No estás matriculado en este curso.')
+                return result
+            
+            # 3. Verificar que el lab existe
+            lab = LaboratoryGroup.objects.filter(
+                lab_id=lab_id,
+                course=campaign.course
+            ).first()
+            
+            if not lab:
+                result['errors'].append('El laboratorio seleccionado no existe.')
+                return result
+            
+            # 4. Verificar que no tenga postulación previa en esta campaña
+            existing = StudentPostulation.objects.filter(
+                campaign=campaign,
+                student=student
+            ).first()
+            
+            if existing:
+                result['errors'].append('Ya postulaste a un laboratorio en esta campaña.')
+                return result
+            
+            # 5. Verificar conflictos de horario
+            if StudentService._check_student_lab_conflict(student, lab):
+                result['errors'].append('Tienes un cruce de horario con este laboratorio.')
+                return result
+            
+            # 6. Crear postulación
+            postulation = StudentPostulation.objects.create(
+                campaign=campaign,
+                student=student,
+                lab_group=lab,
+                status='PENDIENTE'
+            )
+            
+            result['success'] = True
+            result['postulation_id'] = str(postulation.postulation_id)
+            
+        except Exception as e:
+            result['errors'].append(f'Error al procesar inscripción: {str(e)}')
+        
+        return result
+    
+    @staticmethod
+    def get_student_postulations(student):
+        """
+        Obtiene todas las postulaciones del alumno (pendientes y procesadas)
+        """
+        postulations = StudentPostulation.objects.filter(
+            student=student
+        ).select_related(
+            'campaign__course',
+            'lab_group__room',
+            'lab_group__professor',
+            'lab_group__external_professor'
+        ).order_by('-timestamp')
+        
+        data = []
+        for post in postulations:
+            status_info = {
+                'PENDIENTE': {'class': 'warning', 'text': 'En espera', 'icon': 'hourglass-split'},
+                'ACEPTADO': {'class': 'success', 'text': 'Asignado', 'icon': 'check-circle'},
+                'REASIGNADO': {'class': 'info', 'text': 'Reasignado', 'icon': 'arrow-repeat'},
+                'RECHAZADO': {'class': 'danger', 'text': 'No asignado', 'icon': 'x-circle'}
+            }.get(post.status, {'class': 'secondary', 'text': post.status, 'icon': 'question-circle'})
+            
+            data.append({
+                'postulation': post,
+                'status_info': status_info
+            })
+        
+        return data
+
+    @staticmethod
+    def get_lab_details_dto(lab_id, student):
+        """
+        Obtiene los detalles de un laboratorio formateados para consumo JSON (DTO).
+        Incluye validación de conflictos horarios para el estudiante.
+        """
+        try:
+            from infrastructure.persistence.models import LaboratoryGroup
+            
+            # 1. Obtener datos crudos
+            lab = LaboratoryGroup.objects.select_related(
+                'room', 'professor', 'external_professor', 'course'
+            ).get(lab_id=lab_id)
+            
+            # 2. Verificar conflicto (Usando lógica interna del servicio)
+            # Nota: Asumo que _check_student_lab_conflict es un método de esta misma clase
+            has_conflict = StudentService._check_student_lab_conflict(student, lab)
+            
+            # 3. Formatear nombre del profesor
+            professor_name = 'Sin asignar'
+            if lab.professor:
+                professor_name = lab.professor.get_full_name()
+            elif lab.external_professor:
+                professor_name = lab.external_professor.full_name
+            
+            # 4. Construir DTO de respuesta
+            return {
+                'success': True,
+                'lab': {
+                    'id': str(lab.lab_id),
+                    'nomenclature': lab.lab_nomenclature,
+                    'capacity': lab.capacity,
+                    'day': lab.get_day_of_week_display(),
+                    'start_time': lab.start_time.strftime('%H:%M'),
+                    'end_time': lab.end_time.strftime('%H:%M'),
+                    'room': lab.room.name if lab.room else 'Sin asignar',
+                    'professor': professor_name,
+                    'has_conflict': has_conflict
+                }
+            }
+            
+        except LaboratoryGroup.DoesNotExist:
+            return {
+                'success': False,
+                'error': 'Laboratorio no encontrado'
+            }
+        except Exception as e:
+            return {
+                'success': False,
+                'error': f"Error al obtener detalles: {str(e)}"
+            }

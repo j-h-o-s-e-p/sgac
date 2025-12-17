@@ -99,6 +99,51 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
     @page { size: landscape; margin: 0.5cm; }
 }
 
+/* Tarjetas de laboratorio interactivas */
+.lab-card {
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0; /* Borde más sutil */
+}
+
+.lab-card:hover:not(.disabled-card) {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08); /* Sombra más suave y moderna */
+    border-color: #3b82f6; /* Un azul más moderno */
+}
+
+.lab-card.disabled-card {
+    opacity: 0.6;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
+}
+
+/* Badges con gradientes y animaciones */
+.conflict-badge {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    animation: pulse-red 2s infinite;
+}
+
+@keyframes pulse-red {
+    0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+    70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+.enrolled-badge {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.pending-badge {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+/* Estado de carga en botones */
+.btn-loading {
+    pointer-events: none;
+    opacity: 0.75;
+    cursor: wait;
+}
+
 /* OTROS ESTILOS ORIGINALES */
 .bg-gradient-teal { background: linear-gradient(135deg, #11998e, #38ef7d); }
 .bg-gradient-orange { background: linear-gradient(135deg, #fa709a, #fee140); }
@@ -228,3 +273,5 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
     .schedule-theory { background-color: #f8fbff !important; -webkit-print-color-adjust: exact; }
     .schedule-lab { background-color: #f0fdf4 !important; -webkit-print-color-adjust: exact; }
 }
+
+

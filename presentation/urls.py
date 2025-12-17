@@ -25,7 +25,6 @@ urlpatterns = [
     path('student/dashboard/', student_views.dashboard, name='student_dashboard'),
     path('student/schedule/', student_views.schedule, name='student_schedule'),
     path('student/grades/', student_views.grades, name='student_grades'),
-    path('student/lab-enrollment/', student_views.lab_enrollment, name='student_lab_enrollment'),
     path('student/syllabus/', student_views.syllabus_list, name='student_syllabus_list'),
     path('student/syllabus/<uuid:course_id>/', student_views.syllabus_detail, name='student_syllabus_detail'),
     path('student/attendance/', student_views.attendance_list, name='student_attendance_list'),
@@ -71,10 +70,37 @@ urlpatterns = [
     path('secretaria/laboratories/<uuid:lab_id>/delete/', secretaria_lab_views.DeleteLabGroupView.as_view(), name='secretaria_lab_delete'),
     path('secretaria/laboratories/check-conflicts/', secretaria_lab_views.CheckScheduleConflictsView.as_view(), name='secretaria_lab_check_conflicts'),
     path('secretaria/laboratories/available-classrooms/', secretaria_lab_views.GetAvailableClassroomsView.as_view(), name='secretaria_lab_available_classrooms'),
+    
+    # --- SECRETARÍA: LABORATORIOS - CAMPAÑA DE INSCRIPCIÓN ---
+    path('secretaria/laboratories/enable-enrollment/<uuid:course_id>/', 
+         secretaria_lab_views.EnableLabEnrollmentView.as_view(), 
+         name='secretaria_lab_enable_enrollment'),
+    
+    path('secretaria/laboratories/campaign-status/<uuid:course_id>/', 
+         secretaria_lab_views.GetCampaignStatusView.as_view(), 
+         name='secretaria_lab_campaign_status'),
+    
+    path('secretaria/laboratories/enrolled-students/<uuid:lab_id>/', 
+         secretaria_lab_views.GetLabEnrolledStudentsView.as_view(), 
+         name='secretaria_lab_enrolled_students'),
+    
+    path('secretaria/laboratories/close-enrollment/<uuid:course_id>/', 
+         secretaria_lab_views.CloseLabEnrollmentView.as_view(), 
+         name='secretaria_lab_close_enrollment'),
 
     # --- SECRETARÍA: ESTADÍSTICAS ---
     path('secretaria/statistics/', secretaria_statistics_views.SecretariaStatisticsView.as_view(), name='secretaria_statistics'),
+
+    path('student/lab-enrollment/', student_views.lab_enrollment, name='student_lab_enrollment'),
+        # AGREGAR ESTAS 2 NUEVAS RUTAS:
+    path('student/lab-enrollment/postulate/', 
+         student_views.postulate_to_lab, 
+         name='student_lab_postulate'),
+    
+    path('student/lab-enrollment/details/<uuid:lab_id>/', 
+         student_views.get_lab_details, 
+         name='student_lab_details'),
 ]
 
 if settings.DEBUG:
-    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_URL)
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

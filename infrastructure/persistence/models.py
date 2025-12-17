@@ -407,6 +407,13 @@ class LabEnrollmentCampaign(models.Model):
         db_table = 'lab_enrollment_campaigns'
         verbose_name = 'Campaña de Matrícula Lab'
         verbose_name_plural = 'Campañas de Matrícula Lab'
+
+        indexes = [
+            models.Index(
+                fields=['course', 'is_closed'],
+                name='campaign_course_closed_idx'
+            )
+        ]
     
     def __str__(self):
         return f"Campaña {self.course.course_code}"
@@ -427,6 +434,14 @@ class StudentPostulation(models.Model):
         unique_together = [['campaign', 'student']]
         verbose_name = 'Postulación Lab'
         verbose_name_plural = 'Postulaciones Lab'
+        ordering = ['timestamp']
+
+        indexes = [
+            models.Index(
+                fields=['campaign', 'lab_group', 'status'],
+                name='postul_campaign_lab_status_idx'
+            )
+        ]
 
 
 class LabAssignment(models.Model):

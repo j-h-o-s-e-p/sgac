@@ -2,18 +2,19 @@ import csv
 import io
 import json
 import openpyxl
-from datetime import time
+from datetime import time, datetime, timedelta
 from typing import List, Dict, Optional
 from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
 
 from django.db import transaction
-from django.db.models import Count, Q, Avg
+from django.db.models import Count, Q, Avg, Sum
 from django.utils import timezone
 from django.contrib.auth.hashers import make_password
 from django.core.exceptions import ObjectDoesNotExist
 
 from infrastructure.persistence.models import (
-    Classroom, Course, CustomUser, CourseGroup, 
+    Classroom, Course, CustomUser, CourseGroup,
+    LabEnrollmentCampaign, StudentPostulation, LabAssignment,
     Schedule, StudentEnrollment, LaboratoryGroup, 
     ExternalProfessor, Syllabus, SessionProgress, DAY_CHOICES
 )
@@ -372,6 +373,339 @@ class SecretariaService:
             if l.room and overlap(start, end, l.start_time, l.end_time): occupied_ids.add(l.room.classroom_id)
              
         return Classroom.objects.filter(is_active=True, classroom_type='LABORATORIO').exclude(classroom_id__in=occupied_ids)
+
+    @staticmethod
+    def delete_lab_group(lab_id):
+        """
+        Elimina un grupo de laboratorio validando reglas de negocio.
+        Regla: No se puede eliminar si la campaña de inscripción ya cerró.
+        """
+        try:
+            # 1. Obtener el lab
+            from infrastructure.persistence.models import LaboratoryGroup, LabEnrollmentCampaign
+            lab = LaboratoryGroup.objects.get(lab_id=lab_id)
+            
+            # 2. Validar regla de negocio: Campaña cerrada
+            campaign = LabEnrollmentCampaign.objects.filter(
+                course=lab.course,
+                is_closed=True
+            ).first()
+            
+            if campaign:
+                return {
+                    'success': False,
+                    'error': "No se puede eliminar el grupo. La inscripción del curso ya fue cerrada y procesada."
+                }
+            
+            # 3. Ejecutar eliminación
+            lab.delete()
+            return {'success': True, 'message': "Grupo de laboratorio eliminado correctamente."}
+            
+        except LaboratoryGroup.DoesNotExist:
+            return {'success': False, 'error': "El laboratorio no existe."}
+        except Exception as e:
+            return {'success': False, 'error': f"Error al eliminar: {str(e)}"}
+
+    # ==================== CAMPAÑA DE INSCRIPCIÓN ====================
+
+    @staticmethod
+    def can_enable_enrollment(course_id):
+        """
+        Paso 1: El Chequeo Previo.
+        """
+        total_students = SecretariaService.get_course_enrollment_count(course_id)
+        
+        # Sumamos la capacidad de todos los grupos (A, B, C...)
+        total_capacity = LaboratoryGroup.objects.filter(course_id=course_id).aggregate(
+            total=Sum('capacity')
+        )['total'] or 0
+        
+        return {
+            'can_enable': total_capacity >= total_students,
+            'total_students': total_students,
+            'total_capacity': total_capacity,
+            'deficit': max(0, total_students - total_capacity) 
+        }
+    
+    @staticmethod
+    @transaction.atomic
+    def enable_lab_enrollment(course_id, days_duration=7):
+        """
+        Paso 2: ¡Abrir las puertas!
+        Si todo está en orden, creamos la campaña. Esto permite que los botones
+        de "Inscribirse" aparezcan en la pantalla de los alumnos.
+        """
+        result = {'success': False, 'errors': []}
+        
+        try:
+            # Primero nos aseguramos que matemáticamente sea posible 
+            check = SecretariaService.can_enable_enrollment(course_id)
+            if not check['can_enable']:
+                result['errors'].append(f"Faltan cupos. Hay {check['total_students']} alumnos y solo {check['total_capacity']} espacios.")
+                return result
+            
+            # Evitamos errores tontos: no crear una campaña si ya hay una corriendo
+            active = LabEnrollmentCampaign.objects.filter(
+                course_id=course_id, 
+                is_closed=False
+            ).first()
+            
+            if active:
+                result['errors'].append("Ya hay una inscripción activa para este curso.")
+                return result
+            
+            # Creamos la campaña con fecha de inicio y fin
+            now = timezone.now()
+            campaign = LabEnrollmentCampaign.objects.create(
+                course_id=course_id,
+                start_date=now,
+                end_date=now + timedelta(days=days_duration),
+                is_closed=False
+            )
+            
+            result['success'] = True
+            result['campaign_id'] = str(campaign.campaign_id)
+            
+        except Exception as e:
+            result['errors'].append(str(e))
+        
+        return result
+    
+    @staticmethod
+    def get_campaign_status(course_id):
+        """
+        El "Tablero de Control".
+        Nos dice en tiempo real cómo va llenándose cada grupo.
+        Calcula si un lab está vacío, normal, lleno o reventando de gente.
+        """
+        # Buscamos la última campaña creada
+        campaign = LabEnrollmentCampaign.objects.filter(
+            course_id=course_id
+        ).order_by('-created_at').first()
+        
+        if not campaign:
+            return {'exists': False}
+        
+        # Contamos cuántos alumnos han pedido cada grupo
+        labs = LaboratoryGroup.objects.filter(course_id=course_id).annotate(
+            enrolled_count=Count('postulations', filter=Q(postulations__campaign=campaign))
+        )
+        
+        labs_data = []
+        for lab in labs:
+            # Ponemos etiquetas visuales según qué tan lleno esté
+            status = 'empty'
+            if lab.enrolled_count == 0:
+                status = 'empty'         
+            elif lab.enrolled_count < lab.capacity * 0.8:
+                status = 'normal'        
+            elif lab.enrolled_count <= lab.capacity:
+                status = 'almost-full'   
+            else:
+                status = 'exceeded'     
+            
+            labs_data.append({
+                'lab_id': str(lab.lab_id),
+                'nomenclature': lab.lab_nomenclature,
+                'capacity': lab.capacity,
+                'enrolled': lab.enrolled_count,
+                'available': max(0, lab.capacity - lab.enrolled_count),
+                'status': status
+            })
+        
+        return {
+            'exists': True,
+            'campaign_id': str(campaign.campaign_id),
+            'is_active': not campaign.is_closed,
+            'is_closed': campaign.is_closed,
+            'start_date': campaign.start_date.isoformat(),
+            'end_date': campaign.end_date.isoformat(),
+            'labs': labs_data
+        }
+    
+    @staticmethod
+    def get_lab_enrolled_students(lab_id):
+        """
+        La lista de espera.
+        Muestra quiénes se anotaron en un grupo específico y en qué orden llegaron.
+        También avisamos si ese alumno tiene conflicto (para que el jefe sepa).
+        """
+        postulations = StudentPostulation.objects.filter(
+            lab_group_id=lab_id,
+            status='PENDIENTE'
+        ).select_related('student').order_by('timestamp') 
+        
+        students = []
+        for i, post in enumerate(postulations, 1):
+            students.append({
+                'order': i,
+                'student_id': str(post.student.user_id),
+                'full_name': post.student.get_full_name(),
+                'email': post.student.email,
+                'timestamp': post.timestamp.strftime('%d/%m/%Y %H:%M'),
+                # Revisamos si el alumno tiene problemas de horario
+                'has_conflict': SecretariaService._check_student_schedule_conflict(
+                    post.student.user_id,
+                    post.lab_group
+                )
+            })
+        
+        return students
+    
+    @staticmethod
+    def _check_student_schedule_conflict(student_id, lab_group):
+        """
+        El "Detector de Choques".
+        Revisa la agenda del alumno para ver si tiene clases a la misma hora
+        que el lab que quiere.
+        Revisa: 
+        1. Sus clases de Teoría.
+        2. Otros Laboratorios donde ya esté inscrito.
+        """
+        def overlap(s1, e1, s2, e2): return s1 < e2 and s2 < e1
+        
+        enrollments = StudentEnrollment.objects.filter(
+            student_id=student_id,
+            status='ACTIVO'
+        ).select_related('course', 'group')
+        
+        for enrollment in enrollments:
+            if enrollment.group:
+                schedules = Schedule.objects.filter(course_group=enrollment.group)
+                for sch in schedules:
+                    if sch.day_of_week == lab_group.day_of_week:
+                        if overlap(lab_group.start_time, lab_group.end_time, sch.start_time, sch.end_time):
+                            return True 
+            
+            if enrollment.lab_assignment:
+                other_lab = enrollment.lab_assignment.lab_group
+                if other_lab.lab_id != lab_group.lab_id:
+                    if other_lab.day_of_week == lab_group.day_of_week:
+                        if overlap(lab_group.start_time, lab_group.end_time, other_lab.start_time, other_lab.end_time):
+                            return True 
+        
+        return False 
+    
+    @staticmethod
+    @transaction.atomic
+    def close_lab_enrollment(course_id):
+        """
+        Algoritmo de Asignación.
+        """
+        result = {'success': False, 'errors': [], 'redistributions': []}
+        
+        try:
+            campaign = LabEnrollmentCampaign.objects.filter(course_id=course_id, is_closed=False).first()
+            if not campaign:
+                result['errors'].append("No hay nada que cerrar.")
+                return result
+            
+            labs = list(LaboratoryGroup.objects.filter(course_id=course_id))
+            
+            # Analizamos laboratorio por laboratorio
+            for lab in labs:
+                # Traemos a todos los que pidieron este lab, en orden de llegada
+                postulations = StudentPostulation.objects.filter(
+                    campaign=campaign, lab_group=lab, status='PENDIENTE'
+                ).select_related('student').order_by('timestamp')
+                
+                enrolled_count = postulations.count()
+                
+                # --- CASO 1: Todos caben ---
+                if enrolled_count <= lab.capacity:
+                    for post in postulations:
+                        SecretariaService._assign_student(post, lab, 'DIRECTO')
+
+                # --- CASO 2: Sobrevendido (Hay más alumnos que sillas) ---
+                else:
+                    result['redistributions'].append({
+                        'lab': lab.lab_nomenclature,
+                        'original_count': enrolled_count,
+                        'capacity': lab.capacity
+                    })
+                    
+                    # Dividimos a los alumnos en dos grupos:
+                    immovable = [] # Los que tienen cruce en otros horarios (Prioridad Alta)
+                    movable = []   # Los que tienen agenda libre (Pueden ser movidos)
+                    
+                    for post in postulations:
+                        if SecretariaService._check_student_schedule_conflict(post.student.user_id, lab):
+                            immovable.append(post) # Este alumno sufre si lo mueves
+                        else:
+                            movable.append(post)   # Este alumno es flexible
+                    
+                    # REGLA DE EMERGENCIA: Si hay demasiados "inamovibles", ampliamos el salón a la fuerza
+                    if len(immovable) > lab.capacity:
+                        new_capacity = len(immovable) + 10 # Les damos espacio extra por si acaso
+                        lab.capacity = new_capacity
+                        lab.save()
+                    
+                    # A. Asignamos a los inamovibles primero (se quedan con su cupo)
+                    for post in immovable:
+                        SecretariaService._assign_student(post, lab, 'CONFLICTO')
+                    
+                    # B. Llenamos los espacios restantes con los "movibles"
+                    remaining_capacity = max(0, lab.capacity - len(immovable))
+                    can_stay = movable[:remaining_capacity]    
+                    must_move = movable[remaining_capacity:]    
+                    
+                    for post in can_stay:
+                        SecretariaService._assign_student(post, lab, 'DIRECTO')
+                    
+                    # C. Reubicación automática de los sobrantes
+                    for post in must_move:
+                        assigned = False
+                        # Buscamos en los otros grupos del mismo curso
+                        for other_lab in labs:
+                            if other_lab.lab_id == lab.lab_id: continue 
+                            
+                            # Chequeamos si el otro grupo tiene espacio Y el alumno no tiene cruce
+                            current_assigned = LabAssignment.objects.filter(lab_group=other_lab).count()
+                            
+                            if current_assigned < other_lab.capacity:
+                                if not SecretariaService._check_student_schedule_conflict(post.student.user_id, other_lab):
+                                    # ¡Encontramos sitio! Lo movemos aquí
+                                    SecretariaService._assign_student(post, other_lab, 'REDISTRIBUIDO')
+                                    post.status = 'REASIGNADO' # Marca especial para avisarle
+                                    post.save()
+                                    assigned = True
+                                    break
+                        
+                        if not assigned:
+                            # Caso triste: No hubo sitio en ningún lado
+                            post.status = 'RECHAZADO'
+                            post.save()
+            
+            # Cerramos el telón
+            campaign.is_closed = True
+            campaign.closed_at = timezone.now()
+            campaign.save()
+            result['success'] = True
+            
+        except Exception as e:
+            result['errors'].append(str(e))
+        
+        return result
+
+    # Helper pequeño para no repetir código al guardar en base de datos
+    @staticmethod
+    def _assign_student(postulation, lab_group, method):
+        LabAssignment.objects.create(
+            postulation=postulation,
+            student=postulation.student,
+            lab_group=lab_group,
+            assignment_method=method
+        )
+        postulation.status = 'ACEPTADO'
+        postulation.save()
+        
+        # Actualizamos su matrícula oficial
+        enrollment = StudentEnrollment.objects.filter(
+            student=postulation.student, course_id=lab_group.course_id
+        ).first()
+        if enrollment:
+            enrollment.lab_assignment = postulation.assignment
+            enrollment.save()
 
     # ==================== ESTADÍSTICAS AVANZADAS ====================
     @staticmethod

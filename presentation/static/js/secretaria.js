@@ -1,66 +1,83 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Módulo de Secretaría cargado.');
+    console.log('Sistema de Secretaría cargado correctamente.');
 
     // ==========================================================
-    // 1. ELIMINACIÓN DE REGISTROS (MODAL GENÉRICO)
+    // 0. HELPERS GLOBALES
     // ==========================================================
-    // Funciona para Salones, y futuros elementos con la clase .btn-delete-classroom
+    
+    /**
+     * Obtiene el CSRF Token de las cookies para peticiones AJAX seguras.
+     */
+    function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== '') {
+            const cookies = document.cookie.split(';');
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                    cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    // ==========================================================
+    // 1. INTERFAZ GENERAL Y UI
+    // ==========================================================
+
+    // A. Auto-estilizado de formularios Django
+    const classroomForm = document.getElementById('classroomForm');
+    if (classroomForm) {
+        const inputs = classroomForm.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (!['checkbox', 'radio', 'hidden'].includes(input.type)) {
+                input.classList.add(input.tagName === 'SELECT' ? 'form-select' : 'form-control');
+            }
+        });
+    }
+
+    // B. Auto-ocultar alertas (Flash Messages)
+    const alerts = document.querySelectorAll('.alert:not(.alert-permanent, .conflict-alert)');
+    alerts.forEach(alert => {
+        setTimeout(() => {
+            alert.style.transition = 'opacity 0.5s';
+            alert.style.opacity = '0';
+            setTimeout(() => alert.remove(), 500);
+        }, 5000);
+    });
+
+    // C. Modal Genérico de Eliminación
     const deleteModal = document.getElementById('confirmDeleteModal');
     if (deleteModal) {
         deleteModal.addEventListener('show.bs.modal', function (event) {
-            // Botón que disparó el modal
             const button = event.relatedTarget;
+            const deleteUrl = button.dataset.url;
+            const name = button.dataset.name;
             
-            // Extraer info de los atributos data-*
-            const deleteUrl = button.getAttribute('data-url');
-            const name = button.getAttribute('data-name');
-            
-            // Actualizar el formulario del modal
             const deleteForm = deleteModal.querySelector('#deleteForm');
-            if(deleteForm) deleteForm.action = deleteUrl;
+            const nameEl = deleteModal.querySelector('#modalClassroomName, #modalLabName'); // Soporta ambos IDs
             
-            // Actualizar el texto del modal
-            const nameEl = deleteModal.querySelector('#modalClassroomName');
+            if(deleteForm) deleteForm.action = deleteUrl;
             if(nameEl) nameEl.textContent = name;
         });
     }
 
     // ==========================================================
-    // 2. AUTO-ESTILIZADO DE FORMULARIOS DJANGO
+    // 2. GESTIÓN DE LABORATORIOS
     // ==========================================================
-    // Busca formularios específicos y añade clases Bootstrap a los inputs crudos de Django
-    const classroomForm = document.getElementById('classroomForm');
-    
-    if (classroomForm) {
-        const inputs = classroomForm.querySelectorAll('input, select, textarea');
-        inputs.forEach(input => {
-            if (input.type !== 'checkbox' && input.type !== 'radio' && input.type !== 'hidden') {
-                if (input.tagName === 'SELECT') {
-                    input.classList.add('form-select');
-                } else {
-                    input.classList.add('form-control');
-                }
-            }
-        });
-    }
 
-    // ==========================================================
-    // 3. GESTIÓN DE LABORATORIOS (Lógica Dinámica)
-    // ==========================================================
-    
-    // A. Inicializar valores al abrir el formulario (Botón "Crear Nuevo Grupo")
-    const labToggleButtons = document.querySelectorAll('.btn-toggle-lab-form');
-    labToggleButtons.forEach(btn => {
+    // A. Botón "Crear Nuevo Grupo": Calcula capacidad sugerida
+    document.querySelectorAll('.btn-toggle-lab-form').forEach(btn => {
         btn.addEventListener('click', function() {
-            const courseId = this.getAttribute('data-course-id');
-            const enrollment = parseInt(this.getAttribute('data-enrollment'));
-            const needed = parseInt(this.getAttribute('data-needed'));
+            const courseId = this.dataset.courseId;
+            const enrollment = parseInt(this.dataset.enrollment || 0);
+            const needed = parseInt(this.dataset.needed || 1);
             
-            // Calcular capacidad sugerida
             const suggested = Math.ceil(enrollment / needed);
-            
-            // Buscar el formulario correspondiente a este curso
             const form = document.getElementById(`form-${courseId}`);
+            
             if (form) {
                 const capacityInput = form.querySelector('.capacity-input');
                 const suggestedSpan = form.querySelector('.suggested-capacity');
@@ -72,10 +89,8 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // B. Toggle Profesor Interno vs Externo
-    const profTypeRadios = document.querySelectorAll('.prof-type-radio');
-    profTypeRadios.forEach(radio => {
+    document.querySelectorAll('.prof-type-radio').forEach(radio => {
         radio.addEventListener('change', function() {
-            // Buscamos el formulario padre para no afectar a otros cursos
             const form = this.closest('form');
             const targetType = this.value; // 'internal' o 'external'
             
@@ -97,8 +112,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // C. Verificación de Conflictos (AJAX)
-    // Delegación de eventos para inputs de horario (.lab-schedule-input)
+    // C. Verificación de Conflictos (AJAX) - Delegación de Eventos
     document.body.addEventListener('change', function(e) {
         if (e.target.classList.contains('lab-schedule-input')) {
             const form = e.target.closest('form');
@@ -109,23 +123,27 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkLabConflicts(form) {
         if (!form) return;
 
-        const courseId = form.getAttribute('data-course-id');
+        const courseId = form.dataset.courseId;
         const day = form.querySelector('[name="day_of_week"]').value;
         const startTime = form.querySelector('[name="start_time"]').value;
         const endTime = form.querySelector('[name="end_time"]').value;
         const roomId = form.querySelector('[name="room_id"]').value;
-        
-        // Solo consultar si tenemos datos mínimos
-        if (!day || !startTime || !endTime) return;
-
         const urlInput = document.getElementById('url-check-conflicts');
-        if (!urlInput) return;
-        const url = urlInput.value;
+        
+        if (!day || !startTime || !endTime || !urlInput) return;
 
-        // Recuperar CSRF Token (reutilizamos la función del main.js si es global, o la leemos del input)
-        const csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]').value;
+        // UI Update
+        const alertBox = form.querySelector('.conflict-alert');
+        const messageBox = form.querySelector('.conflict-message');
+        const iconBox = form.querySelector('.alert-icon');
+        
+        alertBox.classList.remove('d-none', 'alert-danger', 'alert-success');
+        alertBox.classList.add('alert-info');
+        messageBox.textContent = 'Verificando disponibilidad...';
 
-        fetch(url, {
+        let csrfToken = form.querySelector('[name="csrfmiddlewaretoken"]')?.value || getCookie('csrftoken');
+
+        fetch(urlInput.value, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,140 +157,112 @@ document.addEventListener('DOMContentLoaded', function() {
                 room_id: roomId
             })
         })
-        .then(response => response.json())
+        .then(res => res.json())
         .then(data => {
-            const alertBox = form.querySelector('.conflict-alert');
-            const messageBox = form.querySelector('.conflict-message');
-            const iconBox = form.querySelector('.alert-icon');
-            
-            alertBox.classList.remove('d-none');
-            
+            alertBox.classList.remove('alert-info');
             if (data.has_conflict) {
-                alertBox.classList.remove('alert-success', 'alert-info');
                 alertBox.classList.add('alert-danger');
-                iconBox.classList.replace('bi-check-circle-fill', 'bi-exclamation-triangle-fill');
-                messageBox.textContent = `Conflicto: ${data.messages.join(', ')}`;
+                if(iconBox) iconBox.className = 'bi bi-exclamation-triangle-fill me-2 alert-icon';
+                messageBox.innerHTML = `<strong>Conflicto:</strong> ${data.messages.join(', ')}`;
             } else {
-                alertBox.classList.remove('alert-danger', 'alert-info');
                 alertBox.classList.add('alert-success');
-                iconBox.classList.replace('bi-exclamation-triangle-fill', 'bi-check-circle-fill');
-                messageBox.textContent = 'Horario disponible y sin conflictos.';
+                if(iconBox) iconBox.className = 'bi bi-check-circle-fill me-2 alert-icon';
+                messageBox.textContent = 'Horario disponible.';
             }
         })
-        .catch(err => console.error('Error verificando conflictos:', err));
+        .catch(err => {
+            console.error(err);
+            alertBox.classList.add('alert-warning');
+            messageBox.textContent = 'Error verificando conflictos.';
+        });
     }
 
-    // D. Modal de Eliminación de Labs (Reutiliza la lógica genérica del paso 1, 
-    // pero aseguramos que funcione para el botón .btn-delete-lab)
-    const deleteLabBtns = document.querySelectorAll('.btn-delete-lab');
-    deleteLabBtns.forEach(btn => {
-        btn.addEventListener('click', function() {
-            const modal = document.getElementById('confirmDeleteModal');
-            if(modal) {
-                const url = this.getAttribute('data-url');
-                const name = this.getAttribute('data-name');
-                
-                modal.querySelector('#deleteForm').action = url;
-                modal.querySelector('#modalLabName').textContent = name;
-            }
-        });
-    });
+    // D. Actualización en tiempo real (Status Campañas)
+    const activeCampaigns = document.querySelectorAll('[data-course-id]');
+    if (activeCampaigns.length > 0) {
+        setInterval(() => {
+            activeCampaigns.forEach(card => {
+                const courseId = card.dataset.courseId;
+                if (typeof updateCampaignStatus === 'function') {
+                    updateCampaignStatus(courseId);
+                }
+            });
+        }, 30000); // 30 segundos
+    }
 
     // ==========================================================
-    // 4. PROGRAMACIÓN DE CURSOS (HORARIOS)
+    // 3. PROGRAMACIÓN DE HORARIOS (TEORÍA)
     // ==========================================================
     
-    // Variables para el módulo de horarios
     const scheduleModalEl = document.getElementById('scheduleModal');
     let scheduleModalInstance = null;
     
     if (scheduleModalEl) {
         scheduleModalInstance = new bootstrap.Modal(scheduleModalEl);
         
-        // Elementos DOM
         const entriesContainer = document.getElementById('schedule-entries-container');
         const addBtn = document.getElementById('add-schedule-entry');
         const saveBtn = document.getElementById('btn-save-schedule');
         const errorMsg = document.getElementById('modal-error-message');
         const template = document.getElementById('schedule-entry-template');
 
-        // Función para crear una fila
+        // Función para renderizar una fila
         const createRow = (data = null) => {
             const clone = template.content.cloneNode(true);
             const row = clone.querySelector('.schedule-entry');
             
-            // Referencias a inputs
             const daySelect = row.querySelector('.field-day');
             const roomSelect = row.querySelector('.field-room');
             const startInput = row.querySelector('.field-start');
             const endInput = row.querySelector('.field-end');
-            const removeBtn = row.querySelector('.btn-remove-entry');
             
-            // Precargar datos si existen
             if (data) {
                 daySelect.value = data.day_of_week;
-                roomSelect.value = data.room_id || ""; // Manejar si room es null
+                roomSelect.value = data.room_id || ""; 
                 startInput.value = data.start_time;
                 endInput.value = data.end_time;
             }
             
-            // Evento eliminar
-            removeBtn.addEventListener('click', () => row.remove());
-            
+            row.querySelector('.btn-remove-entry').addEventListener('click', () => row.remove());
             entriesContainer.appendChild(row);
         };
 
-        // A. Abrir Modal y Cargar Datos
+        // Abrir Modal
         document.querySelectorAll('.btn-edit-schedule').forEach(btn => {
             btn.addEventListener('click', function() {
-                const groupId = this.getAttribute('data-group-id');
-                const groupName = this.getAttribute('data-group-name');
+                const groupId = this.dataset.groupId;
+                const groupName = this.dataset.groupName;
                 
-                // Limpiar modal
                 entriesContainer.innerHTML = '';
                 errorMsg.classList.add('d-none');
                 document.getElementById('modal_course_group_id').value = groupId;
                 document.getElementById('modal-group-name-title').textContent = groupName;
                 
-                // Cargar horarios existentes
-                // Nota: Los datos vienen como string JSON en el atributo data-schedules
-                // Django template filter |safe asegura que las comillas estén bien, 
-                // pero a veces el navegador escapa las comillas.
-                // Es más seguro leerlo como objeto si se pasó vía json_script, 
-                // pero en este refactor optimizado lo pusimos directo en data-attribute para simplificar el DOM.
-                // Si el JSON es complejo, usar json_script es mejor.
-                
                 let schedules = [];
                 try {
-                    // Intentamos parsear. Si falla, asumimos vacío.
-                    // Nota: En el HTML usamos data-schedules='{{ ...|safe }}'.
-                    // Asegúrate de que tu vista envíe JSON válido.
-                    const rawJson = this.getAttribute('data-schedules');
-                    if (rawJson) schedules = JSON.parse(rawJson);
+                    const rawJson = this.dataset.schedules;
+                    if (rawJson && rawJson !== "None") schedules = JSON.parse(rawJson);
                 } catch (e) {
-                    console.error("Error parseando horarios", e);
+                    console.error("Error parseando horarios:", e);
                 }
                 
                 if (schedules && schedules.length > 0) {
                     schedules.forEach(s => createRow(s));
                 } else {
-                    createRow(); // Fila vacía por defecto
+                    createRow();
                 }
                 
                 scheduleModalInstance.show();
             });
         });
 
-        // B. Botón Añadir Fila
-        if(addBtn) {
-            addBtn.addEventListener('click', () => createRow());
-        }
+        // Botones Modal
+        if(addBtn) addBtn.addEventListener('click', () => createRow());
 
-        // C. Guardar Cambios (AJAX)
+        // Guardar Horarios
         if(saveBtn) {
             saveBtn.addEventListener('click', function() {
                 errorMsg.classList.add('d-none');
-                
                 const rows = entriesContainer.querySelectorAll('.schedule-entry');
                 const horarios = [];
                 let hasError = false;
@@ -284,59 +274,43 @@ document.addEventListener('DOMContentLoaded', function() {
                     const end = row.querySelector('.field-end').value;
                     
                     if (!day || !room || !start || !end) {
-                        hasError = true;
-                        return;
+                        hasError = true; return;
                     }
-                    
                     if (start >= end) {
-                        hasError = true;
-                        alert('La hora de inicio debe ser menor a la hora de fin en una de las filas.');
+                        hasError = true; 
+                        alert('La hora de inicio debe ser menor a la hora fin.');
                         return;
                     }
                     
-                    horarios.push({
-                        day: day,
-                        room_id: room,
-                        start_time: start,
-                        end_time: end
-                    });
+                    horarios.push({ day, room_id: room, start_time: start, end_time: end });
                 });
                 
                 if (hasError) {
-                    errorMsg.textContent = "Por favor completa todos los campos correctamente.";
+                    errorMsg.textContent = "Completa todos los campos correctamente.";
                     errorMsg.classList.remove('d-none');
                     return;
                 }
 
-                // Enviar datos
                 const url = document.getElementById('api-save-schedule-url').value;
                 const groupId = document.getElementById('modal_course_group_id').value;
-                
-                // Necesitamos el token CSRF. Lo buscamos en cualquier form de la página o cookie
-                const csrfToken = getCookie('csrftoken'); // Usamos la función helper global
 
                 fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'X-CSRFToken': csrfToken
+                        'X-CSRFToken': getCookie('csrftoken')
                     },
-                    body: JSON.stringify({
-                        course_group_id: groupId,
-                        horarios: horarios
-                    })
+                    body: JSON.stringify({ course_group_id: groupId, horarios: horarios })
                 })
                 .then(res => res.json())
                 .then(data => {
-                    if (data.success) {
-                        location.reload(); // Recargar para ver cambios
-                    } else {
+                    if (data.success) location.reload();
+                    else {
                         errorMsg.textContent = data.error || "Error al guardar.";
                         errorMsg.classList.remove('d-none');
                     }
                 })
-                .catch(err => {
-                    console.error(err);
+                .catch(() => {
                     errorMsg.textContent = "Error de conexión.";
                     errorMsg.classList.remove('d-none');
                 });
@@ -345,7 +319,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ==========================================================
-    // 5. BUSCADOR DE REPORTES DE NOTAS
+    // 4. BUSCADOR DE REPORTES
     // ==========================================================
     const searchInput = document.getElementById('gradeReportSearch');
     if (searchInput) {
@@ -356,219 +330,121 @@ document.addEventListener('DOMContentLoaded', function() {
 
             rows.forEach(row => {
                 const text = row.innerText.toLowerCase();
-                if (text.includes(filter)) {
-                    row.style.display = '';
-                    hasVisible = true;
-                } else {
-                    row.style.display = 'none';
-                }
+                const visible = text.includes(filter);
+                row.style.display = visible ? '' : 'none';
+                if (visible) hasVisible = true;
             });
 
-            // Mostrar mensaje si no hay resultados
             const noResMsg = document.getElementById('noResultsMessage');
+            const table = document.getElementById('groupsTable');
+            
             if (noResMsg) {
-                if (!hasVisible) {
-                    noResMsg.classList.remove('d-none');
-                    document.getElementById('groupsTable').classList.add('d-none');
-                } else {
-                    noResMsg.classList.add('d-none');
-                    document.getElementById('groupsTable').classList.remove('d-none');
-                }
+                noResMsg.classList.toggle('d-none', hasVisible);
+                if(table) table.classList.toggle('d-none', !hasVisible);
             }
         });
     }
 
     // ==========================================================
-    // 6. GRÁFICOS DASHBOARD SECRETARÍA 
+    // 5. GRÁFICOS DASHBOARD (Chart.js)
     // ==========================================================
-    
     const initCharts = () => {
         const saturationEl = document.getElementById('data-saturation');
         
         if (saturationEl && typeof Chart !== 'undefined') {
             try {
-                // Helper para parsear datos de Django de forma segura
-                const parseDjangoData = (elementId) => {
-                    const el = document.getElementById(elementId);
+                const parseDjangoData = (id) => {
+                    const el = document.getElementById(id);
                     if (!el) return null;
-                    let content = JSON.parse(el.textContent);
-                    if (typeof content === 'string') content = JSON.parse(content);
-                    return content;
+                    try {
+                        let content = JSON.parse(el.textContent);
+                        if (typeof content === 'string') content = JSON.parse(content);
+                        return content;
+                    } catch(e) { return null; }
                 };
 
                 const saturationData = parseDjangoData('data-saturation');
                 const courseData = parseDjangoData('data-courses');
                 const professorsData = parseDjangoData('data-professors');
 
-                // Configuración Global
                 Chart.defaults.font.family = "'Segoe UI', sans-serif";
                 Chart.defaults.color = '#64748b';
                 Chart.defaults.maintainAspectRatio = false;
 
-                // --------------------------------------------------
-                // GRÁFICO 1: SATURACIÓN (Estado de Grupos)
-                // --------------------------------------------------
-                const satCanvas = document.getElementById('saturationChart');
-                if (satCanvas) {
-                    new Chart(satCanvas, {
+                // 1. Gráfico de Saturación (Doughnut)
+                if (document.getElementById('saturationChart')) {
+                    new Chart(document.getElementById('saturationChart'), {
                         type: 'doughnut',
                         data: {
-                            // Etiquetas explicativas en lugar de genéricas
-                            labels: saturationData.labels || ['Crítico (>90%)', 'Óptimo (50-90%)', 'Baja Demanda (<50%)'], 
+                            labels: saturationData.labels,
                             datasets: [{
-                                data: saturationData.data || [],
-                                backgroundColor: [
-                                    '#ef4444', // Rojo (Crítico/Lleno)
-                                    '#10b981', // Verde (Bien/Normal)
-                                    '#f59e0b'  // Amarillo (Vacío/Baja demanda)
-                                ],
-                                borderWidth: 2,
-                                borderColor: '#ffffff',
-                                hoverOffset: 10
+                                data: saturationData.data,
+                                backgroundColor: ['#ef4444', '#10b981', '#f59e0b'],
+                                borderWidth: 2, borderColor: '#ffffff'
                             }]
                         },
                         options: {
+                            cutout: '65%',
                             plugins: {
-                                legend: { 
-                                    position: 'right', 
-                                    labels: { usePointStyle: true, boxWidth: 8 } 
-                                },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            // Calcula el porcentaje del total para dar contexto
-                                            let value = context.raw;
-                                            let total = context.chart._metasets[context.datasetIndex].total;
-                                            let percentage = Math.round((value / total) * 100) + "%";
-                                            return ` ${value} Grupos (${percentage})`;
-                                        },
-                                        title: function(context) {
-                                            return `Estado: ${context[0].label}`;
-                                        }
-                                    }
-                                }
-                            },
-                            cutout: '65%', // Dona más fina y elegante
-                            layout: { padding: 10 }
+                                legend: { position: 'right', labels: { usePointStyle: true } }
+                            }
                         }
                     });
                 }
 
-                // --------------------------------------------------
-                // GRÁFICO 2: TOP CURSOS (Con Nombre Completo)
-                // --------------------------------------------------
-                const courseCanvas = document.getElementById('courseChart');
-                if (courseCanvas) {
-                    // Preparamos etiquetas combinadas: "Código - Nombre..."
-                    // Si el nombre es muy largo, lo truncamos visualmente en el gráfico
-                    const richLabels = (courseData.labels || []).map((code, index) => {
-                        const name = courseData.names ? courseData.names[index] : '';
-                        // Si existe nombre, mostramos "IS2 - Ingeniería de..."
-                        // Si no, solo el código
+                // 2. Gráfico Top Cursos (Bar Horizontal)
+                if (document.getElementById('courseChart')) {
+                    const richLabels = (courseData.labels || []).map((code, i) => {
+                        const name = courseData.names ? courseData.names[i] : '';
                         return name ? `${code} - ${name}` : code;
                     });
 
-                    new Chart(courseCanvas, {
+                    new Chart(document.getElementById('courseChart'), {
                         type: 'bar',
                         data: {
-                            labels: richLabels, 
+                            labels: richLabels,
                             datasets: [{
-                                label: 'Alumnos Matriculados',
-                                data: courseData.data || [],
-                                backgroundColor: '#0e7490', // Cyan oscuro profesional
-                                borderRadius: 4,
-                                barThickness: 20, // Barras más finas
-                                maxBarThickness: 30
+                                label: 'Alumnos',
+                                data: courseData.data,
+                                backgroundColor: '#0e7490',
+                                borderRadius: 4, barThickness: 20
                             }]
                         },
                         options: {
-                            indexAxis: 'y', // Gráfico horizontal para leer mejor los nombres
+                            indexAxis: 'y',
                             scales: {
-                                x: { 
-                                    beginAtZero: true, 
-                                    grid: { display: false, drawBorder: false },
-                                    ticks: { font: { size: 11 } }
-                                },
+                                x: { grid: { display: false } },
                                 y: { 
-                                    grid: { display: false, drawBorder: false },
+                                    grid: { display: false },
                                     ticks: {
-                                        font: { size: 11, weight: '500' },
-                                        // Truco: Si el texto es muy largo, Chart.js lo corta, 
-                                        // pero con este callback podemos controlar un poco mejor si fuera necesario.
-                                        callback: function(value, index) {
-                                            const label = this.getLabelForValue(value);
-                                            // Truncar si pasa de 25 caracteres para que no ocupe todo el ancho
+                                        callback: function(val) {
+                                            const label = this.getLabelForValue(val);
                                             return label.length > 25 ? label.substr(0, 25) + '...' : label;
                                         }
                                     }
                                 }
                             },
-                            plugins: {
-                                legend: { display: false },
-                                tooltip: {
-                                    backgroundColor: 'rgba(15, 23, 42, 0.9)', // Azul oscuro casi negro
-                                    padding: 12,
-                                    titleFont: { size: 13 },
-                                    bodyFont: { size: 13 },
-                                    callbacks: {
-                                        title: function(context) {
-                                            // En el tooltip sí mostramos el nombre COMPLETO sin cortes
-                                            const index = context[0].dataIndex;
-                                            const code = courseData.labels[index];
-                                            const name = courseData.names ? courseData.names[index] : '';
-                                            return `${code} - ${name}`;
-                                        },
-                                        label: function(context) {
-                                            return ` ${context.raw} Estudiantes matriculados`;
-                                        }
-                                    }
-                                }
-                            }
+                            plugins: { legend: { display: false } }
                         }
                     });
                 }
 
-                // --------------------------------------------------
-                // GRÁFICO 3: CARGA DOCENTE
-                // --------------------------------------------------
-                const profCanvas = document.getElementById('professorsChart');
-                if (profCanvas) {
-                    new Chart(profCanvas, {
+                // 3. Gráfico Carga Docente (Bar Vertical)
+                if (document.getElementById('professorsChart')) {
+                    new Chart(document.getElementById('professorsChart'), {
                         type: 'bar',
                         data: {
-                            labels: professorsData.labels || [],
+                            labels: professorsData.labels,
                             datasets: [{
-                                label: 'Horas Lectivas Semanales',
-                                data: professorsData.data || [],
-                                backgroundColor: 'rgba(139, 92, 246, 0.8)', // Purple con transparencia
-                                borderColor: '#7c3aed',
-                                borderWidth: 1,
-                                borderRadius: 4,
-                                barThickness: 25
+                                label: 'Horas Semanales',
+                                data: professorsData.data,
+                                backgroundColor: 'rgba(139, 92, 246, 0.8)',
+                                borderRadius: 4
                             }]
                         },
                         options: {
-                            responsive: true,
-                            plugins: { 
-                                legend: { display: false },
-                                tooltip: {
-                                    callbacks: {
-                                        label: function(context) {
-                                            return ` ${context.raw} horas / semana`;
-                                        }
-                                    }
-                                }
-                            },
-                            scales: { 
-                                y: { 
-                                    beginAtZero: true, 
-                                    title: { display: true, text: 'Horas Asignadas' },
-                                    grid: { borderDash: [2, 4], color: '#e2e8f0' } // Líneas punteadas sutiles
-                                },
-                                x: { 
-                                    grid: { display: false } 
-                                }
-                            }
+                            plugins: { legend: { display: false } },
+                            scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
                         }
                     });
                 }

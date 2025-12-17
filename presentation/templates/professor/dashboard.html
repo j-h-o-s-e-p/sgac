@@ -75,8 +75,11 @@
                             <div class="d-flex align-items-center">
                                 <div class="progress flex-grow-1 me-2 progress-custom" style="height: 10px;">
                                     <div class="progress-bar bg-{{ item.progress.color }} progress-bar-custom" 
-                                         role="progressbar" 
-                                         style="width: {{ item.progress.percentage }}%;">
+                                        role="progressbar" 
+                                        style="width: {{ item.progress.percentage|floatformat:0 }}%;"
+                                        aria-valuenow="{{ item.progress.percentage|floatformat:0 }}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
                                     </div>
                                 </div>
                                 <span class="small fw-bold text-muted">{{ item.progress.percentage }}%</span>
