@@ -1,25 +1,25 @@
 # --- Core Django & API ---
-Django==4.2.11              # El framework web principal
-djangorestframework==3.14.0 # Kit de herramientas para crear la API REST
-django-cors-headers==4.3.1  # Permite peticiones desde otros dominios (Frontend separado)
-drf-spectacular==0.27.1     # Genera la documentación automática (Swagger/OpenAPI)
+Django==4.2.11
+djangorestframework==3.14.0
+django-cors-headers==4.3.1
+drf-spectacular==0.27.1
 
 # --- Base de Datos & Configuración ---
-psycopg2-binary==2.9.9      # Adaptador para conectar Django con PostgreSQL
-python-decouple==3.8        # Manejo seguro de variables de entorno (.env)
+# psycopg2-binary==2.9.9  <-- COMENTADO: Usaremos la versión del sistema (python3-psycopg2)
+python-decouple==3.8
 
 # --- Asincronía & Cache (Celery + Redis) ---
-celery==5.3.6               # Gestor de tareas en segundo plano (Workers)
-redis==5.0.3                # Cliente de Python para conectarse a Redis
-django-redis==5.4.0         # Permite usar Redis como Backend de Caché de Django
+celery==5.3.6
+redis==5.0.3
+django-redis==5.4.0
 
 # --- Procesamiento de Archivos & Datos ---
-openpyxl==3.1.2             # Leer/Escribir Excel (Reportes de notas)
-pdfplumber==0.10.3          # Extraer texto y tablas de archivos PDF (Sílabos)
-pytesseract==0.3.10         # OCR: Lee texto de imágenes (si el PDF es escaneado)
-ftfy==6.1.3                 # "Fix Text For You": Arregla errores de codificación de texto (tildes rotas, etc.)
-plotly==5.18.0              # Librería de gráficos (Backend). Nota: Ahora usas Chart.js en el frontend, pero la mantenemos por si generas gráficos estáticos.
+openpyxl==3.1.2
+# pdfplumber==0.10.3      <-- COMENTADO: Evita error de compilación de Criptografía
+# pytesseract==0.3.10     <-- COMENTADO: Usaremos versión del sistema si es necesario
+ftfy==6.1.3
+# plotly==5.18.0          <-- COMENTADO: Evita compilación pesada
 
 # --- Servidor de Producción ---
-gunicorn==21.2.0            # Servidor HTTP WSGI para producción (rápido y robusto)
-whitenoise==6.6.0           # Sirve archivos estáticos (CSS/JS) de forma eficiente en producción
+gunicorn==21.2.0
+whitenoise==6.6.0
