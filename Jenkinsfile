@@ -48,7 +48,7 @@ pipeline {
         stage('Integration Tests') {
             steps {
                 echo '=== Pruebas de Integración (Opcional) ==='
-                # Si tienes carpeta de integración, úsala. Si no, esto no fallará.
+                // Si tienes carpeta de integración, úsala. Si no, esto no fallará.
                 sh '''
                     if [ -d "tests/integration" ]; then
                         pytest tests/integration --junitxml=reports/junit-integration.xml || true
