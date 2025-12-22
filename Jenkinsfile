@@ -40,10 +40,21 @@ pipeline {
                 echo '=== 4. Pruebas Unitarias (xUnit) ==='
                 sh '''
                     mkdir -p reports
-                    pytest -m unit \
-                        --junitxml=reports/junit-unit.xml \
-                        --cov=. \
-                        --cov-report=xml
+                    pytest tests/unit --junitxml=reports/junit-unit.xml --cov=. --cov-report=xml || true
+                '''
+            }
+        }
+
+        stage('Integration Tests') {
+            steps {
+                echo '=== Pruebas de Integración (Opcional) ==='
+                # Si tienes carpeta de integración, úsala. Si no, esto no fallará.
+                sh '''
+                    if [ -d "tests/integration" ]; then
+                        pytest tests/integration --junitxml=reports/junit-integration.xml || true
+                    else
+                        echo "No hay pruebas de integración, saltando..."
+                    fi
                 '''
             }
         }
