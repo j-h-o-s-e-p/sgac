@@ -1,7 +1,7 @@
 from .secretaria_views import (
-    SecretariaDashboardView, 
-    ClassroomListView, 
+    SecretariaDashboardView,
+    ClassroomListView,
     ClassroomCreateView,
     CourseScheduleView,
-    BulkUploadView
+    BulkUploadView,
 )

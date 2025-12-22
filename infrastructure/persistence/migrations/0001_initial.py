@@ -14,427 +14,1110 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('auth', '0012_alter_user_first_name_max_length'),
+        ("auth", "0012_alter_user_first_name_max_length"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='CustomUser',
+            name="CustomUser",
             fields=[
-                ('id', models.BigAutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('password', models.CharField(max_length=128, verbose_name='password')),
-                ('last_login', models.DateTimeField(blank=True, null=True, verbose_name='last login')),
-                ('is_superuser', models.BooleanField(default=False, help_text='Designates that this user has all permissions without explicitly assigning them.', verbose_name='superuser status')),
-                ('username', models.CharField(error_messages={'unique': 'A user with that username already exists.'}, help_text='Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.', max_length=150, unique=True, validators=[django.contrib.auth.validators.UnicodeUsernameValidator()], verbose_name='username')),
-                ('first_name', models.CharField(blank=True, max_length=150, verbose_name='first name')),
-                ('last_name', models.CharField(blank=True, max_length=150, verbose_name='last name')),
-                ('is_staff', models.BooleanField(default=False, help_text='Designates whether the user can log into this admin site.', verbose_name='staff status')),
-                ('is_active', models.BooleanField(default=True, help_text='Designates whether this user should be treated as active. Unselect this instead of deleting accounts.', verbose_name='active')),
-                ('date_joined', models.DateTimeField(default=django.utils.timezone.now, verbose_name='date joined')),
-                ('user_id', models.UUIDField(default=uuid.uuid4, editable=False, unique=True)),
-                ('email', models.EmailField(max_length=254, unique=True, verbose_name='Email Institucional')),
-                ('temporal_password', models.CharField(blank=True, max_length=255, null=True)),
-                ('temporal_password_expires_at', models.DateTimeField(blank=True, null=True)),
-                ('user_role', models.CharField(choices=[('ADMIN', 'Administrador'), ('PROFESOR', 'Profesor'), ('ALUMNO', 'Alumno'), ('SECRETARIA', 'Secretaría')], default='ALUMNO', max_length=20)),
-                ('account_status', models.CharField(choices=[('INACTIVO', 'Inactivo'), ('ACTIVO', 'Activo'), ('BLOQUEADO', 'Bloqueado')], default='INACTIVO', max_length=20)),
-                ('failed_login_attempts', models.IntegerField(default=0)),
-                ('last_login_ip', models.GenericIPAddressField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('groups', models.ManyToManyField(blank=True, help_text='The groups this user belongs to. A user will get all permissions granted to each of their groups.', related_name='user_set', related_query_name='user', to='auth.group', verbose_name='groups')),
-                ('user_permissions', models.ManyToManyField(blank=True, help_text='Specific permissions for this user.', related_name='user_set', related_query_name='user', to='auth.permission', verbose_name='user permissions')),
+                (
+                    "id",
+                    models.BigAutoField(
+                        auto_created=True,
+                        primary_key=True,
+                        serialize=False,
+                        verbose_name="ID",
+                    ),
+                ),
+                ("password", models.CharField(max_length=128, verbose_name="password")),
+                (
+                    "last_login",
+                    models.DateTimeField(
+                        blank=True, null=True, verbose_name="last login"
+                    ),
+                ),
+                (
+                    "is_superuser",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates that this user has all permissions without explicitly assigning them.",
+                        verbose_name="superuser status",
+                    ),
+                ),
+                (
+                    "username",
+                    models.CharField(
+                        error_messages={
+                            "unique": "A user with that username already exists."
+                        },
+                        help_text="Required. 150 characters or fewer. Letters, digits and @/./+/-/_ only.",
+                        max_length=150,
+                        unique=True,
+                        validators=[
+                            django.contrib.auth.validators.UnicodeUsernameValidator()
+                        ],
+                        verbose_name="username",
+                    ),
+                ),
+                (
+                    "first_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="first name"
+                    ),
+                ),
+                (
+                    "last_name",
+                    models.CharField(
+                        blank=True, max_length=150, verbose_name="last name"
+                    ),
+                ),
+                (
+                    "is_staff",
+                    models.BooleanField(
+                        default=False,
+                        help_text="Designates whether the user can log into this admin site.",
+                        verbose_name="staff status",
+                    ),
+                ),
+                (
+                    "is_active",
+                    models.BooleanField(
+                        default=True,
+                        help_text="Designates whether this user should be treated as active. Unselect this instead of deleting accounts.",
+                        verbose_name="active",
+                    ),
+                ),
+                (
+                    "date_joined",
+                    models.DateTimeField(
+                        default=django.utils.timezone.now, verbose_name="date joined"
+                    ),
+                ),
+                (
+                    "user_id",
+                    models.UUIDField(default=uuid.uuid4, editable=False, unique=True),
+                ),
+                (
+                    "email",
+                    models.EmailField(
+                        max_length=254, unique=True, verbose_name="Email Institucional"
+                    ),
+                ),
+                (
+                    "temporal_password",
+                    models.CharField(blank=True, max_length=255, null=True),
+                ),
+                (
+                    "temporal_password_expires_at",
+                    models.DateTimeField(blank=True, null=True),
+                ),
+                (
+                    "user_role",
+                    models.CharField(
+                        choices=[
+                            ("ADMIN", "Administrador"),
+                            ("PROFESOR", "Profesor"),
+                            ("ALUMNO", "Alumno"),
+                            ("SECRETARIA", "Secretaría"),
+                        ],
+                        default="ALUMNO",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "account_status",
+                    models.CharField(
+                        choices=[
+                            ("INACTIVO", "Inactivo"),
+                            ("ACTIVO", "Activo"),
+                            ("BLOQUEADO", "Bloqueado"),
+                        ],
+                        default="INACTIVO",
+                        max_length=20,
+                    ),
+                ),
+                ("failed_login_attempts", models.IntegerField(default=0)),
+                ("last_login_ip", models.GenericIPAddressField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "groups",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="The groups this user belongs to. A user will get all permissions granted to each of their groups.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.group",
+                        verbose_name="groups",
+                    ),
+                ),
+                (
+                    "user_permissions",
+                    models.ManyToManyField(
+                        blank=True,
+                        help_text="Specific permissions for this user.",
+                        related_name="user_set",
+                        related_query_name="user",
+                        to="auth.permission",
+                        verbose_name="user permissions",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Usuario',
-                'verbose_name_plural': 'Usuarios',
-                'db_table': 'users',
+                "verbose_name": "Usuario",
+                "verbose_name_plural": "Usuarios",
+                "db_table": "users",
             },
             managers=[
-                ('objects', django.contrib.auth.models.UserManager()),
+                ("objects", django.contrib.auth.models.UserManager()),
             ],
         ),
         migrations.CreateModel(
-            name='Classroom',
+            name="Classroom",
             fields=[
-                ('classroom_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('code', models.CharField(blank=True, editable=False, max_length=10, unique=True, verbose_name='Código')),
-                ('name', models.CharField(max_length=100)),
-                ('capacity', models.IntegerField()),
-                ('location', models.CharField(max_length=200)),
-                ('classroom_type', models.CharField(choices=[('AULA', 'Aula'), ('LABORATORIO', 'Laboratorio')], max_length=20)),
-                ('equipment', models.TextField(blank=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "classroom_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "code",
+                    models.CharField(
+                        blank=True,
+                        editable=False,
+                        max_length=10,
+                        unique=True,
+                        verbose_name="Código",
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                ("capacity", models.IntegerField()),
+                ("location", models.CharField(max_length=200)),
+                (
+                    "classroom_type",
+                    models.CharField(
+                        choices=[("AULA", "Aula"), ("LABORATORIO", "Laboratorio")],
+                        max_length=20,
+                    ),
+                ),
+                ("equipment", models.TextField(blank=True)),
+                ("is_active", models.BooleanField(default=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Salón',
-                'verbose_name_plural': 'Salones',
-                'db_table': 'classrooms',
+                "verbose_name": "Salón",
+                "verbose_name_plural": "Salones",
+                "db_table": "classrooms",
             },
         ),
         migrations.CreateModel(
-            name='Course',
+            name="Course",
             fields=[
-                ('course_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('course_code', models.CharField(max_length=20, unique=True)),
-                ('course_name', models.CharField(max_length=200)),
-                ('credits', models.IntegerField()),
-                ('cycle', models.IntegerField()),
-                ('course_type', models.CharField(choices=[('TEORIA', 'Teoría'), ('PRACTICA', 'Práctica')], max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "course_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("course_code", models.CharField(max_length=20, unique=True)),
+                ("course_name", models.CharField(max_length=200)),
+                ("credits", models.IntegerField()),
+                ("cycle", models.IntegerField()),
+                (
+                    "course_type",
+                    models.CharField(
+                        choices=[("TEORIA", "Teoría"), ("PRACTICA", "Práctica")],
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Curso',
-                'verbose_name_plural': 'Cursos',
-                'db_table': 'courses',
-                'ordering': ['cycle', 'course_code'],
+                "verbose_name": "Curso",
+                "verbose_name_plural": "Cursos",
+                "db_table": "courses",
+                "ordering": ["cycle", "course_code"],
             },
         ),
         migrations.CreateModel(
-            name='CourseGroup',
+            name="CourseGroup",
             fields=[
-                ('group_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('group_code', models.CharField(max_length=20)),
-                ('capacity', models.IntegerField()),
-                ('students_loaded', models.BooleanField(default=False)),
-                ('last_student_upload_at', models.DateTimeField(blank=True, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='groups', to='persistence.course')),
-                ('professor', models.ForeignKey(blank=True, limit_choices_to={'user_role': 'PROFESOR'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='groups_taught', to=settings.AUTH_USER_MODEL)),
+                (
+                    "group_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("group_code", models.CharField(max_length=20)),
+                ("capacity", models.IntegerField()),
+                ("students_loaded", models.BooleanField(default=False)),
+                ("last_student_upload_at", models.DateTimeField(blank=True, null=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="groups",
+                        to="persistence.course",
+                    ),
+                ),
+                (
+                    "professor",
+                    models.ForeignKey(
+                        blank=True,
+                        limit_choices_to={"user_role": "PROFESOR"},
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="groups_taught",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Grupo de Curso',
-                'verbose_name_plural': 'Grupos de Curso',
-                'db_table': 'course_groups',
-                'ordering': ['course__course_code', 'group_code'],
-                'unique_together': {('course', 'group_code')},
+                "verbose_name": "Grupo de Curso",
+                "verbose_name_plural": "Grupos de Curso",
+                "db_table": "course_groups",
+                "ordering": ["course__course_code", "group_code"],
+                "unique_together": {("course", "group_code")},
             },
         ),
         migrations.CreateModel(
-            name='Evaluation',
+            name="Evaluation",
             fields=[
-                ('evaluation_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=100)),
-                ('evaluation_type', models.CharField(choices=[('CONTINUA', 'Evaluación Continua'), ('EXAMEN', 'Examen Parcial')], max_length=20)),
-                ('unit', models.IntegerField()),
-                ('percentage', models.DecimalField(decimal_places=2, max_digits=5)),
-                ('due_date', models.DateField(blank=True, null=True)),
-                ('order', models.IntegerField(default=0)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='evaluations', to='persistence.course')),
+                (
+                    "evaluation_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=100)),
+                (
+                    "evaluation_type",
+                    models.CharField(
+                        choices=[
+                            ("CONTINUA", "Evaluación Continua"),
+                            ("EXAMEN", "Examen Parcial"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("unit", models.IntegerField()),
+                ("percentage", models.DecimalField(decimal_places=2, max_digits=5)),
+                ("due_date", models.DateField(blank=True, null=True)),
+                ("order", models.IntegerField(default=0)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="evaluations",
+                        to="persistence.course",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Evaluación',
-                'verbose_name_plural': 'Evaluaciones',
-                'db_table': 'evaluations',
-                'ordering': ['order', 'unit', 'name'],
+                "verbose_name": "Evaluación",
+                "verbose_name_plural": "Evaluaciones",
+                "db_table": "evaluations",
+                "ordering": ["order", "unit", "name"],
             },
         ),
         migrations.CreateModel(
-            name='ExternalProfessor',
+            name="ExternalProfessor",
             fields=[
-                ('external_prof_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('full_name', models.CharField(max_length=200, verbose_name='Nombre Completo')),
-                ('email', models.EmailField(blank=True, max_length=254, null=True)),
-                ('phone', models.CharField(blank=True, max_length=20, null=True)),
-                ('specialization', models.CharField(blank=True, max_length=200, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "external_prof_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "full_name",
+                    models.CharField(max_length=200, verbose_name="Nombre Completo"),
+                ),
+                ("email", models.EmailField(blank=True, max_length=254, null=True)),
+                ("phone", models.CharField(blank=True, max_length=20, null=True)),
+                (
+                    "specialization",
+                    models.CharField(blank=True, max_length=200, null=True),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Profesor Externo',
-                'verbose_name_plural': 'Profesores Externos',
-                'db_table': 'external_professors',
+                "verbose_name": "Profesor Externo",
+                "verbose_name_plural": "Profesores Externos",
+                "db_table": "external_professors",
             },
         ),
         migrations.CreateModel(
-            name='LabAssignment',
+            name="LabAssignment",
             fields=[
-                ('assignment_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('assignment_method', models.CharField(choices=[('AUTOMATIC', 'Automático'), ('LOTTERY', 'Sorteo')], max_length=20)),
-                ('assigned_at', models.DateTimeField(auto_now_add=True)),
+                (
+                    "assignment_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "assignment_method",
+                    models.CharField(
+                        choices=[("AUTOMATIC", "Automático"), ("LOTTERY", "Sorteo")],
+                        max_length=20,
+                    ),
+                ),
+                ("assigned_at", models.DateTimeField(auto_now_add=True)),
             ],
             options={
-                'verbose_name': 'Asignación Lab',
-                'verbose_name_plural': 'Asignaciones Lab',
-                'db_table': 'lab_assignments',
+                "verbose_name": "Asignación Lab",
+                "verbose_name_plural": "Asignaciones Lab",
+                "db_table": "lab_assignments",
             },
         ),
         migrations.CreateModel(
-            name='LabEnrollmentCampaign',
+            name="LabEnrollmentCampaign",
             fields=[
-                ('campaign_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('start_date', models.DateTimeField()),
-                ('end_date', models.DateTimeField()),
-                ('is_closed', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('closed_at', models.DateTimeField(blank=True, null=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lab_campaigns', to='persistence.course')),
+                (
+                    "campaign_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("start_date", models.DateTimeField()),
+                ("end_date", models.DateTimeField()),
+                ("is_closed", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("closed_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lab_campaigns",
+                        to="persistence.course",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Campaña de Matrícula Lab',
-                'verbose_name_plural': 'Campañas de Matrícula Lab',
-                'db_table': 'lab_enrollment_campaigns',
+                "verbose_name": "Campaña de Matrícula Lab",
+                "verbose_name_plural": "Campañas de Matrícula Lab",
+                "db_table": "lab_enrollment_campaigns",
             },
         ),
         migrations.CreateModel(
-            name='LaboratoryGroup',
+            name="LaboratoryGroup",
             fields=[
-                ('lab_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('lab_nomenclature', models.CharField(max_length=5)),
-                ('capacity', models.IntegerField()),
-                ('day_of_week', models.CharField(choices=[('LUNES', 'Lunes'), ('MARTES', 'Martes'), ('MIERCOLES', 'Miércoles'), ('JUEVES', 'Jueves'), ('VIERNES', 'Viernes')], max_length=20)),
-                ('start_time', models.TimeField()),
-                ('end_time', models.TimeField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='laboratories', to='persistence.course')),
-                ('external_professor', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='labs_taught', to='persistence.externalprofessor', verbose_name='Profesor Externo')),
-                ('professor', models.ForeignKey(blank=True, limit_choices_to={'user_role': 'PROFESOR'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='labs_taught', to=settings.AUTH_USER_MODEL)),
-                ('room', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.PROTECT, related_name='lab_groups', to='persistence.classroom')),
+                (
+                    "lab_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("lab_nomenclature", models.CharField(max_length=5)),
+                ("capacity", models.IntegerField()),
+                (
+                    "day_of_week",
+                    models.CharField(
+                        choices=[
+                            ("LUNES", "Lunes"),
+                            ("MARTES", "Martes"),
+                            ("MIERCOLES", "Miércoles"),
+                            ("JUEVES", "Jueves"),
+                            ("VIERNES", "Viernes"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("start_time", models.TimeField()),
+                ("end_time", models.TimeField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="laboratories",
+                        to="persistence.course",
+                    ),
+                ),
+                (
+                    "external_professor",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="labs_taught",
+                        to="persistence.externalprofessor",
+                        verbose_name="Profesor Externo",
+                    ),
+                ),
+                (
+                    "professor",
+                    models.ForeignKey(
+                        blank=True,
+                        limit_choices_to={"user_role": "PROFESOR"},
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="labs_taught",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "room",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.PROTECT,
+                        related_name="lab_groups",
+                        to="persistence.classroom",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Grupo de Laboratorio',
-                'verbose_name_plural': 'Grupos de Laboratorio',
-                'db_table': 'laboratory_groups',
-                'unique_together': {('course', 'lab_nomenclature')},
+                "verbose_name": "Grupo de Laboratorio",
+                "verbose_name_plural": "Grupos de Laboratorio",
+                "db_table": "laboratory_groups",
+                "unique_together": {("course", "lab_nomenclature")},
             },
         ),
         migrations.CreateModel(
-            name='Semester',
+            name="Semester",
             fields=[
-                ('semester_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('name', models.CharField(max_length=50)),
-                ('start_date', models.DateField()),
-                ('end_date', models.DateField()),
-                ('is_active', models.BooleanField(default=False)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
+                (
+                    "semester_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("name", models.CharField(max_length=50)),
+                ("start_date", models.DateField()),
+                ("end_date", models.DateField()),
+                ("is_active", models.BooleanField(default=False)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
             ],
             options={
-                'verbose_name': 'Semestre',
-                'verbose_name_plural': 'Semestres',
-                'db_table': 'semesters',
-                'ordering': ['-start_date'],
+                "verbose_name": "Semestre",
+                "verbose_name_plural": "Semestres",
+                "db_table": "semesters",
+                "ordering": ["-start_date"],
             },
         ),
         migrations.CreateModel(
-            name='Syllabus',
+            name="Syllabus",
             fields=[
-                ('syllabus_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('syllabus_file', models.FileField(blank=True, null=True, upload_to='syllabi/%Y/%m/', verbose_name='PDF del Sílabo')),
-                ('credits_extracted', models.IntegerField(blank=True, null=True, verbose_name='Créditos extraídos')),
-                ('theory_hours', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True)),
-                ('practice_hours', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True)),
-                ('lab_hours', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True)),
-                ('evaluations_configured', models.BooleanField(default=False, help_text='Indica si evaluaciones configuradas')),
-                ('loaded_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='syllabus', to='persistence.course')),
+                (
+                    "syllabus_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "syllabus_file",
+                    models.FileField(
+                        blank=True,
+                        null=True,
+                        upload_to="syllabi/%Y/%m/",
+                        verbose_name="PDF del Sílabo",
+                    ),
+                ),
+                (
+                    "credits_extracted",
+                    models.IntegerField(
+                        blank=True, null=True, verbose_name="Créditos extraídos"
+                    ),
+                ),
+                (
+                    "theory_hours",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True
+                    ),
+                ),
+                (
+                    "practice_hours",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True
+                    ),
+                ),
+                (
+                    "lab_hours",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True
+                    ),
+                ),
+                (
+                    "evaluations_configured",
+                    models.BooleanField(
+                        default=False, help_text="Indica si evaluaciones configuradas"
+                    ),
+                ),
+                ("loaded_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="syllabus",
+                        to="persistence.course",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sílabo',
-                'verbose_name_plural': 'Sílabos',
-                'db_table': 'syllabuses',
+                "verbose_name": "Sílabo",
+                "verbose_name_plural": "Sílabos",
+                "db_table": "syllabuses",
             },
         ),
         migrations.CreateModel(
-            name='SyllabusUnit',
+            name="SyllabusUnit",
             fields=[
-                ('unit_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('unit_number', models.IntegerField()),
-                ('unit_name', models.CharField(max_length=200)),
-                ('description', models.TextField(blank=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('syllabus', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='units', to='persistence.syllabus')),
+                (
+                    "unit_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("unit_number", models.IntegerField()),
+                ("unit_name", models.CharField(max_length=200)),
+                ("description", models.TextField(blank=True)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "syllabus",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="units",
+                        to="persistence.syllabus",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Unidad Temática',
-                'verbose_name_plural': 'Unidades Temáticas',
-                'db_table': 'syllabus_units',
-                'ordering': ['unit_number'],
-                'unique_together': {('syllabus', 'unit_number')},
+                "verbose_name": "Unidad Temática",
+                "verbose_name_plural": "Unidades Temáticas",
+                "db_table": "syllabus_units",
+                "ordering": ["unit_number"],
+                "unique_together": {("syllabus", "unit_number")},
             },
         ),
         migrations.CreateModel(
-            name='SyllabusSession',
+            name="SyllabusSession",
             fields=[
-                ('session_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('session_number', models.IntegerField()),
-                ('week_number', models.IntegerField(blank=True, null=True)),
-                ('topic', models.TextField()),
-                ('planned_date', models.DateField(blank=True, null=True)),
-                ('real_date', models.DateField(blank=True, null=True, verbose_name='Fecha Real de Ejecución')),
-                ('accumulated_percentage', models.DecimalField(blank=True, decimal_places=2, max_digits=5, null=True)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('syllabus', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='persistence.syllabus')),
-                ('unit', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, related_name='sessions', to='persistence.syllabusunit')),
+                (
+                    "session_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("session_number", models.IntegerField()),
+                ("week_number", models.IntegerField(blank=True, null=True)),
+                ("topic", models.TextField()),
+                ("planned_date", models.DateField(blank=True, null=True)),
+                (
+                    "real_date",
+                    models.DateField(
+                        blank=True, null=True, verbose_name="Fecha Real de Ejecución"
+                    ),
+                ),
+                (
+                    "accumulated_percentage",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=5, null=True
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "syllabus",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sessions",
+                        to="persistence.syllabus",
+                    ),
+                ),
+                (
+                    "unit",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="sessions",
+                        to="persistence.syllabusunit",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Sesión de Sílabo',
-                'verbose_name_plural': 'Sesiones de Sílabo',
-                'db_table': 'syllabus_sessions',
-                'ordering': ['session_number'],
+                "verbose_name": "Sesión de Sílabo",
+                "verbose_name_plural": "Sesiones de Sílabo",
+                "db_table": "syllabus_sessions",
+                "ordering": ["session_number"],
             },
         ),
         migrations.CreateModel(
-            name='StudentPostulation',
+            name="StudentPostulation",
             fields=[
-                ('postulation_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('status', models.CharField(choices=[('PENDIENTE', 'Pendiente'), ('ASIGNADO', 'Asignado'), ('NO_ASIGNADO', 'No Asignado')], default='PENDIENTE', max_length=20)),
-                ('campaign', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='postulations', to='persistence.labenrollmentcampaign')),
-                ('lab_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='postulations', to='persistence.laboratorygroup')),
-                ('student', models.ForeignKey(limit_choices_to={'user_role': 'ALUMNO'}, on_delete=django.db.models.deletion.CASCADE, related_name='lab_postulations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "postulation_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDIENTE", "Pendiente"),
+                            ("ASIGNADO", "Asignado"),
+                            ("NO_ASIGNADO", "No Asignado"),
+                        ],
+                        default="PENDIENTE",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "campaign",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="postulations",
+                        to="persistence.labenrollmentcampaign",
+                    ),
+                ),
+                (
+                    "lab_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="postulations",
+                        to="persistence.laboratorygroup",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        limit_choices_to={"user_role": "ALUMNO"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="lab_postulations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Postulación Lab',
-                'verbose_name_plural': 'Postulaciones Lab',
-                'db_table': 'student_postulations',
-                'unique_together': {('campaign', 'student')},
+                "verbose_name": "Postulación Lab",
+                "verbose_name_plural": "Postulaciones Lab",
+                "db_table": "student_postulations",
+                "unique_together": {("campaign", "student")},
             },
         ),
         migrations.CreateModel(
-            name='StudentEnrollment',
+            name="StudentEnrollment",
             fields=[
-                ('enrollment_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('status', models.CharField(choices=[('ACTIVO', 'Activo'), ('RETIRADO', 'Retirado'), ('COMPLETADO', 'Completado')], default='ACTIVO', max_length=20)),
-                ('current_attendance_percentage', models.DecimalField(decimal_places=2, default=0, max_digits=5)),
-                ('final_grade', models.DecimalField(blank=True, decimal_places=2, max_digits=4, null=True)),
-                ('enrolled_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to='persistence.course')),
-                ('group', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='enrollments', to='persistence.coursegroup')),
-                ('lab_assignment', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='enrollment', to='persistence.labassignment')),
-                ('student', models.ForeignKey(limit_choices_to={'user_role': 'ALUMNO'}, on_delete=django.db.models.deletion.CASCADE, related_name='enrollments', to=settings.AUTH_USER_MODEL)),
+                (
+                    "enrollment_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("ACTIVO", "Activo"),
+                            ("RETIRADO", "Retirado"),
+                            ("COMPLETADO", "Completado"),
+                        ],
+                        default="ACTIVO",
+                        max_length=20,
+                    ),
+                ),
+                (
+                    "current_attendance_percentage",
+                    models.DecimalField(decimal_places=2, default=0, max_digits=5),
+                ),
+                (
+                    "final_grade",
+                    models.DecimalField(
+                        blank=True, decimal_places=2, max_digits=4, null=True
+                    ),
+                ),
+                ("enrolled_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to="persistence.course",
+                    ),
+                ),
+                (
+                    "group",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="enrollments",
+                        to="persistence.coursegroup",
+                    ),
+                ),
+                (
+                    "lab_assignment",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="enrollment",
+                        to="persistence.labassignment",
+                    ),
+                ),
+                (
+                    "student",
+                    models.ForeignKey(
+                        limit_choices_to={"user_role": "ALUMNO"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="enrollments",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Matrícula',
-                'verbose_name_plural': 'Matrículas',
-                'db_table': 'student_enrollments',
-                'unique_together': {('student', 'course')},
+                "verbose_name": "Matrícula",
+                "verbose_name_plural": "Matrículas",
+                "db_table": "student_enrollments",
+                "unique_together": {("student", "course")},
             },
         ),
         migrations.CreateModel(
-            name='SessionProgress',
+            name="SessionProgress",
             fields=[
-                ('progress_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('completed_date', models.DateField()),
-                ('notes', models.TextField(blank=True, verbose_name='Observaciones')),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('course_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='session_progress', to='persistence.coursegroup')),
-                ('marked_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='sessions_marked', to=settings.AUTH_USER_MODEL)),
-                ('session', models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='progress', to='persistence.syllabussession')),
+                (
+                    "progress_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("completed_date", models.DateField()),
+                ("notes", models.TextField(blank=True, verbose_name="Observaciones")),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "course_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="session_progress",
+                        to="persistence.coursegroup",
+                    ),
+                ),
+                (
+                    "marked_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="sessions_marked",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "session",
+                    models.OneToOneField(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="progress",
+                        to="persistence.syllabussession",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Progreso de Sesión',
-                'verbose_name_plural': 'Progreso de Sesiones',
-                'db_table': 'session_progress',
-                'ordering': ['completed_date'],
+                "verbose_name": "Progreso de Sesión",
+                "verbose_name_plural": "Progreso de Sesiones",
+                "db_table": "session_progress",
+                "ordering": ["completed_date"],
             },
         ),
         migrations.AddField(
-            model_name='labassignment',
-            name='lab_group',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='assignments', to='persistence.laboratorygroup'),
+            model_name="labassignment",
+            name="lab_group",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="assignments",
+                to="persistence.laboratorygroup",
+            ),
         ),
         migrations.AddField(
-            model_name='labassignment',
-            name='postulation',
-            field=models.OneToOneField(on_delete=django.db.models.deletion.CASCADE, related_name='assignment', to='persistence.studentpostulation'),
+            model_name="labassignment",
+            name="postulation",
+            field=models.OneToOneField(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="assignment",
+                to="persistence.studentpostulation",
+            ),
         ),
         migrations.AddField(
-            model_name='labassignment',
-            name='student',
-            field=models.ForeignKey(limit_choices_to={'user_role': 'ALUMNO'}, on_delete=django.db.models.deletion.CASCADE, related_name='lab_assignments', to=settings.AUTH_USER_MODEL),
+            model_name="labassignment",
+            name="student",
+            field=models.ForeignKey(
+                limit_choices_to={"user_role": "ALUMNO"},
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="lab_assignments",
+                to=settings.AUTH_USER_MODEL,
+            ),
         ),
         migrations.AddField(
-            model_name='course',
-            name='semester',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='courses', to='persistence.semester'),
+            model_name="course",
+            name="semester",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE,
+                related_name="courses",
+                to="persistence.semester",
+            ),
         ),
         migrations.CreateModel(
-            name='AuditLog',
+            name="AuditLog",
             fields=[
-                ('log_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('action', models.CharField(max_length=200)),
-                ('timestamp', models.DateTimeField(auto_now_add=True)),
-                ('ip_address', models.GenericIPAddressField()),
-                ('details', models.JSONField(blank=True, null=True)),
-                ('user', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='audit_logs', to=settings.AUTH_USER_MODEL)),
+                (
+                    "log_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("action", models.CharField(max_length=200)),
+                ("timestamp", models.DateTimeField(auto_now_add=True)),
+                ("ip_address", models.GenericIPAddressField()),
+                ("details", models.JSONField(blank=True, null=True)),
+                (
+                    "user",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="audit_logs",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Log de Auditoría',
-                'verbose_name_plural': 'Logs de Auditoría',
-                'db_table': 'audit_logs',
-                'ordering': ['-timestamp'],
+                "verbose_name": "Log de Auditoría",
+                "verbose_name_plural": "Logs de Auditoría",
+                "db_table": "audit_logs",
+                "ordering": ["-timestamp"],
             },
         ),
         migrations.CreateModel(
-            name='Schedule',
+            name="Schedule",
             fields=[
-                ('schedule_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('day_of_week', models.CharField(choices=[('LUNES', 'Lunes'), ('MARTES', 'Martes'), ('MIERCOLES', 'Miércoles'), ('JUEVES', 'Jueves'), ('VIERNES', 'Viernes')], max_length=20)),
-                ('start_time', models.TimeField()),
-                ('end_time', models.TimeField()),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('course_group', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='schedules', to='persistence.coursegroup')),
-                ('room', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='schedules', to='persistence.classroom')),
+                (
+                    "schedule_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                (
+                    "day_of_week",
+                    models.CharField(
+                        choices=[
+                            ("LUNES", "Lunes"),
+                            ("MARTES", "Martes"),
+                            ("MIERCOLES", "Miércoles"),
+                            ("JUEVES", "Jueves"),
+                            ("VIERNES", "Viernes"),
+                        ],
+                        max_length=20,
+                    ),
+                ),
+                ("start_time", models.TimeField()),
+                ("end_time", models.TimeField()),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                (
+                    "course_group",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="schedules",
+                        to="persistence.coursegroup",
+                    ),
+                ),
+                (
+                    "room",
+                    models.ForeignKey(
+                        blank=True,
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="schedules",
+                        to="persistence.classroom",
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Bloque de Horario',
-                'verbose_name_plural': 'Bloques de Horario',
-                'db_table': 'schedules',
-                'ordering': ['day_of_week', 'start_time'],
-                'unique_together': {('course_group', 'day_of_week', 'start_time')},
+                "verbose_name": "Bloque de Horario",
+                "verbose_name_plural": "Bloques de Horario",
+                "db_table": "schedules",
+                "ordering": ["day_of_week", "start_time"],
+                "unique_together": {("course_group", "day_of_week", "start_time")},
             },
         ),
         migrations.AlterUniqueTogether(
-            name='labassignment',
-            unique_together={('student', 'lab_group')},
+            name="labassignment",
+            unique_together={("student", "lab_group")},
         ),
         migrations.CreateModel(
-            name='GradeRecord',
+            name="GradeRecord",
             fields=[
-                ('record_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('is_locked', models.BooleanField(default=False)),
-                ('raw_score', models.DecimalField(decimal_places=2, max_digits=4)),
-                ('rounded_score', models.DecimalField(decimal_places=2, max_digits=4)),
-                ('recorded_at', models.DateTimeField(auto_now_add=True)),
-                ('enrollment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='grade_records', to='persistence.studentenrollment')),
-                ('evaluation', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='grade_records', to='persistence.evaluation')),
-                ('recorded_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='grade_records_created', to=settings.AUTH_USER_MODEL)),
+                (
+                    "record_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("is_locked", models.BooleanField(default=False)),
+                ("raw_score", models.DecimalField(decimal_places=2, max_digits=4)),
+                ("rounded_score", models.DecimalField(decimal_places=2, max_digits=4)),
+                ("recorded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "enrollment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="grade_records",
+                        to="persistence.studentenrollment",
+                    ),
+                ),
+                (
+                    "evaluation",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="grade_records",
+                        to="persistence.evaluation",
+                    ),
+                ),
+                (
+                    "recorded_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="grade_records_created",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Registro de Nota',
-                'verbose_name_plural': 'Registros de Notas',
-                'db_table': 'grade_records',
-                'unique_together': {('enrollment', 'evaluation')},
+                "verbose_name": "Registro de Nota",
+                "verbose_name_plural": "Registros de Notas",
+                "db_table": "grade_records",
+                "unique_together": {("enrollment", "evaluation")},
             },
         ),
         migrations.CreateModel(
-            name='AttendanceRecord',
+            name="AttendanceRecord",
             fields=[
-                ('record_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('session_number', models.IntegerField()),
-                ('session_date', models.DateField()),
-                ('status', models.CharField(choices=[('P', 'Presente'), ('F', 'Falta'), ('J', 'Falta Justificada')], max_length=1)),
-                ('justification', models.TextField(blank=True)),
-                ('professor_ip', models.GenericIPAddressField()),
-                ('geo_latitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('geo_longitude', models.DecimalField(blank=True, decimal_places=6, max_digits=9, null=True)),
-                ('recorded_at', models.DateTimeField(auto_now_add=True)),
-                ('enrollment', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='attendance_records', to='persistence.studentenrollment')),
-                ('recorded_by', models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='attendance_records_created', to=settings.AUTH_USER_MODEL)),
+                (
+                    "record_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("session_number", models.IntegerField()),
+                ("session_date", models.DateField()),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("P", "Presente"),
+                            ("F", "Falta"),
+                            ("J", "Falta Justificada"),
+                        ],
+                        max_length=1,
+                    ),
+                ),
+                ("justification", models.TextField(blank=True)),
+                ("professor_ip", models.GenericIPAddressField()),
+                (
+                    "geo_latitude",
+                    models.DecimalField(
+                        blank=True, decimal_places=6, max_digits=9, null=True
+                    ),
+                ),
+                (
+                    "geo_longitude",
+                    models.DecimalField(
+                        blank=True, decimal_places=6, max_digits=9, null=True
+                    ),
+                ),
+                ("recorded_at", models.DateTimeField(auto_now_add=True)),
+                (
+                    "enrollment",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="attendance_records",
+                        to="persistence.studentenrollment",
+                    ),
+                ),
+                (
+                    "recorded_by",
+                    models.ForeignKey(
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="attendance_records_created",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Registro de Asistencia',
-                'verbose_name_plural': 'Registros de Asistencia',
-                'db_table': 'attendance_records',
-                'unique_together': {('enrollment', 'session_number')},
+                "verbose_name": "Registro de Asistencia",
+                "verbose_name_plural": "Registros de Asistencia",
+                "db_table": "attendance_records",
+                "unique_together": {("enrollment", "session_number")},
             },
         ),
     ]

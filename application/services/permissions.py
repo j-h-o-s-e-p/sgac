@@ -2,8 +2,8 @@ class SecretariaPermissionService:
     @staticmethod
     def has_secretaria_access(user):
         # Verifica si está logueado y es secretaria
-        return user.is_authenticated and user.user_role == 'SECRETARIA'
-    
+        return user.is_authenticated and user.user_role == "SECRETARIA"
+
     @staticmethod
     def check_secretaria_access(user):
         if not SecretariaPermissionService.has_secretaria_access(user):

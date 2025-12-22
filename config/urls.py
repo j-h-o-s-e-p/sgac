@@ -6,14 +6,16 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 urlpatterns = [
     # Administración de Django
-    path('admin/', admin.site.urls),
-    
+    path("admin/", admin.site.urls),
     # Documentación de API (Swagger/OpenAPI)
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
-    
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+    path(
+        "api/schema/swagger-ui/",
+        SpectacularSwaggerView.as_view(url_name="schema"),
+        name="swagger-ui",
+    ),
     # Enrutamiento principal de la aplicación (Capa de Presentación)
-    path('', include('presentation.urls')),
+    path("", include("presentation.urls")),
 ]
 
 # Servir archivos media en modo DEBUG (Desarrollo)

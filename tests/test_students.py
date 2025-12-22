@@ -21,4 +21,3 @@ class TestStudentLogic:
             assert "@" in student.email
             assert student.first_name
             assert student.last_name
-

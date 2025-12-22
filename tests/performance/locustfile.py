@@ -2,6 +2,7 @@
 Pruebas de rendimiento con Locust
 Simula carga de usuarios concurrentes en el sistema
 """
+
 from locust import HttpUser, task, between, SequentialTaskSet
 import random
 
@@ -20,19 +21,19 @@ class StudentBehavior(SequentialTaskSet):
         """Simula el login de un estudiante"""
         # Primero obtener el CSRF token
         response = self.client.get("/auth/login/")
-        
+
         # Extraer CSRF token (simplificado)
-        csrftoken = self.client.cookies.get('csrftoken', '')
-        
+        csrftoken = self.client.cookies.get("csrftoken", "")
+
         # Intentar login
         self.client.post(
             "/auth/login/",
             {
                 "email": f"student{random.randint(1, 100)}@unsa.edu.pe",
-                "password": "testpassword123"
+                "password": "testpassword123",
             },
             headers={"X-CSRFToken": csrftoken},
-            name="Login"
+            name="Login",
         )
 
     @task(1)
@@ -72,16 +73,16 @@ class ProfessorBehavior(SequentialTaskSet):
 
     def login(self):
         response = self.client.get("/auth/login/")
-        csrftoken = self.client.cookies.get('csrftoken', '')
-        
+        csrftoken = self.client.cookies.get("csrftoken", "")
+
         self.client.post(
             "/auth/login/",
             {
                 "email": f"professor{random.randint(1, 20)}@unsa.edu.pe",
-                "password": "testpassword123"
+                "password": "testpassword123",
             },
             headers={"X-CSRFToken": csrftoken},
-            name="Professor Login"
+            name="Professor Login",
         )
 
     @task(3)
@@ -95,8 +96,7 @@ class ProfessorBehavior(SequentialTaskSet):
         # Simula ver estadísticas de un curso aleatorio
         course_id = random.randint(1, 10)
         self.client.get(
-            f"/professor/statistics/?course_id={course_id}",
-            name="Estadísticas Curso"
+            f"/professor/statistics/?course_id={course_id}", name="Estadísticas Curso"
         )
 
     @task(1)
@@ -109,6 +109,7 @@ class StudentUser(HttpUser):
     """
     Usuario virtual que simula a un estudiante.
     """
+
     tasks = [StudentBehavior]
     wait_time = between(1, 3)  # Espera entre 1 y 3 segundos entre tareas
     weight = 3  # 75% de los usuarios serán estudiantes
@@ -118,6 +119,7 @@ class ProfessorUser(HttpUser):
     """
     Usuario virtual que simula a un profesor.
     """
+
     tasks = [ProfessorBehavior]
     wait_time = between(2, 5)  # Los profesores son más pausados
     weight = 1  # 25% de los usuarios serán profesores
@@ -128,6 +130,7 @@ class QuickLoadTest(HttpUser):
     Test de carga simple: Solo consultas GET rápidas.
     Útil para medir capacidad máxima del servidor.
     """
+
     weight = 0  # Desactivado por defecto, activar manualmente si se necesita
 
     @task(1)
@@ -153,11 +156,13 @@ class QuickLoadTest(HttpUser):
 
 # ============ CONFIGURACIÓN DE ESCENARIOS ============
 
+
 class StressTestScenario(HttpUser):
     """
     Escenario de prueba de estrés.
     Usuarios agresivos que hacen muchas peticiones rápidas.
     """
+
     tasks = [StudentBehavior, ProfessorBehavior]
     wait_time = between(0.1, 0.5)  # Muy rápido
     weight = 0  # Activar manualmente para stress testing
@@ -167,20 +172,22 @@ class StressTestScenario(HttpUser):
 
 from locust import events
 
+
 @events.test_start.add_listener
 def on_test_start(environment, **kwargs):
     """Se ejecuta cuando inicia la prueba"""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("🚀 INICIANDO PRUEBAS DE RENDIMIENTO")
-    print("="*50 + "\n")
+    print("=" * 50 + "\n")
+
 
 @events.test_stop.add_listener
 def on_test_stop(environment, **kwargs):
     """Se ejecuta cuando termina la prueba"""
-    print("\n" + "="*50)
+    print("\n" + "=" * 50)
     print("✅ PRUEBAS DE RENDIMIENTO COMPLETADAS")
-    print("="*50 + "\n")
-    
+    print("=" * 50 + "\n")
+
     # Mostrar resumen
     stats = environment.stats
     print(f"Total de requests: {stats.total.num_requests}")
@@ -188,6 +195,7 @@ def on_test_stop(environment, **kwargs):
     print(f"Tiempo promedio de respuesta: {stats.total.avg_response_time:.2f}ms")
     print(f"RPS (requests per second): {stats.total.total_rps:.2f}")
     print()
+
 
 @events.request.add_listener
 def on_request(request_type, name, response_time, response_length, exception, **kwargs):

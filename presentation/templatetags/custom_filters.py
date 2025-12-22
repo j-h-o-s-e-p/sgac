@@ -8,13 +8,14 @@ register = template.Library()
 # UTILIDADES DE DICCIONARIOS Y JSON
 # ==========================================
 
-@register.filter(name='get_item')
+
+@register.filter(name="get_item")
 def get_item(dictionary, key):
     """
     Obtiene un valor de un diccionario manejando conversiones de tipos y JSON strings.
-    
+
     Uso: {{ mi_dict|get_item:clave }}
-    
+
     Estrategia:
     1. Si es None, retorna None.
     2. Si es string, intenta parsearlo como JSON.
@@ -38,12 +39,12 @@ def get_item(dictionary, key):
     # 1. Búsqueda Directa
     if key in dictionary:
         return dictionary[key]
-    
+
     # 2. Búsqueda como String (Para UUIDs o claves numéricas accedidas como string)
     key_str = str(key)
     if key_str in dictionary:
         return dictionary[key_str]
-    
+
     # 3. Búsqueda como Entero (Si la clave en el dict es int, pero llega como str)
     if key_str.isdigit():
         try:
@@ -52,21 +53,21 @@ def get_item(dictionary, key):
                 return dictionary[key_int]
         except (ValueError, TypeError):
             pass
-            
+
     return None
 
 
-@register.filter(name='selectattr')
+@register.filter(name="selectattr")
 def selectattr(iterable, attr):
     """
     Filtra una lista de objetos o diccionarios, devolviendo solo aquellos
     que contienen el atributo o clave especificada.
-    
+
     Uso: {{ lista_objetos|selectattr:'nombre_atributo' }}
     """
     if not iterable:
         return []
-    
+
     result = []
     for item in iterable:
         # Si es un diccionario
@@ -77,7 +78,7 @@ def selectattr(iterable, attr):
         else:
             if hasattr(item, attr):
                 result.append(item)
-    
+
     return result
 
 
@@ -85,7 +86,8 @@ def selectattr(iterable, attr):
 # UTILIDADES MATEMÁTICAS Y DE FORMATO
 # ==========================================
 
-@register.filter(name='subtract')
+
+@register.filter(name="subtract")
 def subtract(value, arg):
     """
     Resta el argumento al valor.
@@ -101,12 +103,12 @@ def subtract(value, arg):
             return 0
 
 
-@register.filter(name='to_str')
+@register.filter(name="to_str")
 def to_str(value):
     """
     Convierte cualquier valor a cadena de texto.
     VITAL para comparaciones de UUIDs en templates.
-    
+
     Uso: {% if objeto.id|to_str == otro_id|to_str %}
     """
     return str(value) if value is not None else ""

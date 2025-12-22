@@ -3,15 +3,22 @@ from faker import Faker
 from datetime import datetime, timedelta
 from decimal import Decimal
 from infrastructure.persistence.models import (
-    CustomUser, Semester, Course, CourseGroup, 
-    StudentEnrollment, Evaluation, GradeRecord,
-    Classroom, LaboratoryGroup
+    CustomUser,
+    Semester,
+    Course,
+    CourseGroup,
+    StudentEnrollment,
+    Evaluation,
+    GradeRecord,
+    Classroom,
+    LaboratoryGroup,
 )
 
 fake = Faker("es_ES")
 
 
 # ==================== USUARIOS ====================
+
 
 class CustomUserFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -31,16 +38,19 @@ class CustomUserFactory(factory.django.DjangoModelFactory):
 
 class StudentFactory(CustomUserFactory):
     """Alias semántico para crear estudiantes"""
+
     user_role = "ALUMNO"
 
 
 class ProfessorFactory(CustomUserFactory):
     """Factory para profesores"""
+
     user_role = "PROFESOR"
     email = factory.Sequence(lambda n: f"profesor{n}@unsa.edu.pe")
 
 
 # ==================== ESTRUCTURA ACADÉMICA ====================
+
 
 class SemesterFactory(factory.django.DjangoModelFactory):
     class Meta:
@@ -48,9 +58,7 @@ class SemesterFactory(factory.django.DjangoModelFactory):
 
     name = factory.LazyAttribute(lambda _: f"{datetime.now().year}-1")
     start_date = factory.LazyAttribute(lambda _: datetime.now().date())
-    end_date = factory.LazyAttribute(
-        lambda obj: obj.start_date + timedelta(days=120)
-    )
+    end_date = factory.LazyAttribute(lambda obj: obj.start_date + timedelta(days=120))
     is_active = True
 
 
@@ -60,9 +68,7 @@ class CourseFactory(factory.django.DjangoModelFactory):
 
     semester = factory.SubFactory(SemesterFactory)
     course_code = factory.Sequence(lambda n: f"IS{n:03d}")
-    course_name = factory.LazyAttribute(
-        lambda obj: f"Curso {obj.course_code}"
-    )
+    course_name = factory.LazyAttribute(lambda obj: f"Curso {obj.course_code}")
     credits = 4
     cycle = 5
     course_type = "TEORIA_PRACTICA"
@@ -106,6 +112,7 @@ class LaboratoryGroupFactory(factory.django.DjangoModelFactory):
 
 # ==================== EVALUACIONES ====================
 
+
 class EvaluationFactory(factory.django.DjangoModelFactory):
     class Meta:
         model = Evaluation
@@ -119,6 +126,7 @@ class EvaluationFactory(factory.django.DjangoModelFactory):
 
 
 # ==================== MATRÍCULAS Y NOTAS ====================
+
 
 class StudentEnrollmentFactory(factory.django.DjangoModelFactory):
     class Meta:

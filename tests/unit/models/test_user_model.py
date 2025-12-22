@@ -51,10 +51,7 @@ class TestCustomUserModel:
         Verifica que el método __str__ retorne el formato esperado.
         """
         # Arrange
-        user = StudentFactory.create(
-            first_name="Juan",
-            last_name="Pérez"
-        )
+        user = StudentFactory.create(first_name="Juan", last_name="Pérez")
 
         # Act
         display_name = str(user)

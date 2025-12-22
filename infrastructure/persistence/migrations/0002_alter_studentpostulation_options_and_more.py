@@ -6,20 +6,29 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('persistence', '0001_initial'),
+        ("persistence", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterModelOptions(
-            name='studentpostulation',
-            options={'ordering': ['timestamp'], 'verbose_name': 'Postulación Lab', 'verbose_name_plural': 'Postulaciones Lab'},
+            name="studentpostulation",
+            options={
+                "ordering": ["timestamp"],
+                "verbose_name": "Postulación Lab",
+                "verbose_name_plural": "Postulaciones Lab",
+            },
         ),
         migrations.AddIndex(
-            model_name='labenrollmentcampaign',
-            index=models.Index(fields=['course', 'is_closed'], name='campaign_course_closed_idx'),
+            model_name="labenrollmentcampaign",
+            index=models.Index(
+                fields=["course", "is_closed"], name="campaign_course_closed_idx"
+            ),
         ),
         migrations.AddIndex(
-            model_name='studentpostulation',
-            index=models.Index(fields=['campaign', 'lab_group', 'status'], name='postul_campaign_lab_status_idx'),
+            model_name="studentpostulation",
+            index=models.Index(
+                fields=["campaign", "lab_group", "status"],
+                name="postul_campaign_lab_status_idx",
+            ),
         ),
     ]

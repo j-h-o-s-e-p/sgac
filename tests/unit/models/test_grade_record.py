@@ -10,15 +10,18 @@ class TestGradeRecordRounding:
     Regla de negocio: .5 o más redondea hacia arriba.
     """
 
-    @pytest.mark.parametrize("raw_score,expected_rounded", [
-        (Decimal("15.00"), Decimal("15")),
-        (Decimal("15.49"), Decimal("15")),
-        (Decimal("15.50"), Decimal("16")),
-        (Decimal("15.51"), Decimal("16")),
-        (Decimal("15.99"), Decimal("16")),
-        (Decimal("19.50"), Decimal("20")),
-        (Decimal("10.49"), Decimal("10")),
-    ])
+    @pytest.mark.parametrize(
+        "raw_score,expected_rounded",
+        [
+            (Decimal("15.00"), Decimal("15")),
+            (Decimal("15.49"), Decimal("15")),
+            (Decimal("15.50"), Decimal("16")),
+            (Decimal("15.51"), Decimal("16")),
+            (Decimal("15.99"), Decimal("16")),
+            (Decimal("19.50"), Decimal("20")),
+            (Decimal("10.49"), Decimal("10")),
+        ],
+    )
     def test_grade_rounding_logic(self, raw_score, expected_rounded):
         """
         Verifica que el redondeo de notas siga la regla:

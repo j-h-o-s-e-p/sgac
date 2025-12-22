@@ -2,8 +2,11 @@ import pytest
 from decimal import Decimal
 from django.db import IntegrityError
 from tests.factories import (
-    StudentEnrollmentFactory, GradeRecordFactory,
-    EvaluationFactory, StudentFactory, CourseFactory
+    StudentEnrollmentFactory,
+    GradeRecordFactory,
+    EvaluationFactory,
+    StudentFactory,
+    CourseFactory,
 )
 
 
@@ -38,37 +41,28 @@ class TestStudentEnrollmentModel:
         enrollment.grade_records.all().delete()
 
         # Crear evaluaciones con sus pesos (deben sumar 100%)
-        eval1 = EvaluationFactory.create(
-            course=course,
-            percentage=Decimal("30.00")
-        )
-        eval2 = EvaluationFactory.create(
-            course=course,
-            percentage=Decimal("30.00")
-        )
-        eval3 = EvaluationFactory.create(
-            course=course,
-            percentage=Decimal("40.00")
-        )
+        eval1 = EvaluationFactory.create(course=course, percentage=Decimal("30.00"))
+        eval2 = EvaluationFactory.create(course=course, percentage=Decimal("30.00"))
+        eval3 = EvaluationFactory.create(course=course, percentage=Decimal("40.00"))
 
         # Crear notas para el alumno
         GradeRecordFactory.create(
             enrollment=enrollment,
             evaluation=eval1,
             raw_score=Decimal("15.00"),
-            rounded_score=Decimal("15.00")
+            rounded_score=Decimal("15.00"),
         )
         GradeRecordFactory.create(
             enrollment=enrollment,
             evaluation=eval2,
             raw_score=Decimal("18.00"),
-            rounded_score=Decimal("18.00")
+            rounded_score=Decimal("18.00"),
         )
         GradeRecordFactory.create(
             enrollment=enrollment,
             evaluation=eval3,
             raw_score=Decimal("12.00"),
-            rounded_score=Decimal("12.00")
+            rounded_score=Decimal("12.00"),
         )
 
         # Act
@@ -77,7 +71,7 @@ class TestStudentEnrollmentModel:
         # Assert
         # El método devuelve float por usar round()
         # Convertimos a Decimal para comparar
-        assert Decimal(str(final_grade)).quantize(Decimal('0.01')) == Decimal("14.70")
+        assert Decimal(str(final_grade)).quantize(Decimal("0.01")) == Decimal("14.70")
 
     def test_final_grade_is_none_when_no_evaluations_configured(self):
         """
@@ -102,15 +96,15 @@ class TestStudentEnrollmentModel:
         from datetime import date
 
         enrollment = StudentEnrollmentFactory.create()
-        
+
         # Crear 10 registros de asistencia, todos presentes
         for i in range(1, 11):
             AttendanceRecord.objects.create(
                 enrollment=enrollment,
                 session_number=i,
                 session_date=date.today(),
-                status='P',  # Presente
-                professor_ip='127.0.0.1'
+                status="P",  # Presente
+                professor_ip="127.0.0.1",
             )
 
         # Act
@@ -128,24 +122,24 @@ class TestStudentEnrollmentModel:
         from datetime import date
 
         enrollment = StudentEnrollmentFactory.create()
-        
+
         # 7 presentes, 3 ausentes
         for i in range(1, 8):
             AttendanceRecord.objects.create(
                 enrollment=enrollment,
                 session_number=i,
                 session_date=date.today(),
-                status='P',
-                professor_ip='127.0.0.1'
+                status="P",
+                professor_ip="127.0.0.1",
             )
-        
+
         for i in range(8, 11):
             AttendanceRecord.objects.create(
                 enrollment=enrollment,
                 session_number=i,
                 session_date=date.today(),
-                status='F',  # Falta
-                professor_ip='127.0.0.1'
+                status="F",  # Falta
+                professor_ip="127.0.0.1",
             )
 
         # Act
