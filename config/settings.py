@@ -1,4 +1,5 @@
 import os
+import sys
 from pathlib import Path
 from decouple import config
 from django.contrib.messages import constants as messages
@@ -195,16 +196,18 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ==================== LOGGING ====================
-# Crea carpeta logs si no existe
+
 LOG_DIR = BASE_DIR / 'logs'
 os.makedirs(LOG_DIR, exist_ok=True)
+
+DISABLE_FILE_LOGGING = os.getenv("DISABLE_FILE_LOGGING") == "1"
 
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'formatters': {
         'verbose': {
-            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'format': '{levelname} {asctime} {module} {message}',
             'style': '{',
         },
     },
@@ -213,19 +216,24 @@ LOGGING = {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
         },
-        'file': {
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': LOG_DIR / 'sgac.log',
-            'maxBytes': 1024 * 1024 * 5,  # 5 MB por archivo
-            'backupCount': 5,              # Mantener 5 archivos de backup
-            'formatter': 'verbose',
-        },
+        **({} if DISABLE_FILE_LOGGING else {
+            'file': {
+                'class': 'logging.handlers.RotatingFileHandler',
+                'filename': LOG_DIR / 'sgac.log',
+                'maxBytes': 1024 * 1024 * 5,
+                'backupCount': 5,
+                'formatter': 'verbose',
+            }
+        }),
     },
     'root': {
-        'handlers': ['console', 'file'],
+        'handlers': ['console'] if DISABLE_FILE_LOGGING else ['console', 'file'],
         'level': 'INFO',
     },
 }
+
+if os.getenv("PYTEST_CURRENT_TEST"):
+    LOGGING_CONFIG = None
 
 # ==================== UI HELPERS ====================
 # Mapeo de etiquetas de mensajes de Django a clases de Bootstrap 5

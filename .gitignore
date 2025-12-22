@@ -60,3 +60,5 @@ celerybeat-schedule
 # Logs
 logs/
 *.log
+coverage.xml
+reports/
