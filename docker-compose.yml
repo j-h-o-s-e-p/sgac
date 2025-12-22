@@ -76,6 +76,21 @@ services:
       - web
       - redis
       - db
+  
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: sgac_jenkins
+    restart: unless-stopped
+    user: root 
+    ports:
+      - "8080:8080"
+      - "50000:50000"
+    volumes:
+      - jenkins_home:/var/jenkins_home
+      - /var/run/docker.sock:/var/run/docker.sock 
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
+  jenkins_home:

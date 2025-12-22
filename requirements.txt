@@ -15,7 +15,6 @@ django-redis==5.4.0         # Permite usar Redis como Backend de Caché de Djang
 
 # --- Procesamiento de Archivos & Datos ---
 openpyxl==3.1.2             # Leer/Escribir Excel (Reportes de notas)
-pandas==2.2.1               # Análisis de datos y estructuras (Estadísticas complejas)
 pdfplumber==0.10.3          # Extraer texto y tablas de archivos PDF (Sílabos)
 pytesseract==0.3.10         # OCR: Lee texto de imágenes (si el PDF es escaneado)
 pillow==10.1.0              # Procesamiento de imágenes (necesario para OCR)
