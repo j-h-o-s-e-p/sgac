@@ -1,19 +1,55 @@
+# ==================================================
 # Hereda todas las dependencias de producción
+# ==================================================
 -r requirements.txt
 
-# --- Testing (Pruebas Automatizadas) ---
-pytest==8.0.2               # Framework de testing moderno (más potente que el nativo)
-pytest-django==4.8.0        # Plugin para que pytest entienda Django
-pytest-cov==4.1.0           # Genera reportes de cuánto código estás probando (% cobertura)
-factory-boy==3.3.0          # Crea objetos de prueba (Factories) en lugar de Fixtures estáticos
-faker==23.2.1               # Genera datos falsos realistas (Nombres, emails, direcciones)
 
-# --- Functional Testing (UI / Browser) ---
-selenium==4.10.0
-webdriver-manager==4.0.0
+# ==================================================
+# TESTING (Pruebas Automatizadas)
+# ==================================================
+pytest==8.0.2               # Framework de testing
+pytest-django==4.8.0        # Integración con Django
+pytest-cov==4.1.0           # Reporte de cobertura
+pytest-xdist==3.5.0         # Tests en paralelo
 
-# --- Calidad de Código (Linters & Formatters) ---
-black==24.2.0               # Formateador de código automático (deja todo bonito)
-flake8==7.0.0               # Revisa errores de estilo y sintaxis (PEP 8)
-isort==5.13.2               # Ordena los imports alfabéticamente y por secciones
-bandit==1.7.5
+
+# ==================================================
+# DATOS DE PRUEBA
+# ==================================================
+factory-boy==3.3.0          # Factories para tests
+faker==23.2.1               # Datos falsos realistas
+
+
+# ==================================================
+# TESTING FUNCIONAL / E2E
+# ==================================================
+selenium==4.17.2            # Testing en navegador
+webdriver-manager==4.0.0    # Descarga automática de drivers
+
+
+# ==================================================
+# PERFORMANCE TESTING
+# ==================================================
+locust==2.23.1              # Pruebas de carga
+
+
+# ==================================================
+# CALIDAD DE CÓDIGO
+# ==================================================
+black==24.2.0               # Formateo automático
+flake8==7.0.0               # Linting
+flake8-docstrings==1.7.0    # Docstrings
+isort==5.13.2               # Ordena imports
+
+
+# ==================================================
+# SEGURIDAD
+# ==================================================
+bandit==1.7.6               # Análisis de seguridad
+
+
+# ==================================================
+# DEBUGGING
+# ==================================================
+ipython==8.21.0             # Consola mejorada
+ipdb==0.13.13               # Debugger avanzado

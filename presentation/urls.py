@@ -14,7 +14,7 @@ from .views import (
 
 app_name = 'presentation'
 
-urlpatterns = [
+urlpatterns = [   
     # --- AUTH ---
     path('', auth_views.login_view, name='login'),
     path('login/', auth_views.login_view, name='login'),
