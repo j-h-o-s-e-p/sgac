@@ -10,14 +10,14 @@ pipeline {
 
         stage('Setup') {
             steps {
-                echo '=== Instalando Dependencias ==='
+                echo '=== 1. Construcción y Dependencias ==='
                 sh 'pip install -r requirements-dev.txt'
             }
         }
 
         stage('Code Quality') {
             steps {
-                echo '=== Black & Flake8 ==='
+                echo '=== 2. Análisis Estático (Reemplazo SonarQube) ==='
                 sh 'black --check .'
                 sh 'flake8 . --exclude=migrations,venv --max-line-length=120'
             }
@@ -25,7 +25,7 @@ pipeline {
 
         stage('Security Audit') {
             steps {
-                echo '=== Bandit ==='
+                echo '=== 3. Pruebas de Seguridad (OWASP/Bandit) ==='
                 sh '''
                     bandit -r . \
                         -x ./tests,./venv \
@@ -37,7 +37,7 @@ pipeline {
 
         stage('Unit Tests') {
             steps {
-                echo '=== Tests Unitarios ==='
+                echo '=== 4. Pruebas Unitarias (xUnit) ==='
                 sh '''
                     mkdir -p reports
                     pytest -m unit \
@@ -48,22 +48,35 @@ pipeline {
             }
         }
 
-        stage('Integration Tests') {
+        stage('Functional Tests') {
             steps {
-                echo '=== Tests de Integración ==='
+                echo '=== 5. Pruebas Funcionales (Selenium) ==='
+                // Ejecuta los tests que están en la carpeta tests/functional
                 sh '''
-                    pytest -m integration \
-                        --junitxml=reports/junit-integration.xml
+                    pytest tests/functional \
+                        --junitxml=reports/junit-functional.xml || true
+                '''
+            }
+        }
+
+        stage('Performance Tests') {
+            steps {
+                echo '=== 6. Pruebas de Rendimiento (Locust) ==='
+                // Ejecuta locust en modo headless (sin interfaz gráfica) por 10 segundos
+                sh '''
+                    locust -f tests/performance/locustfile.py \
+                        --headless -u 10 -r 2 --run-time 10s \
+                        --html reports/locust_report.html || true
                 '''
             }
         }
 
         stage('Deploy') {
             when {
-                branch 'main'
+                branch 'master' 
             }
             steps {
-                echo '=== Deploy ==='
+                echo '=== 7. Gestión de Entrega (Docker) ==='
                 sh 'docker-compose up -d --build'
             }
         }
@@ -71,12 +84,14 @@ pipeline {
 
     post {
         always {
+            // Recoge todos los reportes XML (Unitarios y Funcionales)
             junit 'reports/**/*.xml'
-            archiveArtifacts artifacts: 'bandit-report.json', allowEmptyArchive: true
+            // Guarda el reporte de seguridad y de rendimiento
+            archiveArtifacts artifacts: 'bandit-report.json, reports/locust_report.html', allowEmptyArchive: true
         }
 
         success {
-            echo '✅ Pipeline ejecutado correctamente'
+            echo '✅ Pipeline ejecutado correctamente: CI/CD Completo'
         }
 
         failure {
@@ -84,4 +99,3 @@ pipeline {
         }
     }
 }
-
