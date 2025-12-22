@@ -75,9 +75,7 @@ pipeline {
                 echo '=== 6. Pruebas de Rendimiento (Locust) ==='
                 // Ejecuta locust en modo headless (sin interfaz gráfica) por 10 segundos
                 sh '''
-                    locust -f tests/performance/locustfile.py \
-                        --headless -u 10 -r 2 --run-time 10s \
-                        --html reports/locust_report.html || true
+                    locust -f tests/performance/locustfile.py --headless -u 10 -r 2 --run-time 10s --host http://localhost:8000 --html reports/locust_report.html || true
                 '''
             }
         }

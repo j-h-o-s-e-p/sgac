@@ -1,4 +1,7 @@
-import pdfplumber
+try:
+    import pdfplumber
+except ImportError:
+    pdfplumber = None
 import re
 from decimal import Decimal, InvalidOperation
 from typing import Dict, List, Optional
