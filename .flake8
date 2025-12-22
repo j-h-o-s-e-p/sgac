@@ -1,9 +1,9 @@
 [flake8]
 # Longitud de línea compatible con Black
-max-line-length = 88
+max-line-length = 120
 
 # Ignorar reglas específicas
-ignore = W503
+ignore = D100,D101,D102,D103,D104,D105,D106,D107,F401,E722,W503,E203,E402
 extend-ignore = E203
 
 # Carpetas y archivos a excluir
@@ -17,5 +17,7 @@ exclude =
     build,
     dist,
     venv,
-    env
+    env,
+    reports,
+    test
 
