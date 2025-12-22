@@ -1,49 +1,61 @@
 {% extends 'base.html' %}
 
-{% block sidebar %}
-<ul class="nav flex-column"> <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-            <i class="bi bi-house-door"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-            <i class="bi bi-calendar3"></i> Mi Horario
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
-            <i class="bi bi-clipboard-check"></i> Asistencia
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-            <i class="bi bi-clipboard-data"></i> Notas
-        </a>
-    </li>
-</ul> {% endblock %}
+{% block title %}Reporte de Asistencia{% endblock %}
 
+{% block sidebar %}
+    {% include 'includes/professor_sidebar.html' %}
+{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-between mb-4">
-    <h2>Reporte de Asistencia: {{ group.course.course_name }}</h2>
+<div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <a href="{% url 'presentation:professor_record_attendance' group.group_id %}" class="btn btn-outline-secondary">Volver</a>
-        <a href="?export=excel" class="btn btn-success"><i class="bi bi-file-earmark-excel"></i> Descargar Excel</a>
+        <h2 class="h4 mb-0 fw-bold text-dark">Reporte: {{ group.course.course_name }}</h2>
+        
+        <p class="text-muted mb-0 small">
+            {{ group.course.course_code }}
+            <span class="mx-1">|</span>
+            <span class="fw-bold text-primary">
+                {% if group.group_code %}
+                    Grupo {{ group.group_code }}
+                {% else %}
+                    Lab {{ group.lab_nomenclature }}
+                {% endif %}
+            </span>
+        </p>
+    </div>
+
+    <div class="btn-group shadow-sm">
+        <a href="{% url 'presentation:professor_record_attendance' group_id %}" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i> Volver
+        </a>
+        <a href="?export=excel" class="btn btn-success btn-sm fw-bold">
+            <i class="bi bi-file-earmark-excel me-1"></i> Excel
+        </a>
     </div>
 </div>
 
-<div class="card">
-    <div class="table-responsive">
-        <table class="table table-bordered table-sm table-hover text-center" style="font-size: 0.9rem;">
+<div class="alert alert-info border-0 bg-info bg-opacity-10 d-flex align-items-center mb-3 py-2">
+    <i class="bi bi-hand-index-thumb me-3 fs-5 text-info"></i>
+    <small class="text-dark">
+        <strong>Tip:</strong> Puedes arrastrar la tabla horizontalmente con el mouse o usar las flechas del teclado.
+    </small>
+</div>
+
+<div class="card border-0 shadow-sm">
+    <div class="table-drag-scroll" id="attendanceTableContainer">
+        <table class="table table-bordered table-sm table-hover mb-0 sticky-table align-middle">
             <thead class="table-light">
                 <tr>
-                    <th class="text-start">Estudiante</th>
-                    <th>%</th>
+                    <th class="sticky-col sticky-col-1 text-start ps-3">Estudiante</th>
+                    
+                    <th class="sticky-col sticky-col-2 text-center">%</th>
+                    
                     {% for session in sessions %}
-                        <th title="{{ session.date }}">
-                            S{{ session.number }}<br>
-                            <small style="font-size: 0.7rem">{{ session.date|date:"d/m" }}</small>
+                        <th title="Fecha: {{ session.date }}" class="session-header bg-light">
+                            <div class="d-flex flex-column align-items-center">
+                                <span class="fw-bold text-dark">S{{ session.number }}</span>
+                                <small class="text-muted" style="font-size: 0.7rem">{{ session.date|date:"d/m" }}</small>
+                            </div>
                         </th>
                     {% endfor %}
                 </tr>
@@ -51,18 +63,24 @@
             <tbody>
                 {% for row in matrix %}
                 <tr>
-                    <td class="text-start text-nowrap">
-                        {{ row.student.last_name }}, {{ row.student.first_name }}
+                    <td class="sticky-col sticky-col-1 text-start text-nowrap bg-white ps-3">
+                        <div class="fw-bold text-dark">{{ row.student.last_name }}, {{ row.student.first_name }}</div>
                     </td>
-                    <td class="fw-bold {% if row.enrollment.current_attendance_percentage < 70 %}text-danger{% endif %}">
+                    <td class="sticky-col sticky-col-2 fw-bold text-center bg-white 
+                        {% if row.enrollment.current_attendance_percentage < 70 %}text-danger{% else %}text-success{% endif %}">
                         {{ row.enrollment.current_attendance_percentage|floatformat:0 }}%
                     </td>
                     {% for data in row.attendance_data %}
-                        <td>
-                            {% if data.status == 'P' %}<i class="bi bi-check text-success"></i>
-                            {% elif data.status == 'F' %}<span class="text-danger fw-bold">F</span>
-                            {% elif data.status == 'J' %}<span class="text-warning fw-bold">J</span>
-                            {% else %}-{% endif %}
+                        <td class="text-center session-cell">
+                            {% if data.status == 'P' %}
+                                <i class="bi bi-check-circle-fill text-success opacity-75"></i>
+                            {% elif data.status == 'F' %}
+                                <i class="bi bi-x-circle-fill text-danger opacity-75"></i>
+                            {% elif data.status == 'J' %}
+                                <i class="bi bi-exclamation-circle-fill text-warning opacity-75"></i>
+                            {% else %}
+                                <span class="text-muted opacity-25">•</span>
+                            {% endif %}
                         </td>
                     {% endfor %}
                 </tr>

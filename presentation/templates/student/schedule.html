@@ -3,210 +3,26 @@
 {% block title %}Mi Horario - Alumno{% endblock %}
 
 {% block sidebar %}
-<ul class="nav flex-column">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_dashboard' %}">
-            <i class="bi bi-house-door"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_schedule' %}">
-            <i class="bi bi-calendar3"></i> Mi Horario
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_grades' %}">
-            <i class="bi bi-clipboard-data"></i> Mis Notas
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_syllabus_list' %}">
-            <i class="bi bi-file-earmark-text"></i> Sílabos
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_attendance_list' %}">
-            <i class="bi bi-clipboard-check"></i> Asistencia
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:student_lab_enrollment' %}">
-            <i class="bi bi-pen"></i> Matrícula Laboratorios
-        </a>
-    </li>
-</ul>
+    {% include 'includes/student_sidebar.html' %}
 {% endblock %}
 
 {% block content %}
-<style>
-    /* --- Estilos Generales (Pantalla) --- */
-    .schedule-table {
-        font-size: 0.85rem;
-        border-collapse: separate;
-        border-spacing: 0;
-        width: 100%;
-    }
-    
-    .schedule-table th {
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        color: white;
-        font-weight: 600;
-        padding: 8px 4px;
-        text-align: center;
-        border: 1px solid #dee2e6;
-        position: sticky;
-        top: 0;
-        z-index: 10;
-    }
-    
-    .schedule-table td {
-        padding: 4px;
-        border: 1px solid #dee2e6;
-        text-align: center;
-        vertical-align: middle;
-        background-color: #f8f9fa;
-        height: 60px;
-        min-width: 100px;
-    }
-    
-    .time-cell {
-        background-color: #e9ecef !important;
-        font-weight: 600;
-        color: #495057;
-        width: 60px;
-        font-size: 0.75rem;
-        position: sticky;
-        left: 0;
-        z-index: 5;
-    }
-    
-    .course-block {
-        padding: 4px;
-        border-radius: 4px;
-        color: white;
-        font-weight: 500;
-        height: 100%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        cursor: pointer;
-        font-size: 0.75rem;
-        transition: transform 0.2s;
-    }
-
-    .course-block:hover {
-        transform: translateY(-2px);
-    }
-    
-    /* --- Colores --- */
-    .color-1 { background: linear-gradient(135deg, #667eea, #764ba2); }
-    .color-2 { background: linear-gradient(135deg, #f093fb, #f5576c); }
-    .color-3 { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-    .color-4 { background: linear-gradient(135deg, #43e97b, #38f9d7); }
-    .color-5 { background: linear-gradient(135deg, #fa709a, #fee140); }
-    .color-6 { background: linear-gradient(135deg, #30cfd0, #330867); }
-    .color-7 { background: linear-gradient(135deg, #a8edea, #fed6e3); }
-    .color-8 { background: linear-gradient(135deg, #ff9a9e, #fecfef); }
-    .color-9 { background: linear-gradient(135deg, #ffecd2, #fcb69f); }
-    .color-10 { background: linear-gradient(135deg, #ff6e7f, #bfe9ff); }
-    
-    .legend {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-        margin-top: 20px;
-        padding: 10px;
-        background: white;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    }
-    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 0.8rem; }
-    .legend-color { width: 20px; height: 20px; border-radius: 4px; }
-    .collision-warning { border: 2px solid #ff6b6b !important; }
-
-    @media print {
-        /* Ocultar todo excepto el área imprimible */
-        body * { visibility: hidden; }
-        
-        /* Mostrar solo el área de impresión */
-        #printable-area, #printable-area * { visibility: visible; }
-        
-        /* Posicionar en la esquina superior izquierda */
-        #printable-area {
-            position: absolute;
-            left: 0;
-            top: 0;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-            background: white;
-        }
-        
-        /* Tabla ajustada al ancho de papel HORIZONTAL (Landscape) */
-        .schedule-table {
-            width: 100% !important;
-            table-layout: fixed; 
-            font-size: 10px !important; /* Podemos usar una letra un poco más grande que en vertical */
-        }
-        
-        /* Ajustar celdas para impresión */
-        .schedule-table td, .schedule-table th {
-            padding: 4px !important; /* Un poco más de padding lateral */
-            min-width: auto !important;
-            height: auto !important; /* Dejar que la altura se ajuste al contenido */
-            border: 1px solid #999 !important;
-            word-wrap: break-word;
-        }
-        
-        /* Reducir altura de bloques vacíos para ahorrar espacio vertical */
-        .schedule-table td:empty {
-            height: 25px !important; 
-        }
-
-        .course-block {
-            box-shadow: none !important;
-            border: 1px solid #ccc;
-            padding: 2px;
-        }
-
-        /* Asegurar colores de fondo */
-        .course-block, .schedule-table th {
-            -webkit-print-color-adjust: exact;
-            print-color-adjust: exact;
-        }
-        
-        .no-print, .btn { display: none !important; }
-        
-        /* Configuración de página HORIZONTAL */
-        @page {
-            size: landscape; /* <--- CAMBIO CLAVE */
-            margin: 0.5cm;   /* Márgenes estrechos para aprovechar el espacio */
-        }
-    }
-</style>
-
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h2 class="h4">
-            <i class="bi bi-calendar-week"></i> Mi Horario Semanal
-        </h2>
-        <p class="text-muted mb-0">Semestre 2025-2</p>
+        <h2 class="h3 mb-0 text-primary fw-bold"><i class="bi bi-calendar-week me-2"></i>Mi Horario Semanal</h2>
+        <p class="text-muted small mb-0">Semestre Académico 2025-2</p>
     </div>
-    <div>
-        <button class="btn btn-outline-primary" onclick="window.print()">
-            <i class="bi bi-printer"></i> Imprimir / Guardar PDF
-        </button>
-    </div>
+    <button class="btn btn-outline-primary shadow-sm no-print" onclick="window.print()">
+        <i class="bi bi-printer me-2"></i> Imprimir PDF
+    </button>
 </div>
 
 <div id="printable-area">
-    <div class="d-none d-print-block mb-2 text-center">
+    <div class="d-none d-print-block mb-3 text-center">
         <h3>Horario de Clases - {{ user.get_full_name }}</h3>
-        <p class="mb-0">Semestre 2025-2</p>
     </div>
 
-    <div class="card shadow-sm">
+    <div class="card shadow-sm border-0">
         <div class="card-body p-0">
             <div class="table-responsive">
                 <table class="schedule-table table mb-0">
@@ -224,7 +40,7 @@
                         {% for slot in time_slots %}
                         <tr>
                             <td class="time-cell">
-                                <strong>{{ slot.start }}</strong> - {{ slot.end }}
+                                {{ slot.start }} - {{ slot.end }}
                             </td>
                             
                             {% for day in days %}
@@ -232,17 +48,17 @@
                                     {% with courses=schedule_grid|get_item:day|get_item:slot.start %}
                                         {% if courses %}
                                             {% for course_info in courses %}
-                                                <div class="course-block color-{{ course_info.color_index }} {% if courses|length > 1 %}collision-warning{% endif %}">
+                                                <div class="course-block color-{{ course_info.color_index }} {% if courses|length > 1 %}collision-warning{% endif %}"
+                                                     title="{{ course_info.name }}">
                                                     
-                                                    <div class="course-room" style="font-size: 0.75rem; text-transform: uppercase; margin-bottom: 2px; opacity: 0.95;">
-                                                        <i class="bi bi-geo-alt-fill"></i> 
+                                                    <div class="course-room small text-uppercase mb-1 opacity-75">
+                                                        <i class="bi bi-geo-alt-fill me-1"></i> 
                                                         {{ course_info.room }} - {{ course_info.group }}
                                                     </div>
 
-                                                    <div class="course-name" style="font-size: 0.85rem; font-weight: bold; line-height: 1.1;">
+                                                    <div class="course-name lh-sm">
                                                         {{ course_info.name }}
                                                     </div>
-
                                                 </div>
                                             {% endfor %}
                                         {% endif %}
@@ -259,9 +75,11 @@
 </div>
 
 {% if has_collisions %}
-<div class="alert alert-warning mt-3 no-print">
-    <i class="bi bi-exclamation-triangle"></i>
-    <strong>Advertencia:</strong> Se detectaron colisiones de horario. Las celdas con borde rojo indican conflictos.
+<div class="alert alert-warning mt-3 shadow-sm no-print d-flex align-items-center">
+    <i class="bi bi-exclamation-triangle-fill fs-4 me-3"></i>
+    <div>
+        <strong>Conflicto detectado:</strong> Hay cursos que se solapan en el mismo horario (bordes rojos).
+    </div>
 </div>
 {% endif %}
 

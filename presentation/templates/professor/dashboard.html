@@ -3,98 +3,97 @@
 {% block title %}Dashboard - Profesor{% endblock %}
 
 {% block sidebar %}
-<ul class="nav flex-column"> <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_dashboard' %}">
-            <i class="bi bi-house-door"></i> Dashboard
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_schedule' %}">
-            <i class="bi bi-calendar3"></i> Mi Horario
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_attendance' %}">
-            <i class="bi bi-clipboard-check"></i> Asistencia
-        </a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'presentation:professor_grades' %}">
-            <i class="bi bi-clipboard-data"></i> Notas
-        </a>
-    </li>
-</ul> {% endblock %}
+    {% include 'includes/professor_sidebar.html' %}
+{% endblock %}
 
 {% block content %}
-<!-- Header -->
 <div class="d-flex justify-content-between align-items-center mb-4">
     <div>
-        <h1 class="h3 mb-1">¡Bienvenido, Prof. {{ user.last_name }}!</h1>
-        <p class="text-muted">Panel de control docente</p>
+        <h1 class="h3 mb-1 fw-bold text-dark">¡Bienvenido, Prof. {{ user.last_name }}!</h1>
+        <p class="text-muted mb-0">Panel de control docente del semestre <strong>2025-2</strong></p>
     </div>
-    <div>
-        <span class="badge bg-success badge-custom">{{ user.get_user_role_display }}</span>
-    </div>
+    <span class="badge bg-success badge-custom fs-6 shadow-sm">
+        <i class="bi bi-person-badge-fill me-1"></i> {{ user.get_user_role_display }}
+    </span>
 </div>
 
-<!-- Estadísticas -->
-<div class="row mb-4">
+<div class="row mb-4 g-3">
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #667eea, #764ba2);">
-            <i class="bi bi-book" style="font-size: 2rem; opacity: 0.8;"></i>
-            <h3 class="mt-2">{{ total_courses }}</h3>
+        <div class="stat-card bg-gradient-purple">
+            <i class="bi bi-book"></i>
+            <h3>{{ total_courses }}</h3>
             <p>Cursos Asignados</p>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
-            <i class="bi bi-people" style="font-size: 2rem; opacity: 0.8;"></i>
-            <h3 class="mt-2">{{ total_students }}</h3>
+        <div class="stat-card bg-gradient-pink">
+            <i class="bi bi-people"></i>
+            <h3>{{ total_students }}</h3>
             <p>Estudiantes Totales</p>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="stat-card" style="background: linear-gradient(135deg, #4facfe, #00f2fe);">
-            <i class="bi bi-calendar-check" style="font-size: 2rem; opacity: 0.8;"></i>
-            <h3 class="mt-2">2025-2</h3>
+        <div class="stat-card bg-gradient-cyan">
+            <i class="bi bi-calendar-check"></i>
+            <h3>2025-2</h3>
             <p>Semestre Actual</p>
         </div>
     </div>
 </div>
 
-<!-- Mis Cursos (Teoría) -->
 {% if course_groups %}
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="bi bi-book-fill"></i> Cursos de Teoría
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 text-primary fw-bold"><i class="bi bi-book-fill me-2"></i>Cursos de Teoría</h5>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover table-custom">
-                <thead>
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>Código</th>
+                        <th class="ps-4">Código</th>
                         <th>Curso</th>
                         <th>Grupo</th>
                         <th>Capacidad</th>
-                        <th>Acciones</th>
+                        <th style="min-width: 200px;">Progreso del Sílabo</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {% for group in course_groups %}
+                    {% for item in course_groups %}
                     <tr>
-                        <td><strong>{{ group.course.course_code }}</strong></td>
-                        <td>{{ group.course.course_name }}</td>
+                        <td class="ps-4 fw-bold text-primary">{{ item.group.course.course_code }}</td>
+                        <td class="fw-500">{{ item.group.course.course_name }}</td>
                         <td>
-                            <span class="badge bg-primary badge-custom">{{ group.group_code }}</span>
+                            <span class="badge bg-primary badge-custom">{{ item.group.group_code }}</span>
                         </td>
                         <td>
-                            <span class="badge bg-info badge-custom">{{ group.capacity }} alumnos</span>
+                            <span class="badge bg-info bg-opacity-10 text-info border border-info">
+                                <i class="bi bi-people me-1"></i>{{ item.group.capacity }}
+                            </span>
                         </td>
-                        <td>
-                            <a href="{% url 'presentation:professor_record_attendance' group.group_id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-clipboard-check"></i> Asistencia
-                            </a>
+                        <td class="pe-4">
+                            <div class="d-flex align-items-center">
+                                <div class="progress flex-grow-1 me-2 progress-custom" style="height: 10px;">
+                                    <div class="progress-bar bg-{{ item.progress.color }} progress-bar-custom" 
+                                        role="progressbar" 
+                                        style="width: {{ item.progress.percentage|floatformat:0 }}%;"
+                                        aria-valuenow="{{ item.progress.percentage|floatformat:0 }}" 
+                                        aria-valuemin="0" 
+                                        aria-valuemax="100">
+                                    </div>
+                                </div>
+                                <span class="small fw-bold text-muted">{{ item.progress.percentage }}%</span>
+                            </div>
+                            <div class="d-flex justify-content-between mt-1">
+                                <small class="text-muted" style="font-size: 0.75rem;">
+                                    {{ item.progress.completed }} de {{ item.progress.total }} temas
+                                </small>
+                                {% if not item.progress.is_on_track %}
+                                    <small class="text-danger fw-bold" style="font-size: 0.75rem;">
+                                        <i class="bi bi-exclamation-triangle-fill"></i> Atrasado
+                                    </small>
+                                {% endif %}
+                            </div>
                         </td>
                     </tr>
                     {% endfor %}
@@ -105,45 +104,45 @@
 </div>
 {% endif %}
 
-<!-- Mis Laboratorios -->
 {% if lab_groups %}
-<div class="card mb-4">
-    <div class="card-header">
-        <i class="bi bi-flask"></i> Laboratorios
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 text-success fw-bold"><i class="bi bi-pc-display me-2"></i>Laboratorios Asignados</h5>
     </div>
-    <div class="card-body">
+    <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover table-custom">
-                <thead>
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
                     <tr>
-                        <th>Código</th>
+                        <th class="ps-4">Código</th>
                         <th>Curso</th>
                         <th>Lab</th>
                         <th>Horario</th>
                         <th>Aula</th>
                         <th>Capacidad</th>
-                        <th>Acciones</th>
+                        <th class="text-end pe-4">Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for lab in lab_groups %}
                     <tr>
-                        <td><strong>{{ lab.course.course_code }}</strong></td>
+                        <td class="ps-4 fw-bold text-dark">{{ lab.course.course_code }}</td>
                         <td>{{ lab.course.course_name }}</td>
                         <td>
                             <span class="badge bg-success badge-custom">Lab {{ lab.lab_nomenclature }}</span>
                         </td>
                         <td>
-                            {{ lab.day_of_week }}<br>
+                            <div class="fw-bold text-dark">{{ lab.day_of_week }}</div>
                             <small class="text-muted">{{ lab.start_time|time:"H:i" }} - {{ lab.end_time|time:"H:i" }}</small>
                         </td>
-                        <td>{{ lab.room }}</td>
+                        <td><small class="text-muted"><i class="bi bi-geo-alt me-1"></i>{{ lab.room }}</small></td>
                         <td>
-                            <span class="badge bg-info badge-custom">{{ lab.capacity }} alumnos</span>
+                            <span class="badge bg-light text-dark border">{{ lab.capacity }} alum.</span>
                         </td>
-                        <td>
-                            <a href="{% url 'presentation:professor_record_attendance' lab.lab_id %}" class="btn btn-sm btn-outline-primary">
-                                <i class="bi bi-clipboard-check"></i> Asistencia
+                        <td class="text-end pe-4">
+                            <a href="{% url 'presentation:professor_record_attendance' lab.lab_id %}" 
+                               class="btn btn-sm btn-outline-primary fw-bold">
+                                <i class="bi bi-clipboard-check me-1"></i> Asistencia
                             </a>
                         </td>
                     </tr>
@@ -155,48 +154,47 @@
 </div>
 {% endif %}
 
-<!-- Accesos Rápidos -->
-<div class="row">
+<div class="row g-3">
     <div class="col-md-3">
-        <a href="{% url 'presentation:professor_attendance' %}" class="text-decoration-none">
-            <div class="card text-center">
+        <a href="{% url 'presentation:professor_my_courses' %}" class="text-decoration-none">
+            <div class="card text-center h-100 py-3 border-0 shadow-sm card-hover">
                 <div class="card-body">
-                    <i class="bi bi-clipboard-check text-primary" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">Tomar Asistencia</h5>
-                    <p class="text-muted">Registrar asistencia</p>
+                    <i class="bi bi-clipboard-check text-primary display-4 mb-2"></i>
+                    <h6 class="fw-bold text-dark">Tomar Asistencia</h6>
+                    <small class="text-muted">Gestión diaria</small>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-md-3">
-        <a href="{% url 'presentation:professor_grades' %}" class="text-decoration-none">
-            <div class="card text-center">
+        <a href="{% url 'presentation:professor_my_courses' %}" class="text-decoration-none">
+            <div class="card text-center h-100 py-3 border-0 shadow-sm card-hover">
                 <div class="card-body">
-                    <i class="bi bi-clipboard-data text-success" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">Registrar Notas</h5>
-                    <p class="text-muted">Ingresar calificaciones</p>
+                    <i class="bi bi-clipboard-data text-success display-4 mb-2"></i>
+                    <h6 class="fw-bold text-dark">Registrar Notas</h6>
+                    <small class="text-muted">Evaluaciones parciales</small>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-md-3">
         <a href="{% url 'presentation:professor_schedule' %}" class="text-decoration-none">
-            <div class="card text-center">
+            <div class="card text-center h-100 py-3 border-0 shadow-sm card-hover">
                 <div class="card-body">
-                    <i class="bi bi-calendar3 text-warning" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">Mi Horario</h5>
-                    <p class="text-muted">Ver horario semanal</p>
+                    <i class="bi bi-calendar3 text-info display-4 mb-2"></i>
+                    <h6 class="fw-bold text-dark">Mi Horario</h6>
+                    <small class="text-muted">Agenda semanal</small>
                 </div>
             </div>
         </a>
     </div>
     <div class="col-md-3">
-        <a href="#" class="text-decoration-none">
-            <div class="card text-center">
+        <a href="{% url 'presentation:professor_my_courses' %}" class="text-decoration-none">
+            <div class="card text-center h-100 py-3 border-0 shadow-sm card-hover">
                 <div class="card-body">
-                    <i class="bi bi-door-open text-info" style="font-size: 3rem;"></i>
-                    <h5 class="mt-3">Reservar Aula</h5>
-                    <p class="text-muted">Próximamente</p>
+                    <i class="bi bi-file-earmark-pdf text-secondary display-4 mb-2"></i>
+                    <h6 class="fw-bold text-dark">Mis Sílabos</h6>
+                    <small class="text-muted">Documentos cargados</small>
                 </div>
             </div>
         </a>
@@ -204,10 +202,11 @@
 </div>
 
 {% if not course_groups and not lab_groups %}
-<div class="card">
+<div class="card shadow-sm border-0 mt-4">
     <div class="card-body text-center py-5">
-        <i class="bi bi-inbox" style="font-size: 4rem; color: #ccc;"></i>
-        <p class="text-muted mt-3">No tienes cursos asignados en este semestre</p>
+        <i class="bi bi-inbox display-1 text-muted opacity-25"></i>
+        <h5 class="mt-3 text-muted">Sin asignación académica</h5>
+        <p class="text-muted small">No tienes cursos ni laboratorios registrados para este semestre.</p>
     </div>
 </div>
 {% endif %}

@@ -1,0 +1,29 @@
+<ul class="nav flex-column">
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'professor_dashboard' %}active{% endif %}" 
+           href="{% url 'presentation:professor_dashboard' %}">
+            <i class="bi bi-house-door"></i> Dashboard
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'professor_schedule' %}active{% endif %}" 
+           href="{% url 'presentation:professor_schedule' %}">
+            <i class="bi bi-calendar3"></i> Mi Horario
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'professor_my_courses' or request.resolver_match.url_name == 'professor_record_attendance' %}active{% endif %}" 
+           href="{% url 'presentation:professor_my_courses' %}">
+            <i class="bi bi-collection"></i> Mis Cursos
+        </a>
+    </li>
+
+    <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'professor_statistics' %}active{% endif %}" 
+           href="{% url 'presentation:professor_statistics' %}">
+            <i class="bi bi-graph-up"></i> Estadísticas
+        </a>
+    </li>
+</ul>

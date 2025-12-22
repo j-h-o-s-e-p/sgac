@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Estadísticas Académicas{% endblock %}
+
+{% block sidebar %}
+    {% include 'includes/professor_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="h3 fw-bold text-dark mb-1"><i class="bi bi-graph-up me-2"></i>Análisis de Rendimiento</h2>
+            <p class="text-muted mb-0 small">Visión general del semestre y métricas de riesgo.</p>
+        </div>
+        <button onclick="window.print()" class="btn btn-outline-secondary btn-sm shadow-sm d-print-none">
+            <i class="bi bi-printer me-2"></i> Imprimir Reporte
+        </button>
+    </div>
+
+    {% if no_data %}
+        <div class="alert alert-info border-0 shadow-sm d-flex align-items-center">
+            <i class="bi bi-info-circle-fill fs-4 me-3"></i>
+            <div>
+                <strong>Sin datos suficientes.</strong>
+                <p class="mb-0 small">Asegúrate de tener alumnos matriculados y notas registradas para generar las estadísticas.</p>
+            </div>
+        </div>
+    {% else %}
+
+    <div class="row g-4 mb-4">
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-primary shadow-sm h-100 py-2 card-hover-effect">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-primary text-uppercase mb-1">Promedio Global</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.promedio_general|floatformat:2 }} / 20</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-calculator text-gray-300 fs-1 opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-success shadow-sm h-100 py-2 card-hover-effect">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-success text-uppercase mb-1">Asistencia Global</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.asistencia_promedio|floatformat:1 }}%</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-person-check text-gray-300 fs-1 opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-info shadow-sm h-100 py-2 card-hover-effect">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-info text-uppercase mb-1">Total Alumnos</div>
+                            <div class="h5 mb-0 fw-bold text-dark">{{ global_stats.total_alumnos }}</div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-people text-gray-300 fs-1 opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6">
+            <div class="card border-start border-4 border-warning shadow-sm h-100 py-2 card-hover-effect">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs fw-bold text-warning text-uppercase mb-1">Aprobados</div>
+                            <div class="h5 mb-0 fw-bold text-dark">
+                                {{ aprobados_count }} <span class="small text-muted fw-normal">de {{ global_stats.total_alumnos }}</span>
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="bi bi-award text-gray-300 fs-1 opacity-25"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Rendimiento por Curso</h6>
+                </div>
+                <div class="card-body">
+                    <div class="chart-container-lg">
+                        <canvas id="courseChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Estado Académico</h6>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-center">
+                    <div class="chart-container-sm mx-auto">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    
+                    <div class="mt-4 text-center small">
+                        <span class="me-3">
+                            <i class="bi bi-circle-fill text-success"></i> Aprobados
+                        </span>
+                        <span>
+                            <i class="bi bi-circle-fill text-danger"></i> Desaprobados
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header py-3 bg-white border-bottom">
+                    <h6 class="m-0 fw-bold text-primary">Detalle por Curso</h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped align-middle mb-0 table-sm" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Curso</th>
+                                    <th class="text-center">Prom.</th>
+                                    <th class="text-center">Mejor</th>
+                                    <th class="text-center">Peor</th>
+                                    <th class="pe-3" style="width: 30%;">Asistencia</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for c in course_performance %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ c.course_name }}</div>
+                                        <span class="badge bg-light text-dark border">{{ c.group_code }}</span>
+                                    </td>
+                                    <td class="text-center {% if c.avg_grade < 10.5 %}text-danger fw-bold{% else %}text-success fw-bold{% endif %}">
+                                        {{ c.avg_grade }}
+                                    </td>
+                                    <td class="text-center text-primary">{{ c.max_grade }}</td>
+                                    <td class="text-center text-danger">{{ c.min_grade }}</td>
+                                    <td class="pe-3">
+                                        <div class="d-flex align-items-center">
+                                            <progress 
+                                                max="100" 
+                                                value="{{ c.avg_attendance|stringformat:'.1f' }}"
+                                                class="flex-grow-1 me-2 html5-progress"
+                                                style="height: 8px; --progress-color: {% if c.avg_attendance < 70 %}var(--danger-color){% else %}var(--info-color){% endif %};">
+                                                {{ c.avg_attendance }}%
+                                            </progress>
+                                            
+                                            <span class="small fw-bold {% if c.avg_attendance < 70 %}text-danger{% else %}text-info{% endif %}" style="min-width: 35px; text-align: right;">
+                                                {{ c.avg_attendance }}%
+                                            </span>
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 border-start border-4 border-danger h-100">
+                <div class="card-header py-3 bg-white border-bottom d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 fw-bold text-danger">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i> Alumnos en Riesgo (Top 10)
+                    </h6>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0 table-sm" style="font-size: 0.9rem;">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Alumno</th>
+                                    <th>Contexto</th>
+                                    <th class="text-end pe-3">Motivo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for student in at_risk_students %}
+                                <tr>
+                                    <td class="ps-3">
+                                        <div class="fw-bold text-dark">{{ student.student.get_full_name }}</div>
+                                        <div class="text-muted small"><i class="bi bi-envelope me-1"></i>{{ student.student.email }}</div>
+                                    </td>
+                                    <td>
+                                        <div class="small fw-bold text-dark text-truncate" style="max-width: 120px;">
+                                            {{ student.course.course_name }}
+                                        </div>
+                                        <span class="badge bg-secondary badge-custom" style="font-size: 0.65rem;">Grp {{ student.group.group_code }}</span>
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        {% if student.final_grade < 10.5 %}
+                                            <div class="badge bg-danger bg-opacity-10 text-danger border border-danger mb-1">
+                                                Nota: {{ student.final_grade|default:"-" }}
+                                            </div>
+                                        {% endif %}
+                                        
+                                        {% if student.current_attendance_percentage < 70 %}
+                                            <div class="badge bg-warning bg-opacity-10 text-warning border border-warning">
+                                                Asist: {{ student.current_attendance_percentage }}%
+                                            </div>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-center py-5">
+                                        <i class="bi bi-check-circle-fill text-success fs-1 opacity-50"></i>
+                                        <p class="text-success fw-bold mt-2">¡No hay alumnos en riesgo crítico!</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% endif %}
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+{{ chart_labels|json_script:"data-labels" }}
+{{ chart_grades|json_script:"data-grades" }}
+{{ chart_attendance|json_script:"data-attendance" }}
+
+<script id="data-counts" type="application/json">
+    {
+        "aprobados": {{ aprobados_count|default:0 }},
+        "desaprobados": {{ desaprobados_count|default:0 }}
+    }
+</script>
+{% endblock %}

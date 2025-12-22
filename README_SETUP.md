@@ -9,217 +9,206 @@ Antes de comenzar, asegúrate de tener instalado:
 - [Git](https://git-scm.com/downloads)
 
 Verifica tus versiones:
-```bash
+
+Bash
+
+```
 docker --version
 docker compose version
+```
 
-## 🚀 Primeros Pasos
+🚀 Primeros Pasos
+-----------------
 
-### 1. Clonar el repositorio
-```bash
-git clone https://github.com/j-h-o-s-e-p/sgac.git
+### 1\. Clonar el repositorio
+
+Bash
+
+```
+git clone [https://github.com/j-h-o-s-e-p/sgac.git](https://github.com/j-h-o-s-e-p/sgac.git)
 cd sgac
 ```
 
-### 2. Configurar variables de entorno
-```bash
+### 2\. Configurar variables de entorno
+
+Bash
+
+```
 cp .env.example .env
-# El archivo .env ya tiene valores por defecto para desarrollo
+# El archivo .env ya tiene valores por defecto para desarrollo local
 ```
 
-### 3. Construir y levantar los contenedores
-```bash
+### 3\. Construir y levantar los contenedores
+
+Bash
+
+```
 docker compose up -d --build
 ```
 
 Esto levantará:
-- PostgreSQL (puerto 5432)
-- Redis (puerto 6379)
-- Django Web (puerto 8000)
-- Celery Worker
 
-### 4. Ejecutar migraciones
-```bash
-docker compose exec web python manage.py makemigrations
+-   **db:** PostgreSQL 15 (puerto 5432)
+
+-   **redis:** Redis 7 (puerto 6379)
+
+-   **web:** Django Web App (puerto 8000)
+
+-   **worker:** Celery Worker (procesamiento asíncrono)
+
+### 4\. Ejecutar migraciones
+
+Bash
+
+```
 docker compose exec web python manage.py migrate
 ```
 
-### 5. Crear superusuario
-```bash
+### 5\. Crear superusuario (Admin)
+
+Bash
+
+```
 docker compose exec web python manage.py createsuperuser
 ```
 
-### 6. Acceder a la aplicación
-- API Base: http://localhost:8000
-- Admin Panel: http://localhost:8000/admin
-- API Docs (Swagger): http://localhost:8000/api/schema/swagger-ui/
+### 6\. 📦 Poblado de Datos Iniciales (SEEDING)
 
-## 📂 Estructura del Proyecto
+Para no empezar con el sistema vacío, ejecuta estos comandos en orden:
+
+**A. Cargar Cursos, Profesores y Grupos (desde CSV):** Este comando lee el archivo `scripts/data/Curso_Profesor.csv`, crea el semestre activo y estructura la base académica.
+
+Bash
+
+```
+docker compose exec web python manage.py load_initial_data scripts/data/Curso_Profesor.csv
+```
+
+**B. Generar Asistencia Aleatoria (Opcional - Testing):** Genera registros de asistencia para el curso de Ingeniería de Software II (o el que indiques) para probar los gráficos.
+
+Bash
+
+```
+docker compose exec web python manage.py seed_attendance
+```
+
+### 7\. Acceder a la aplicación
+
+Una vez levantado, puedes acceder a los diferentes módulos:
+
+-   **Login General:** http://localhost:8000/login/
+
+-   **Panel de Secretaría:** http://localhost:8000/secretaria/dashboard/
+
+-   **Panel de Profesor:** http://localhost:8000/professor/dashboard/
+
+-   **Panel de Estudiante:** http://localhost:8000/student/dashboard/
+
+-   **Admin Panel (Django):** http://localhost:8000/admin/
+
+-   **API Docs (Swagger):** http://localhost:8000/api/schema/swagger-ui/
+
+* * * * *
+
+📂 Estructura del Proyecto (Clean Architecture + DDD)
+-----------------------------------------------------
+
 ```
 sgac/
-├── config/              # Configuración Django
-├── presentation/        # Capa de Presentación (Controllers, Serializers)
-├── application/         # Capa de Aplicación (Services, DTOs)
-├── domain/             # Capa de Dominio (Agregados, Entidades, VOs)
-├── infrastructure/      # Capa de Infraestructura (Repositories, External Services)
-├── shared/             # Código compartido
-└── tests/              # Tests unitarios e integración
+├── config/              # Configuración del proyecto (Settings, Celery, URLs globales)
+├── presentation/        # Capa de Presentación (Vistas, Templates, Static, URLs)
+├── application/         # Capa de Aplicación (Servicios, Casos de Uso)
+├── domain/              # Capa de Dominio (Modelos puros -aunque usamos modelos de Django en infra-)
+├── infrastructure/      # Capa de Infraestructura (Modelos ORM, Repositorios, Comandos de Gestión)
+│   └── persistence/     # Modelos de BD y scripts de carga (management/commands)
+├── shared/              # Utilidades compartidas
+└── tests/               # Tests unitarios e integración
+
 ```
 
-## 🌿 Estrategia de Ramas
-```
-main (producción)
-  └── develop (desarrollo)
-      ├── feature/identity-authentication
-      ├── feature/academic-structure
-      ├── feature/lab-enrollment
-      ├── feature/academic-performance
-      └── feature/reporting-dashboards
-```
-
-### Crear tu rama de trabajo
-```bash
-git checkout develop
-git pull origin develop
-git checkout -b feature/tu-contexto
-```
-
-## 🛠️ Comandos Útiles
+🛠️ Comandos Útiles
+-------------------
 
 ### Ver logs en tiempo real
-```bash
+
+Bash
+
+```
 docker compose logs -f web
 ```
 
 ### Ejecutar tests
-```bash
+
+Bash
+
+```
 docker compose exec web pytest
 ```
 
 ### Acceder al shell de Django
-```bash
+
+Bash
+
+```
 docker compose exec web python manage.py shell
 ```
 
-### Ejecutar comandos de manage.py
-```bash
-docker compose exec web python manage.py [comando]
-```
+### Reiniciar todo desde cero (Borrar BD y volver a crear)
 
-### Parar los contenedores
-```bash
-docker compose down
-```
+¡Cuidado! Esto borra todos los datos.
 
-### Reiniciar todo desde cero
-```bash
+Bash
+
+```
 docker compose down -v
 docker compose up -d --build
 docker compose exec web python manage.py migrate
+docker compose exec web python manage.py load_initial_data scripts/data/Curso_Profesor.csv
 ```
 
-## 📏 Convenciones de Código
+📏 Convenciones de Código
+-------------------------
 
-- **Lenguaje:** Python 3.11
-- **Estilo:** PEP 8
-- **Formateador:** black
-- **Linter:** flake8
-- **Imports:** isort
+-   **Estilo:** PEP 8
+
+-   **Frontend:** Bootstrap 5 + Chart.js (Vistas renderizadas por Django Templates)
 
 ### Antes de hacer commit
-```bash
-# Formatear código
+
+Bash
+
+```
+# Formatear código (Black)
 docker compose exec web black .
 
-# Verificar estilo
-docker compose exec web flake8
-
-# Ordenar imports
+# Ordenar imports (Isort)
 docker compose exec web isort .
 ```
 
-## 🔄 Flujo de Trabajo
+🐛 Troubleshooting
+------------------
 
-1. **Crear rama desde develop**
-2. **Desarrollar feature**
-3. **Hacer commits descriptivos**
-4. **Push a tu rama**
-5. **Crear Pull Request a develop**
-6. **Code Review**
-7. **Merge a develop**
+### Error: "Relation does not exist"
 
-### Formato de commits
+Faltan correr las migraciones.
+
+Bash
+
 ```
-[CONTEXTO] Descripción breve
-
-- Cambio detallado 1
-- Cambio detallado 2
-
-Ejemplo:
-[IDENTITY] Implementar login y activación de cuenta
-
-- Crear User aggregate con validaciones
-- Implementar UserApplicationService
-- Crear endpoints de autenticación
-```
-
-## 🧪 Testing
-
-### Ejecutar todos los tests
-```bash
-docker compose exec web pytest
-```
-
-### Ejecutar tests con cobertura
-```bash
-docker compose exec web pytest --cov
-```
-
-### Ejecutar tests específicos
-```bash
-docker compose exec web pytest tests/unit/domain/test_user.py
-```
-
-## 🐛 Troubleshooting
-
-### Error de conexión a la BD
-```bash
-docker compose down
-docker compose up -d db
-# Esperar unos segundos
-docker compose up -d web
-```
-
-### Limpiar caché de Python
-```bash
-find . -type d -name __pycache__ -exec rm -r {} +
-find . -type f -name "*.pyc" -delete
-```
-
-### Resetear la base de datos
-```bash
-docker compose down -v
-docker compose up -d
 docker compose exec web python manage.py migrate
 ```
 
-## 💡 Notas Técnicas
+### Error: Gráficos vacíos en Dashboard
 
-### Usa siempre el comando moderno:
-```bash
-docker compose ...
-```
-### Antes de apagar tu PC, detén los contenedores:
-```bash
-docker compose down
-```
-### Si clonas el proyecto en otra máquina:
-```bash
-docker compose down -v --remove-orphans
-docker compose up -d --build
-```
-### Todos los servicios usan volúmenes nombrados, por lo que el entorno puede recrearse sin conflictos.
+Asegúrate de haber ejecutado el comando de seed o tener alumnos matriculados con notas/asistencia.
 
-## 📞 Contacto
+Bash
 
-Para dudas o problemas, crear un issue en GitHub o contactar al arquitecto del proyecto.
+```
+docker compose exec web python manage.py seed_attendance
+```
+
+📞 Contacto
+-----------
+
+Para dudas sobre la arquitectura, contactar al equipo de desarrollo backend.

@@ -1,49 +1,110 @@
 from datetime import date, datetime, timedelta
-from infrastructure.persistence.models import Schedule
+from infrastructure.persistence.models import Schedule, Semester
+
+# Constante auxiliar para mapear los strings de la BD a los enteros de Python (0=Lunes, 6=Domingo)
+DAY_MAPPING = {
+    'LUNES': 0,
+    'MARTES': 1,
+    'MIERCOLES': 2,
+    'JUEVES': 3,
+    'VIERNES': 4,
+    'SABADO': 5,
+    'DOMINGO': 6
+}
 
 def get_group_sessions(group):
     """
-    Genera una lista de todas las sesiones programadas para un grupo
-    basado en las fechas del semestre y el horario configurado.
+    Genera las sesiones de un grupo de curso basado en su horario semanal.
     """
-    # Obtenemos el semestre
+    # Obtener todos los horarios del grupo
+    schedules = Schedule.objects.filter(course_group=group).order_by('day_of_week', 'start_time')
+    
+    if not schedules.exists():
+        return []
+    
+    # Obtener semestre
     semester = group.course.semester
+    if not semester:
+        return []
+    
     start_date = semester.start_date
     end_date = semester.end_date
     
-    # Obtenemos los horarios configurados (Ej: LUNES, MIERCOLES)
-    schedules = group.schedules.all()
+    # Recolectar todos los días de clase únicos (ej: [0, 2] para Lunes y Miércoles)
+    class_days = set()
+    for schedule in schedules:
+        weekday = DAY_MAPPING.get(schedule.day_of_week)
+        if weekday is not None:
+            class_days.add(weekday)
     
-    # Mapeo de días de Python (0=Lunes) a tu modelo
-    days_map = {
-        0: 'LUNES', 1: 'MARTES', 2: 'MIERCOLES', 
-        3: 'JUEVES', 4: 'VIERNES', 5: 'SABADO', 6: 'DOMINGO'
-    }
+    if not class_days:
+        return []
     
+    # Generar sesiones
     sessions = []
     current_date = start_date
-    session_counter = 1
+    session_number = 1
+    today = date.today()
     
-    # Iteramos día por día del semestre
     while current_date <= end_date:
-        day_name = days_map[current_date.weekday()]
-        
-        # Buscamos si hay clase este día
-        daily_schedule = next((s for s in schedules if s.day_of_week == day_name), None)
-        
-        if daily_schedule:
+        if current_date.weekday() in class_days:
+            # Obtener nombre bonito del día
+            # Buscamos la key (LUNES) basada en el value (0)
+            day_name = next((k.capitalize() for k, v in DAY_MAPPING.items() if v == current_date.weekday()), current_date.strftime('%A'))
+            
             sessions.append({
-                'number': session_counter,
+                'number': session_number,
                 'date': current_date,
                 'day_name': day_name,
-                'start_time': daily_schedule.start_time,
-                'end_time': daily_schedule.end_time,
-                'is_past': current_date < date.today(),
-                'is_today': current_date == date.today(),
-                'is_future': current_date > date.today()
+                'is_today': current_date == today,
+                'is_past': current_date < today,
+                'is_future': current_date > today,
             })
-            session_counter += 1
             
-        current_date += timedelta(days=1)
+            session_number += 1
         
+        current_date += timedelta(days=1)
+    
+    return sessions
+
+def get_lab_sessions(lab_group):
+    """
+    Genera las sesiones de un laboratorio.
+    Regla de negocio: Los labs empiezan 1 semana después del inicio del semestre.
+    """
+    semester = lab_group.course.semester
+    if not semester:
+        return []
+    
+    # Lab empieza 1 semana después
+    lab_start_date = semester.start_date + timedelta(days=7)
+    lab_end_date = semester.end_date
+    
+    target_weekday = DAY_MAPPING.get(lab_group.day_of_week)
+    if target_weekday is None:
+        return []
+    
+    sessions = []
+    current_date = lab_start_date
+    session_number = 1
+    today = date.today()
+    
+    # 1. Avanzar el calendario hasta encontrar el primer día que coincida (ej. el primer Jueves)
+    while current_date.weekday() != target_weekday:
+        current_date += timedelta(days=1)
+    
+    # 2. Generar sesiones saltando de 7 en 7 días
+    while current_date <= lab_end_date:
+        sessions.append({
+            'number': session_number,
+            'date': current_date,
+            'day_name': lab_group.get_day_of_week_display(), # Django display method
+            'is_today': current_date == today,
+            'is_past': current_date < today,
+            'is_future': current_date > today,
+        })
+        
+        session_number += 1
+        current_date += timedelta(days=7) 
+    
     return sessions

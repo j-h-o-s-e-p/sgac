@@ -1,14 +1,27 @@
-Django==4.2.11
-djangorestframework==3.14.0
-psycopg2-binary==2.9.9
-python-decouple==3.8
-drf-spectacular==0.27.1
-celery==5.3.6
-redis==5.0.3
-django-redis==5.4.0
-openpyxl==3.1.2
-gunicorn==21.2.0
-django-cors-headers==4.3.1
-whitenoise==6.6.0
-pandas
-ftfy
+# --- Core Django & API ---
+Django==4.2.11              # El framework web principal
+djangorestframework==3.14.0 # Kit de herramientas para crear la API REST
+django-cors-headers==4.3.1  # Permite peticiones desde otros dominios (Frontend separado)
+drf-spectacular==0.27.1     # Genera la documentación automática (Swagger/OpenAPI)
+
+# --- Base de Datos & Configuración ---
+psycopg2-binary==2.9.9      # Adaptador para conectar Django con PostgreSQL
+python-decouple==3.8        # Manejo seguro de variables de entorno (.env)
+
+# --- Asincronía & Cache (Celery + Redis) ---
+celery==5.3.6               # Gestor de tareas en segundo plano (Workers)
+redis==5.0.3                # Cliente de Python para conectarse a Redis
+django-redis==5.4.0         # Permite usar Redis como Backend de Caché de Django
+
+# --- Procesamiento de Archivos & Datos ---
+openpyxl==3.1.2             # Leer/Escribir Excel (Reportes de notas)
+pandas==2.2.1               # Análisis de datos y estructuras (Estadísticas complejas)
+pdfplumber==0.10.3          # Extraer texto y tablas de archivos PDF (Sílabos)
+pytesseract==0.3.10         # OCR: Lee texto de imágenes (si el PDF es escaneado)
+pillow==10.1.0              # Procesamiento de imágenes (necesario para OCR)
+ftfy==6.1.3                 # "Fix Text For You": Arregla errores de codificación de texto (tildes rotas, etc.)
+plotly==5.18.0              # Librería de gráficos (Backend). Nota: Ahora usas Chart.js en el frontend, pero la mantenemos por si generas gráficos estáticos.
+
+# --- Servidor de Producción ---
+gunicorn==21.2.0            # Servidor HTTP WSGI para producción (rápido y robusto)
+whitenoise==6.6.0           # Sirve archivos estáticos (CSS/JS) de forma eficiente en producción

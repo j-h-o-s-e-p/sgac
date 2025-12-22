@@ -1,81 +1,146 @@
-# SGAC - Sistema de Gestión Académica Complementario
+SGAC - Sistema de Gestión Académica Complementario
+==================================================
 
-Sistema de gestión académica basado en Domain-Driven Design (DDD) para la administración de cursos, laboratorios, notas, asistencia y reportes académicos.
+Sistema integral de gestión académica diseñado para universidades, enfocado en la administración eficiente de la carga lectiva, laboratorios, asistencia y análisis de rendimiento académico mediante dashboards interactivos.
 
-## 🏗️ Arquitectura
+🏗️ Arquitectura
+----------------
 
-El proyecto sigue una arquitectura en capas basada en DDD:
+El proyecto sigue una arquitectura modular inspirada en Clean Architecture y Domain-Driven Design (DDD) para garantizar escalabilidad y mantenimiento:
+
 ```
+
 sgac/
-├── presentation/        # Capa de Presentación (API REST)
-├── application/         # Capa de Aplicación (Casos de uso)
-├── domain/             # Capa de Dominio (Lógica de negocio)
-├── infrastructure/      # Capa de Infraestructura (BD, Servicios externos)
-└── shared/             # Código compartido
+├── presentation/    # Capa de Interfaz (Vistas, Templates, Static, Serializers)
+├── application/     # Capa de Aplicación (Servicios, Casos de Uso, DTOs)
+├── domain/          # Capa de Dominio (Lógica de Negocio Pura)
+├── infrastructure/  # Capa de Infraestructura (Modelos ORM, Repositorios, Comandos)
+└── config/          # Configuración del Framework (Settings, URLs, WSGI/ASGI)
+
 ```
 
-## 🚀 Quick Start
+📋 Módulos del Sistema
+----------------------
 
-### Requisitos
-- Docker y Docker Compose
+El sistema cuenta con 3 portales especializados y un panel administrativo central:
 
-### Instalación
-```bash
-# 1. Clonar el repositorio
-git clone https://github.com/j-h-o-s-e-p/sgac.git
-cd sgac
+### 1\. Módulo de Secretaría (Administrativo)
 
-# 2. Copiar variables de entorno
-cp .env.example .env
+-   Dashboard Ejecutivo: KPIs en tiempo real y gráficos de ocupación/rendimiento (Chart.js)
 
-# 3. Levantar servicios
-docker-compose up -d --build
+-   Gestión de Infraestructura: Administración de salones, aforos y tipos de aula
 
-# 4. Crear superusuario
-docker-compose exec web python manage.py createsuperuser
+-   Gestión de Laboratorios: Creación dinámica de grupos prácticos con detección automática de conflictos de horario (AJAX)
 
-# 5. Acceder
-# Admin: http://localhost:8000/admin
-# API Docs: http://localhost:8000/api/schema/swagger-ui/
-```
+-   Programación Académica: Asignación visual de horarios para grupos teóricos
 
-Para más detalles, ver [README_SETUP.md](README_SETUP.md)
+-   Carga Masiva: Importación de alumnos matriculados vía CSV
 
-## 📋 Contextos DDD
+-   Reportes: Generación de consolidados de notas en Excel
 
-El sistema está dividido en 5 bounded contexts:
+### 2\. Módulo de Profesor
 
-1. **Identity & Access Management** - Autenticación y usuarios
-2. **Academic Structure** - Cursos, grupos, horarios, sílabos
-3. **Laboratory Enrollment** - Postulación y asignación de laboratorios
-4. **Academic Performance** - Notas, asistencia, exámenes sustitutorios
-5. **Reporting & Analytics** - Dashboards y reportes
+-   Gestión de Cursos: Vista unificada de cursos de teoría y laboratorio asignados
 
-## 🛠️ Stack Tecnológico
+-   Control de Asistencia: Registro diario con validación de fechas y control de avance de temas del sílabo
 
-- **Backend:** Django 4.2 + Django REST Framework
-- **Base de Datos:** PostgreSQL 15
-- **Cache/Eventos:** Redis 7
-- **Task Queue:** Celery
-- **Containerización:** Docker + Docker Compose
-- **Testing:** pytest
-- **API Docs:** drf-spectacular (OpenAPI/Swagger)
+-   Registro de Notas: Sábana de notas dinámica con cálculos automáticos
 
-## 🌿 Workflow de Desarrollo
-```
-main (producción)
-  └── develop (desarrollo)
-      ├── feature/identity-authentication
-      ├── feature/academic-structure
-      ├── feature/lab-enrollment
-      ├── feature/academic-performance
-      └── feature/reporting-dashboards
-```
+-   Gestión de Sílabos: Carga, actualización y visualización de sílabos en PDF
 
-## 📞 Contacto
+-   Estadísticas Docentes: Análisis gráfico de rendimiento y asistencia de sus aulas
 
-Para dudas o issues, contactar al equipo de desarrollo.
+### 3\. Módulo de Estudiante
 
-## 📄 Licencia
+-   Mi Horario: Visualización semanal de clases (Teoría y Práctica)
 
-[Definir licencia]
+-   Matrícula de Laboratorio: Sistema de postulación e inscripción a grupos prácticos
+
+-   Seguimiento Académico: Consulta de notas, asistencia y descarga de sílabos
+
+🛠️ Stack Tecnológico
+---------------------
+
+-   Backend: Python 3.11, Django 4.2
+
+-   Base de Datos: PostgreSQL 15
+
+-   Frontend: Django Templates, Bootstrap 5, JavaScript (ES6), Chart.js 4.4
+
+-   Asincronía: Celery + Redis (para tareas en segundo plano y caché)
+
+-   Containerización: Docker & Docker Compose
+
+-   Calidad de Código: Black, Flake8, Isort
+
+🚀 Quick Start (Resumen)
+------------------------
+
+Si ya tienes Docker instalado, puedes levantar el proyecto en minutos:
+
+1.  Clonar repositorio:
+
+    bash
+
+    ```
+    git clone https://github.com/j-h-o-s-e-p/sgac.git
+    cd sgac
+    ```
+
+2.  Configurar entorno:
+
+    bash
+    
+    ```
+    cp .env.example .env
+    ```
+
+3.  Levantar contenedores:
+
+    bash
+
+    ```
+    docker compose up -d --build
+    ```
+
+4.  Inicializar base de datos:
+
+    bash
+
+    ```
+    docker compose exec web python manage.py migrate
+    ```
+
+5.  📦 Cargar Datos Iniciales (Seed):\
+    El sistema incluye comandos personalizados para poblar la base de datos:
+
+    Cargar Estructura Académica (Semestre, Cursos, Profesores):
+
+    bash
+
+    ```
+    docker compose exec web python manage.py load_initial_data scripts/data/Curso_Profesor.csv
+    ```
+
+    Generar Asistencia Aleatoria (Opcional para Testing):
+
+    bash
+
+    ```
+    docker compose exec web python manage.py seed_attendance
+    ```
+
+6.  Acceder:
+
+    -   Web: `http://localhost:8000/login/`
+
+    -   Admin: `http://localhost:8000/admin/`
+
+    -   Swagger API: `http://localhost:8000/api/schema/swagger-ui/`
+
+> Para la guía detallada de instalación, comandos de desarrollo y troubleshooting, revisa el archivo [README_SETUP.md](https://readme_setup.md/).
+
+📄 Licencia
+-----------
+
+Este proyecto es de uso académico y privado.

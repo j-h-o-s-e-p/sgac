@@ -1,8 +1,9 @@
 version: "3.9"
 
 services:
+  # --- BASE DE DATOS ---
   db:
-    image: postgres:15
+    image: postgres:15-alpine
     container_name: sgac_db
     restart: always
     environment:
@@ -15,10 +16,11 @@ services:
       - "5432:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-sgac_user} -d ${DB_NAME:-sgac_db}"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
+  # --- CACHÉ Y COLAS ---
   redis:
     image: redis:7-alpine
     container_name: sgac_redis
@@ -27,24 +29,26 @@ services:
       - "6379:6379"
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
+      interval: 5s
       timeout: 5s
       retries: 5
 
+  # --- APLICACIÓN WEB (DJANGO) ---
   web:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    build: .
     container_name: sgac_web
-    restart: always
+    restart: unless-stopped
+    # Comando de desarrollo: Migra y levanta runserver (mejor para debug que gunicorn)
+    # Si prefieres gunicorn local, cambia 'runserver 0.0.0.0:8000' por 'gunicorn ... --reload'
     command: >
       sh -c "
         python manage.py migrate &&
-        python manage.py collectstatic --noinput &&
-        gunicorn config.wsgi:application --bind 0.0.0.0:8000 --workers 4 --reload
+        python manage.py runserver 0.0.0.0:8000
       "
     volumes:
-      - .:/app
+      - .:/app              # Montar código local para Hot-Reload
+      - ./media:/app/media  # Persistencia de archivos subidos
+      - ./logs:/app/logs    # Logs accesibles desde fuera
     ports:
       - "8000:8000"
     env_file:
@@ -55,24 +59,23 @@ services:
       redis:
         condition: service_healthy
 
-  celery:
-    build:
-      context: .
-      dockerfile: Dockerfile
+  # --- WORKER ASÍNCRONO (CELERY) ---
+  worker:
+    build: .
     container_name: sgac_celery
-    restart: always
+    restart: unless-stopped
+    # Ejecuta el worker de Celery
     command: celery -A config worker -l info
     volumes:
       - .:/app
+      - ./media:/app/media
+      - ./logs:/app/logs
     env_file:
       - .env
     depends_on:
-      db:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-      web:
-        condition: service_started
+      - web
+      - redis
+      - db
 
 volumes:
   postgres_data:

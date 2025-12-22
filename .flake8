@@ -1,9 +1,21 @@
 [flake8]
-max-line-length = 100
-exclude = 
+# Longitud de línea compatible con Black
+max-line-length = 88
+
+# Ignorar reglas específicas
+ignore = W503
+extend-ignore = E203
+
+# Carpetas y archivos a excluir
+exclude =
     .git,
     __pycache__,
     */migrations/*,
+    migrations,
+    docs/source/conf.py,
+    old,
+    build,
+    dist,
     venv,
     env
-ignore = E203, W503
+
