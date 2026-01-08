@@ -1,3 +1,4 @@
+import json
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -226,3 +227,144 @@ def get_course_progress_api(request, group_id):
     return JsonResponse(
         data if data else {"error": "No encontrado"}, status=200 if data else 404
     )
+
+# ==================== RESERVAS DE AULAS ====================
+
+
+@login_required
+def classroom_reservation(request):
+    """Vista principal de reservas de aulas para profesores"""
+    if request.user.user_role != "PROFESOR":
+        return redirect("presentation:login")
+    
+    # Obtener reservas activas e historial
+    active_reservations = _service.get_professor_reservations(request.user, include_history=False)
+    history = _service.get_professor_reservations(request.user, include_history=True)[:20]
+    
+    # Estadísticas rápidas
+    from infrastructure.persistence.models import ClassroomReservation
+    stats = {
+        'total': ClassroomReservation.objects.filter(professor=request.user).count(),
+        'pending': ClassroomReservation.objects.filter(professor=request.user, status='PENDIENTE').count(),
+        'approved': ClassroomReservation.objects.filter(professor=request.user, status='APROBADA').count(),
+    }
+    
+    context = {
+        'active_reservations': active_reservations,
+        'history': history,
+        'stats': stats,
+    }
+    
+    return render(request, "professor/classroom_reservation.html", context)
+
+
+@login_required
+def get_available_classrooms_api(request):
+    """API para obtener aulas disponibles en una fecha/hora específica"""
+    if request.user.user_role != "PROFESOR":
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    try:
+        # Parsear parámetros
+        date_str = request.GET.get('date')
+        start_str = request.GET.get('start_time')
+        end_str = request.GET.get('end_time')
+        
+        if not all([date_str, start_str, end_str]):
+            return JsonResponse({'error': 'Parámetros incompletos'}, status=400)
+        
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d').date()
+        start_time = datetime.strptime(start_str, '%H:%M').time()
+        end_time = datetime.strptime(end_str, '%H:%M').time()
+        
+        # Obtener aulas disponibles
+        available = _service.get_available_classrooms_for_reservation(
+            date_obj, start_time, end_time
+        )
+        
+        # Formatear respuesta
+        classrooms_data = [
+            {
+                'id': str(c.classroom_id),
+                'code': c.code,
+                'name': c.name,
+                'type': c.get_classroom_type_display(),
+                'capacity': c.capacity,
+                'location': c.location,
+            }
+            for c in available
+        ]
+        
+        return JsonResponse({
+            'success': True,
+            'classrooms': classrooms_data,
+            'count': len(classrooms_data)
+        })
+        
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+
+@login_required
+def create_reservation_api(request):
+    """API para crear una nueva reserva"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    if request.user.user_role != "PROFESOR":
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        
+        # Parsear datos
+        classroom_id = data.get('classroom_id')
+        date_obj = datetime.strptime(data.get('date'), '%Y-%m-%d').date()
+        start_time = datetime.strptime(data.get('start_time'), '%H:%M').time()
+        end_time = datetime.strptime(data.get('end_time'), '%H:%M').time()
+        purpose = data.get('purpose', '').strip()
+        
+        if not purpose:
+            return JsonResponse({'error': 'El motivo es obligatorio'}, status=400)
+        
+        # Crear reserva
+        result = _service.create_classroom_reservation(
+            request.user,
+            classroom_id,
+            date_obj,
+            start_time,
+            end_time,
+            purpose
+        )
+        
+        if result['success']:
+            messages.success(request, result['message'])
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'errors': [str(e)]}, status=500)
+
+
+@login_required
+def cancel_reservation_api(request):
+    """API para cancelar una reserva"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    if request.user.user_role != "PROFESOR":
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        reservation_id = data.get('reservation_id')
+        
+        result = _service.cancel_reservation(reservation_id, request.user)
+        
+        if result['success']:
+            messages.success(request, result['message'])
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

@@ -41,7 +41,7 @@ function initEnrollmentSystem() {
             // Obtener detalles completos vía AJAX (GET)
             // Reemplazamos el '0' placeholder por el ID real
             const urlDetailsBase = this.dataset.urlDetails; 
-            const fetchUrl = urlDetailsBase.replace('0', currentLabId);
+            const fetchUrl = this.dataset.urlDetails;
 
             fetch(fetchUrl)
                 .then(res => {
@@ -91,8 +91,8 @@ function initEnrollmentSystem() {
                 // EXITO: SweetAlert
                 modal.hide();
                 Swal.fire({
-                    title: '¡Postulación Exitosa!',
-                    text: 'Tu solicitud ha sido registrada correctamente. Te avisaremos cuando se confirme la asignación.',
+                    title: '¡Matricula Exitosa!',
+                    text: 'Tu matricula ha sido registrada correctamente.',
                     icon: 'success',
                     confirmButtonColor: '#198754', // Bootstrap success color
                     confirmButtonText: 'Entendido'
@@ -107,7 +107,7 @@ function initEnrollmentSystem() {
                 const errorMsg = data.errors ? data.errors.join(', ') : 'Ocurrió un error desconocido';
                 
                 Swal.fire({
-                    title: 'No se pudo postular',
+                    title: 'No se pudo matricular',
                     text: errorMsg,
                     icon: 'warning',
                     confirmButtonColor: '#ffc107',

@@ -12,6 +12,7 @@ from infrastructure.persistence.models import (
     SessionProgress,
     LabEnrollmentCampaign,
     StudentPostulation,
+    LabAssignment,
 )
 
 
@@ -569,10 +570,31 @@ class StudentService:
                 )
                 return result
 
-            # 6. Crear postulación
+            # 6. Verificar cupos disponibles
+            current_enrolled = StudentPostulation.objects.filter(
+                campaign=campaign, lab_group=lab
+            ).count()
+
+            if current_enrolled >= lab.capacity:
+                result["errors"].append("Este laboratorio ya no tiene cupos disponibles.")
+                return result
+
+            # 7. Crear postulación Y asignar inmediatamente
             postulation = StudentPostulation.objects.create(
-                campaign=campaign, student=student, lab_group=lab, status="PENDIENTE"
+                campaign=campaign, student=student, lab_group=lab, status="ACEPTADO"
             )
+
+            # 8. Crear asignación inmediata
+            assignment = LabAssignment.objects.create(
+                postulation=postulation,
+                student=student,
+                lab_group=lab,
+                assignment_method="DIRECTO"
+            )
+
+            # 9. Actualizar matrícula
+            enrollment.lab_assignment = assignment
+            enrollment.save()
 
             result["success"] = True
             result["postulation_id"] = str(postulation.postulation_id)

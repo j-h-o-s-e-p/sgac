@@ -275,3 +275,71 @@ body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-
 }
 
 
+/* ==========================================================
+   SECCIÓN 3: RESERVA DE AULAS 
+   ========================================================== */
+
+/* Tarjetas de Reserva */
+.reservation-card {
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+    background-color: white; /* Asegurar fondo blanco */
+}
+.reservation-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+/* Colores de estado para el borde izquierdo */
+.status-pending { border-left-color: #f59e0b; }   /* Warning */
+.status-approved { border-left-color: #10b981; }  /* Success */
+.status-rejected { border-left-color: #ef4444; }  /* Danger */
+.status-cancelled { border-left-color: #6b7280; } /* Grey */
+
+/* Grid de Calendario */
+.calendar-grid {
+    display: grid;
+    gap: 1rem;
+}
+
+/* Slots de tiempo */
+.time-slot {
+    background: #f8fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 0.75rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+.time-slot:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+}
+.time-slot.occupied {
+    background: #fee2e2;
+    border-color: #fecaca;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+/* Tarjetas de Aulas (Resultados de búsqueda) */
+.classroom-card {
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 1rem;
+    cursor: pointer;
+    transition: all 0.3s;
+    background-color: white;
+}
+.classroom-card:hover {
+    border-color: #3b82f6;
+    background: #eff6ff;
+    transform: translateY(-2px);
+}
+.classroom-card.selected {
+    border-color: #2563eb;
+    background: #dbeafe;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+

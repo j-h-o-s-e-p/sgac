@@ -1,7 +1,7 @@
 import csv
 import openpyxl
 from io import TextIOWrapper
-from datetime import datetime, date, timedelta
+from datetime import datetime, date, timedelta, time
 from decimal import Decimal, InvalidOperation
 from django.db import transaction
 from django.db.models import Avg, Max, Min, Count, Q
@@ -23,6 +23,8 @@ from infrastructure.persistence.models import (
     Syllabus,
     SessionProgress,
     SyllabusSession,
+    ClassroomReservation,
+    Classroom,
 )
 
 # Imports de otros servicios
@@ -906,3 +908,183 @@ class ProfessorService:
         return SessionProgress.objects.filter(
             course_group=group, completed_date=date_obj
         ).count()
+    
+    # =========================================================================
+    # 6. RESERVAS DE AULAS
+    # =========================================================================
+
+    def get_available_classrooms_for_reservation(self, date_obj, start_time, end_time):
+        """
+        Busca aulas disponibles para reserva en una fecha/hora específica.
+        Considera: horarios regulares, labs, y otras reservas aprobadas.
+        """
+        
+        def time_overlap(s1, e1, s2, e2):
+            """Helper para detectar cruces de horario"""
+            return s1 < e2 and s2 < e1
+        
+        # Obtener día de la semana
+        day_name = date_obj.strftime('%A').upper()
+        day_mapping = {
+            'MONDAY': 'LUNES',
+            'TUESDAY': 'MARTES', 
+            'WEDNESDAY': 'MIERCOLES',
+            'THURSDAY': 'JUEVES',
+            'FRIDAY': 'VIERNES',
+        }
+        day_spanish = day_mapping.get(day_name, 'LUNES')
+        
+        occupied_ids = set()
+        
+        # 1. Aulas ocupadas por horarios regulares de teoría
+        regular_schedules = Schedule.objects.filter(
+            day_of_week=day_spanish
+        ).select_related('room')
+        
+        for schedule in regular_schedules:
+            if schedule.room and time_overlap(
+                start_time, end_time, 
+                schedule.start_time, schedule.end_time
+            ):
+                occupied_ids.add(schedule.room.classroom_id)
+        
+        # 2. Aulas ocupadas por laboratorios
+        labs = LaboratoryGroup.objects.filter(
+            day_of_week=day_spanish
+        ).select_related('room')
+        
+        for lab in labs:
+            if lab.room and time_overlap(
+                start_time, end_time,
+                lab.start_time, lab.end_time
+            ):
+                occupied_ids.add(lab.room.classroom_id)
+        
+        # 3. Aulas con reservas aprobadas o pendientes en esa fecha
+        reservations = ClassroomReservation.objects.filter(
+            reservation_date=date_obj,
+            status__in=['PENDIENTE', 'APROBADA']
+        ).select_related('classroom')
+        
+        for reservation in reservations:
+            if time_overlap(
+                start_time, end_time,
+                reservation.start_time, reservation.end_time
+            ):
+                occupied_ids.add(reservation.classroom.classroom_id)
+        
+        # Retornar aulas disponibles
+        available = Classroom.objects.filter(
+            is_active=True
+        ).exclude(
+            classroom_id__in=occupied_ids
+        ).order_by('classroom_type', 'name')
+        
+        return available
+
+    def create_classroom_reservation(self, professor, classroom_id, date_obj, 
+                                    start_time, end_time, purpose):
+        """
+        Crea una nueva reserva de aula (estado PENDIENTE).
+        Valida:
+        - Horario dentro de rango permitido (7am - 8:10pm)
+        - Disponibilidad del aula
+        - Duración mínima 1 hora
+        """
+        
+        errors = []
+        
+        # Validación 1: Horario permitido
+        MIN_TIME = time(7, 0)
+        MAX_TIME = time(20, 10)
+        
+        if start_time < MIN_TIME or end_time > MAX_TIME:
+            errors.append("El horario debe estar entre 7:00 AM y 8:10 PM")
+        
+        # Validación 2: Duración mínima
+        duration = datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time)
+        if duration.total_seconds() < 3600:  # 1 hora mínimo
+            errors.append("La reserva debe ser de al menos 1 hora")
+        
+        # Validación 3: Fecha no pasada
+        if date_obj < date.today():
+            errors.append("No puedes reservar fechas pasadas")
+        
+        # Validación 4: Disponibilidad
+        if not errors:
+            available = self.get_available_classrooms_for_reservation(
+                date_obj, start_time, end_time
+            )
+            if not available.filter(classroom_id=classroom_id).exists():
+                errors.append("El aula no está disponible en ese horario")
+        
+        if errors:
+            return {'success': False, 'errors': errors}
+        
+        # Crear reserva
+        try:
+            with transaction.atomic():
+                reservation = ClassroomReservation.objects.create(
+                    classroom_id=classroom_id,
+                    professor=professor,
+                    reservation_date=date_obj,
+                    start_time=start_time,
+                    end_time=end_time,
+                    purpose=purpose,
+                    status='PENDIENTE'
+                )
+                
+                return {
+                    'success': True, 
+                    'reservation_id': str(reservation.reservation_id),
+                    'message': 'Reserva creada. Pendiente de aprobación por Secretaría.'
+                }
+        except Exception as e:
+            return {'success': False, 'errors': [str(e)]}
+
+    def get_professor_reservations(self, professor, include_history=False):
+        """
+        Lista las reservas del profesor.
+        Si include_history=False, solo muestra activas (PENDIENTE/APROBADA).
+        Si True, muestra todo el historial.
+        """
+        
+        qs = ClassroomReservation.objects.filter(
+            professor=professor
+        ).select_related('classroom', 'approved_by')
+        
+        if not include_history:
+            qs = qs.filter(
+                status__in=['PENDIENTE', 'APROBADA'],
+                reservation_date__gte=date.today()
+            )
+        
+        return qs.order_by('-reservation_date', '-start_time')
+
+    def cancel_reservation(self, reservation_id, professor):
+        """
+        Cancela una reserva (solo si es del profesor y está activa).
+        """
+        
+        try:
+            reservation = ClassroomReservation.objects.get(
+                reservation_id=reservation_id,
+                professor=professor
+            )
+            
+            if not reservation.can_cancel():
+                return {
+                    'success': False, 
+                    'error': 'Esta reserva no puede ser cancelada'
+                }
+            
+            reservation.status = 'CANCELADA'
+            reservation.save()
+            
+            return {
+                'success': True,
+                'message': 'Reserva cancelada correctamente'
+            }
+            
+        except ClassroomReservation.DoesNotExist:
+            return {'success': False, 'error': 'Reserva no encontrada'}

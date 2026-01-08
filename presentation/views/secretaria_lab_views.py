@@ -215,14 +215,14 @@ class GetLabEnrolledStudentsView(SecretariaRequiredMixin, View):
 
 
 class EnableLabEnrollmentView(SecretariaRequiredMixin, View):
-    """Acción: Habilita inscripción de laboratorios."""
+    """Acción: Habilita matricula de laboratorios."""
 
     def post(self, request, course_id):
         days = int(request.POST.get("days_duration", 7))
         result = SecretariaService.enable_lab_enrollment(course_id, days)
 
         if result["success"]:
-            messages.success(request, f"Inscripción habilitada por {days} días")
+            messages.success(request, f"Matricula habilitada por {days} días")
         else:
             for error in result["errors"]:
                 messages.error(request, error)
@@ -231,20 +231,15 @@ class EnableLabEnrollmentView(SecretariaRequiredMixin, View):
 
 
 class CloseLabEnrollmentView(SecretariaRequiredMixin, View):
-    """Acción: Cierra inscripción, consolida y redistribuye."""
+    """Acción: Cierra matricula"""
 
     def post(self, request, course_id):
         result = SecretariaService.close_lab_enrollment(course_id)
 
         if result["success"]:
             messages.success(
-                request, "Inscripción cerrada y alumnos asignados correctamente"
+                request, "Matricula cerrada y alumnos asignados correctamente"
             )
-            if result["redistributions"]:
-                messages.info(
-                    request,
-                    f"Se redistribuyeron alumnos en {len(result['redistributions'])} laboratorio(s)",
-                )
         else:
             for error in result["errors"]:
                 messages.error(request, error)

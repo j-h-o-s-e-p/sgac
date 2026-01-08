@@ -2,7 +2,7 @@
 -- PostgreSQL database dump
 --
 
-\restrict jHHR4gfVtqj4eHfKOocYiRoGaF9ANrWXIdwUOEHo0XlS8LPyGDwjecJ7AHVB7kj
+\restrict q8Uv2GZhmC9ucFM3UqvpO6al5N7L93LWyLDB9JiqapoNn2WohQq8juVypcj31K2
 
 -- Dumped from database version 15.15
 -- Dumped by pg_dump version 15.15
@@ -17,6 +17,212 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+
+ALTER TABLE IF EXISTS ONLY public.users_user_permissions DROP CONSTRAINT IF EXISTS users_user_permissions_customuser_id_efdb305c_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.users_user_permissions DROP CONSTRAINT IF EXISTS users_user_permissio_permission_id_6d08dcd2_fk_auth_perm;
+ALTER TABLE IF EXISTS ONLY public.users_groups DROP CONSTRAINT IF EXISTS users_groups_group_id_2f3517aa_fk_auth_group_id;
+ALTER TABLE IF EXISTS ONLY public.users_groups DROP CONSTRAINT IF EXISTS users_groups_customuser_id_4bd991a9_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.syllabuses DROP CONSTRAINT IF EXISTS syllabuses_course_id_7dfb1a31_fk_courses_course_id;
+ALTER TABLE IF EXISTS ONLY public.syllabus_units DROP CONSTRAINT IF EXISTS syllabus_units_syllabus_id_5d917911_fk_syllabuses_syllabus_id;
+ALTER TABLE IF EXISTS ONLY public.syllabus_sessions DROP CONSTRAINT IF EXISTS syllabus_sessions_unit_id_f6769b99_fk_syllabus_units_unit_id;
+ALTER TABLE IF EXISTS ONLY public.syllabus_sessions DROP CONSTRAINT IF EXISTS syllabus_sessions_syllabus_id_0c1dd4e0_fk_syllabuse;
+ALTER TABLE IF EXISTS ONLY public.student_postulations DROP CONSTRAINT IF EXISTS student_postulations_student_id_1f19b78f_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.student_postulations DROP CONSTRAINT IF EXISTS student_postulations_lab_group_id_b431e80d_fk_laborator;
+ALTER TABLE IF EXISTS ONLY public.student_postulations DROP CONSTRAINT IF EXISTS student_postulations_campaign_id_5b8223d5_fk_lab_enrol;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_student_id_8f9115cb_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_lab_assignment_id_075aad88_fk_lab_assig;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_group_id_03eca43e_fk_course_groups_group_id;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_course_id_a4572c59_fk_courses_course_id;
+ALTER TABLE IF EXISTS ONLY public.session_progress DROP CONSTRAINT IF EXISTS session_progress_session_id_f38d6ded_fk_syllabus_;
+ALTER TABLE IF EXISTS ONLY public.session_progress DROP CONSTRAINT IF EXISTS session_progress_marked_by_id_c3419d82_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.session_progress DROP CONSTRAINT IF EXISTS session_progress_course_group_id_b4f11f6c_fk_course_gr;
+ALTER TABLE IF EXISTS ONLY public.schedules DROP CONSTRAINT IF EXISTS schedules_room_id_0c558cc6_fk_classrooms_classroom_id;
+ALTER TABLE IF EXISTS ONLY public.schedules DROP CONSTRAINT IF EXISTS schedules_course_group_id_f33327dd_fk_course_groups_group_id;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_room_id_1d9aaad9_fk_classrooms_classroom_id;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_professor_id_c6847835_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_external_professor_i_7c4d849a_fk_external_;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_course_id_93a8c7aa_fk_courses_course_id;
+ALTER TABLE IF EXISTS ONLY public.lab_enrollment_campaigns DROP CONSTRAINT IF EXISTS lab_enrollment_campa_course_id_c09e022a_fk_courses_c;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_student_id_4ba0570e_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_postulation_id_60ccc189_fk_student_p;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_lab_group_id_3c00a14b_fk_laborator;
+ALTER TABLE IF EXISTS ONLY public.grade_records DROP CONSTRAINT IF EXISTS grade_records_recorded_by_id_7964c302_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.grade_records DROP CONSTRAINT IF EXISTS grade_records_evaluation_id_eb6bb18e_fk_evaluatio;
+ALTER TABLE IF EXISTS ONLY public.grade_records DROP CONSTRAINT IF EXISTS grade_records_enrollment_id_2b59aedf_fk_student_e;
+ALTER TABLE IF EXISTS ONLY public.evaluations DROP CONSTRAINT IF EXISTS evaluations_course_id_9f9e305b_fk_courses_course_id;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_user_id_c564eba6_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_content_type_id_c4bce8eb_fk_django_co;
+ALTER TABLE IF EXISTS ONLY public.courses DROP CONSTRAINT IF EXISTS courses_semester_id_b0a820a8_fk_semesters_semester_id;
+ALTER TABLE IF EXISTS ONLY public.course_groups DROP CONSTRAINT IF EXISTS course_groups_professor_id_bc370da4_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.course_groups DROP CONSTRAINT IF EXISTS course_groups_course_id_84a8cb6c_fk_courses_course_id;
+ALTER TABLE IF EXISTS ONLY public.classroom_reservations DROP CONSTRAINT IF EXISTS classroom_reservations_professor_id_5348db87_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.classroom_reservations DROP CONSTRAINT IF EXISTS classroom_reservations_approved_by_id_d51565c8_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.classroom_reservations DROP CONSTRAINT IF EXISTS classroom_reservatio_classroom_id_4180e833_fk_classroom;
+ALTER TABLE IF EXISTS ONLY public.authtoken_token DROP CONSTRAINT IF EXISTS authtoken_token_user_id_35299eff_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_content_type_id_2f476e4b_fk_django_co;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_group_id_b120cbf9_fk_auth_group_id;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissio_permission_id_84c5c92e_fk_auth_perm;
+ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_user_id_752b0e2b_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.attendance_records DROP CONSTRAINT IF EXISTS attendance_records_recorded_by_id_5754c2dd_fk_users_id;
+ALTER TABLE IF EXISTS ONLY public.attendance_records DROP CONSTRAINT IF EXISTS attendance_records_enrollment_id_3c51c395_fk_student_e;
+DROP INDEX IF EXISTS public.users_username_e8658fc8_like;
+DROP INDEX IF EXISTS public.users_user_permissions_permission_id_6d08dcd2;
+DROP INDEX IF EXISTS public.users_user_permissions_customuser_id_efdb305c;
+DROP INDEX IF EXISTS public.users_groups_group_id_2f3517aa;
+DROP INDEX IF EXISTS public.users_groups_customuser_id_4bd991a9;
+DROP INDEX IF EXISTS public.users_email_0ea73cca_like;
+DROP INDEX IF EXISTS public.unique_active_reservation;
+DROP INDEX IF EXISTS public.syllabus_units_syllabus_id_5d917911;
+DROP INDEX IF EXISTS public.syllabus_sessions_unit_id_f6769b99;
+DROP INDEX IF EXISTS public.syllabus_sessions_syllabus_id_0c1dd4e0;
+DROP INDEX IF EXISTS public.student_postulations_student_id_1f19b78f;
+DROP INDEX IF EXISTS public.student_postulations_lab_group_id_b431e80d;
+DROP INDEX IF EXISTS public.student_postulations_campaign_id_5b8223d5;
+DROP INDEX IF EXISTS public.student_enrollments_student_id_8f9115cb;
+DROP INDEX IF EXISTS public.student_enrollments_lab_assignment_id_075aad88;
+DROP INDEX IF EXISTS public.student_enrollments_group_id_03eca43e;
+DROP INDEX IF EXISTS public.student_enrollments_course_id_a4572c59;
+DROP INDEX IF EXISTS public.session_progress_marked_by_id_c3419d82;
+DROP INDEX IF EXISTS public.session_progress_course_group_id_b4f11f6c;
+DROP INDEX IF EXISTS public.schedules_room_id_0c558cc6;
+DROP INDEX IF EXISTS public.schedules_course_group_id_f33327dd;
+DROP INDEX IF EXISTS public.postul_campaign_lab_status_idx;
+DROP INDEX IF EXISTS public.laboratory_groups_room_id_1d9aaad9;
+DROP INDEX IF EXISTS public.laboratory_groups_professor_id_c6847835;
+DROP INDEX IF EXISTS public.laboratory_groups_external_professor_id_7c4d849a;
+DROP INDEX IF EXISTS public.laboratory_groups_course_id_93a8c7aa;
+DROP INDEX IF EXISTS public.lab_enrollment_campaigns_course_id_c09e022a;
+DROP INDEX IF EXISTS public.lab_assignments_student_id_4ba0570e;
+DROP INDEX IF EXISTS public.lab_assignments_lab_group_id_3c00a14b;
+DROP INDEX IF EXISTS public.grade_records_recorded_by_id_7964c302;
+DROP INDEX IF EXISTS public.grade_records_evaluation_id_eb6bb18e;
+DROP INDEX IF EXISTS public.grade_records_enrollment_id_2b59aedf;
+DROP INDEX IF EXISTS public.evaluations_course_id_9f9e305b;
+DROP INDEX IF EXISTS public.django_session_session_key_c0390e0f_like;
+DROP INDEX IF EXISTS public.django_session_expire_date_a5c62663;
+DROP INDEX IF EXISTS public.django_admin_log_user_id_c564eba6;
+DROP INDEX IF EXISTS public.django_admin_log_content_type_id_c4bce8eb;
+DROP INDEX IF EXISTS public.courses_semester_id_b0a820a8;
+DROP INDEX IF EXISTS public.courses_course_code_3f85c62e_like;
+DROP INDEX IF EXISTS public.course_groups_professor_id_bc370da4;
+DROP INDEX IF EXISTS public.course_groups_course_id_84a8cb6c;
+DROP INDEX IF EXISTS public.classrooms_code_85ae9b8a_like;
+DROP INDEX IF EXISTS public.classroom_reservations_professor_id_5348db87;
+DROP INDEX IF EXISTS public.classroom_reservations_classroom_id_4180e833;
+DROP INDEX IF EXISTS public.classroom_reservations_approved_by_id_d51565c8;
+DROP INDEX IF EXISTS public.classroom_r_reserva_983ca7_idx;
+DROP INDEX IF EXISTS public.classroom_r_profess_4ddf6e_idx;
+DROP INDEX IF EXISTS public.campaign_course_closed_idx;
+DROP INDEX IF EXISTS public.authtoken_token_key_10f0b77e_like;
+DROP INDEX IF EXISTS public.auth_permission_content_type_id_2f476e4b;
+DROP INDEX IF EXISTS public.auth_group_permissions_permission_id_84c5c92e;
+DROP INDEX IF EXISTS public.auth_group_permissions_group_id_b120cbf9;
+DROP INDEX IF EXISTS public.auth_group_name_a6ea08ec_like;
+DROP INDEX IF EXISTS public.audit_logs_user_id_752b0e2b;
+DROP INDEX IF EXISTS public.attendance_records_recorded_by_id_5754c2dd;
+DROP INDEX IF EXISTS public.attendance_records_enrollment_id_3c51c395;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_key;
+ALTER TABLE IF EXISTS ONLY public.users_user_permissions DROP CONSTRAINT IF EXISTS users_user_permissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.users_user_permissions DROP CONSTRAINT IF EXISTS users_user_permissions_customuser_id_permission_2b4e4e39_uniq;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_user_id_key;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_pkey;
+ALTER TABLE IF EXISTS ONLY public.users_groups DROP CONSTRAINT IF EXISTS users_groups_pkey;
+ALTER TABLE IF EXISTS ONLY public.users_groups DROP CONSTRAINT IF EXISTS users_groups_customuser_id_group_id_927de924_uniq;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_email_key;
+ALTER TABLE IF EXISTS ONLY public.syllabuses DROP CONSTRAINT IF EXISTS syllabuses_pkey;
+ALTER TABLE IF EXISTS ONLY public.syllabuses DROP CONSTRAINT IF EXISTS syllabuses_course_id_key;
+ALTER TABLE IF EXISTS ONLY public.syllabus_units DROP CONSTRAINT IF EXISTS syllabus_units_syllabus_id_unit_number_0a2cf790_uniq;
+ALTER TABLE IF EXISTS ONLY public.syllabus_units DROP CONSTRAINT IF EXISTS syllabus_units_pkey;
+ALTER TABLE IF EXISTS ONLY public.syllabus_sessions DROP CONSTRAINT IF EXISTS syllabus_sessions_pkey;
+ALTER TABLE IF EXISTS ONLY public.student_postulations DROP CONSTRAINT IF EXISTS student_postulations_pkey;
+ALTER TABLE IF EXISTS ONLY public.student_postulations DROP CONSTRAINT IF EXISTS student_postulations_campaign_id_student_id_c925ad7e_uniq;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_student_id_course_id_72c7b985_uniq;
+ALTER TABLE IF EXISTS ONLY public.student_enrollments DROP CONSTRAINT IF EXISTS student_enrollments_pkey;
+ALTER TABLE IF EXISTS ONLY public.session_progress DROP CONSTRAINT IF EXISTS session_progress_session_id_key;
+ALTER TABLE IF EXISTS ONLY public.session_progress DROP CONSTRAINT IF EXISTS session_progress_pkey;
+ALTER TABLE IF EXISTS ONLY public.semesters DROP CONSTRAINT IF EXISTS semesters_pkey;
+ALTER TABLE IF EXISTS ONLY public.schedules DROP CONSTRAINT IF EXISTS schedules_pkey;
+ALTER TABLE IF EXISTS ONLY public.schedules DROP CONSTRAINT IF EXISTS schedules_course_group_id_day_of_week_start_time_8b921549_uniq;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_pkey;
+ALTER TABLE IF EXISTS ONLY public.laboratory_groups DROP CONSTRAINT IF EXISTS laboratory_groups_course_id_lab_nomenclature_709f2181_uniq;
+ALTER TABLE IF EXISTS ONLY public.lab_enrollment_campaigns DROP CONSTRAINT IF EXISTS lab_enrollment_campaigns_pkey;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_student_id_lab_group_id_74636ac9_uniq;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_postulation_id_key;
+ALTER TABLE IF EXISTS ONLY public.lab_assignments DROP CONSTRAINT IF EXISTS lab_assignments_pkey;
+ALTER TABLE IF EXISTS ONLY public.grade_records DROP CONSTRAINT IF EXISTS grade_records_pkey;
+ALTER TABLE IF EXISTS ONLY public.grade_records DROP CONSTRAINT IF EXISTS grade_records_enrollment_id_evaluation_id_405b5391_uniq;
+ALTER TABLE IF EXISTS ONLY public.external_professors DROP CONSTRAINT IF EXISTS external_professors_pkey;
+ALTER TABLE IF EXISTS ONLY public.evaluations DROP CONSTRAINT IF EXISTS evaluations_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_session DROP CONSTRAINT IF EXISTS django_session_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_migrations DROP CONSTRAINT IF EXISTS django_migrations_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_content_type DROP CONSTRAINT IF EXISTS django_content_type_pkey;
+ALTER TABLE IF EXISTS ONLY public.django_content_type DROP CONSTRAINT IF EXISTS django_content_type_app_label_model_76bd3d3b_uniq;
+ALTER TABLE IF EXISTS ONLY public.django_admin_log DROP CONSTRAINT IF EXISTS django_admin_log_pkey;
+ALTER TABLE IF EXISTS ONLY public.courses DROP CONSTRAINT IF EXISTS courses_pkey;
+ALTER TABLE IF EXISTS ONLY public.courses DROP CONSTRAINT IF EXISTS courses_course_code_key;
+ALTER TABLE IF EXISTS ONLY public.course_groups DROP CONSTRAINT IF EXISTS course_groups_pkey;
+ALTER TABLE IF EXISTS ONLY public.course_groups DROP CONSTRAINT IF EXISTS course_groups_course_id_group_code_34cba46b_uniq;
+ALTER TABLE IF EXISTS ONLY public.classrooms DROP CONSTRAINT IF EXISTS classrooms_pkey;
+ALTER TABLE IF EXISTS ONLY public.classrooms DROP CONSTRAINT IF EXISTS classrooms_code_key;
+ALTER TABLE IF EXISTS ONLY public.classroom_reservations DROP CONSTRAINT IF EXISTS classroom_reservations_pkey;
+ALTER TABLE IF EXISTS ONLY public.authtoken_token DROP CONSTRAINT IF EXISTS authtoken_token_user_id_key;
+ALTER TABLE IF EXISTS ONLY public.authtoken_token DROP CONSTRAINT IF EXISTS authtoken_token_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_permission DROP CONSTRAINT IF EXISTS auth_permission_content_type_id_codename_01ab375a_uniq;
+ALTER TABLE IF EXISTS ONLY public.auth_group DROP CONSTRAINT IF EXISTS auth_group_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_pkey;
+ALTER TABLE IF EXISTS ONLY public.auth_group_permissions DROP CONSTRAINT IF EXISTS auth_group_permissions_group_id_permission_id_0cd325b0_uniq;
+ALTER TABLE IF EXISTS ONLY public.auth_group DROP CONSTRAINT IF EXISTS auth_group_name_key;
+ALTER TABLE IF EXISTS ONLY public.audit_logs DROP CONSTRAINT IF EXISTS audit_logs_pkey;
+ALTER TABLE IF EXISTS ONLY public.attendance_records DROP CONSTRAINT IF EXISTS attendance_records_pkey;
+ALTER TABLE IF EXISTS ONLY public.attendance_records DROP CONSTRAINT IF EXISTS attendance_records_enrollment_id_session_number_22fd3b13_uniq;
+DROP TABLE IF EXISTS public.users_user_permissions;
+DROP TABLE IF EXISTS public.users_groups;
+DROP TABLE IF EXISTS public.users;
+DROP TABLE IF EXISTS public.syllabuses;
+DROP TABLE IF EXISTS public.syllabus_units;
+DROP TABLE IF EXISTS public.syllabus_sessions;
+DROP TABLE IF EXISTS public.student_postulations;
+DROP TABLE IF EXISTS public.student_enrollments;
+DROP TABLE IF EXISTS public.session_progress;
+DROP TABLE IF EXISTS public.semesters;
+DROP TABLE IF EXISTS public.schedules;
+DROP TABLE IF EXISTS public.laboratory_groups;
+DROP TABLE IF EXISTS public.lab_enrollment_campaigns;
+DROP TABLE IF EXISTS public.lab_assignments;
+DROP TABLE IF EXISTS public.grade_records;
+DROP TABLE IF EXISTS public.external_professors;
+DROP TABLE IF EXISTS public.evaluations;
+DROP TABLE IF EXISTS public.django_session;
+DROP TABLE IF EXISTS public.django_migrations;
+DROP TABLE IF EXISTS public.django_content_type;
+DROP TABLE IF EXISTS public.django_admin_log;
+DROP TABLE IF EXISTS public.courses;
+DROP TABLE IF EXISTS public.course_groups;
+DROP TABLE IF EXISTS public.classrooms;
+DROP TABLE IF EXISTS public.classroom_reservations;
+DROP TABLE IF EXISTS public.authtoken_token;
+DROP TABLE IF EXISTS public.auth_permission;
+DROP TABLE IF EXISTS public.auth_group_permissions;
+DROP TABLE IF EXISTS public.auth_group;
+DROP TABLE IF EXISTS public.audit_logs;
+DROP TABLE IF EXISTS public.attendance_records;
+-- *not* dropping schema, since initdb creates it
+--
+-- Name: public; Type: SCHEMA; Schema: -; Owner: sgac_user
+--
+
+-- *not* creating schema, since initdb creates it
+
+
+ALTER SCHEMA public OWNER TO sgac_user;
+
+--
+-- Name: SCHEMA public; Type: COMMENT; Schema: -; Owner: sgac_user
+--
+
+COMMENT ON SCHEMA public IS '';
+
 
 SET default_tablespace = '';
 
@@ -152,6 +358,28 @@ CREATE TABLE public.authtoken_token (
 
 
 ALTER TABLE public.authtoken_token OWNER TO sgac_user;
+
+--
+-- Name: classroom_reservations; Type: TABLE; Schema: public; Owner: sgac_user
+--
+
+CREATE TABLE public.classroom_reservations (
+    reservation_id uuid NOT NULL,
+    reservation_date date NOT NULL,
+    start_time time without time zone NOT NULL,
+    end_time time without time zone NOT NULL,
+    purpose text NOT NULL,
+    status character varying(20) NOT NULL,
+    created_at timestamp with time zone NOT NULL,
+    approved_at timestamp with time zone,
+    rejection_reason text NOT NULL,
+    approved_by_id bigint,
+    classroom_id uuid NOT NULL,
+    professor_id bigint NOT NULL
+);
+
+
+ALTER TABLE public.classroom_reservations OWNER TO sgac_user;
 
 --
 -- Name: classrooms; Type: TABLE; Schema: public; Owner: sgac_user
@@ -2240,6 +2468,99 @@ cb6e0054-1391-4b0f-ba70-a3c5dc14d955	38	2025-12-11	F		0.0.0.0	\N	\N	2025-12-11 0
 a0053b41-4877-44ea-b57f-3409b6f98b63	38	2025-12-11	F		0.0.0.0	\N	\N	2025-12-11 05:32:11.079195+00	7f9cf976-43d6-411d-8b96-9ce5dded69d9	17
 078fd6b6-2ba3-4a85-bb39-4787275c63a6	38	2025-12-11	F		0.0.0.0	\N	\N	2025-12-11 05:32:11.079206+00	6ffb05a9-5755-4804-ad54-b2fab5d01a0a	17
 2990efce-0682-4598-bed0-144158cda565	38	2025-12-11	F		0.0.0.0	\N	\N	2025-12-11 05:32:11.079217+00	3501109d-0ecd-4877-a483-c0d23d88962b	17
+bc5c7bd2-0812-49ef-ae5f-df2369271662	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098336+00	57449e51-40eb-4ade-8f62-a238b09cbed9	17
+b887bcdb-7f95-467f-95ae-ff1bc457d69b	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.09836+00	886a2185-b3d8-423b-879c-b99fdd0aae61	17
+53f57913-984e-4719-b930-3278578a3242	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098375+00	352929cc-b8c2-44b3-8b44-aab6b0e3a451	17
+f1c6e23e-9cb4-4c07-a2b1-8395a4172f83	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098391+00	56f6e8f0-4bff-4fbb-a8c9-52f670a965e3	17
+d40522aa-6fee-4692-b98b-816927150dc4	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098404+00	7e811f49-44d5-48dc-a128-c5321e6035bd	17
+11c771e7-4b84-40eb-a5c8-35ccc0f17c22	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098417+00	e93c1638-ab36-48b3-87ed-a178e005132a	17
+c24b899b-c1a4-46b9-9218-6490946804c1	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098429+00	f4fc3a4b-c093-4a0e-98dc-e8d1faf471e6	17
+7cbcac71-f38b-4e75-975b-fa8bd6db76ec	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098443+00	64d27f31-40c5-4006-a2c1-9714cbbc7281	17
+192839e6-8e04-4ef1-8f2c-4a13685bf7cf	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098455+00	48c05e27-a206-4f5b-8d80-9705b4dc2bb7	17
+d59cc150-0fa3-4262-b81d-b8fd9c67438f	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098467+00	9f64b136-de90-4cc7-9a6d-92264a85702f	17
+9817b7c5-d291-49ee-9b20-f3ad0ee02595	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098478+00	b3ad5393-0a2f-4c2f-a58f-e27401629083	17
+6b96bc05-8194-4a97-9bfc-b11a888707e1	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.09849+00	79cece18-94c6-47a7-ace7-62b644a31887	17
+78a2d220-55b2-4dcd-be45-15233c6346c0	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098501+00	7e009403-3fec-4d5c-8388-577cfc21d881	17
+af57726c-8202-42f9-aba0-93d0f6c6445b	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098512+00	7d57cb48-0382-45ab-a04d-8af9b527b9da	17
+3e1875a3-4030-45b8-8cd8-96ba7557c0da	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098524+00	b5346d03-5a8e-487e-bc14-128dc445dea0	17
+2ef00071-5a37-41c6-9633-a4cc24750a5e	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098544+00	3576361f-f07e-4883-9d51-43333af019a0	17
+2c950097-7543-4a72-b9d8-86394ac6304d	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098556+00	5762d3ba-b991-48dc-a9f5-c398dab0648f	17
+83613877-24e1-4873-91cc-6764b336ea58	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098567+00	9bb32e33-1f35-4142-a54b-2f4f30c08f84	17
+20d42551-6a76-4ba1-903e-33d1d89b64ba	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098579+00	99c3412d-4d4a-4ccb-927d-0908d004eb2f	17
+d70973af-4959-445e-98a4-f75640406269	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098591+00	45cd7e1d-e078-43d5-9c98-201a322d5a97	17
+86496ffe-9e91-49dc-a1fd-55ddf4804a58	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098602+00	bdfd8e7b-83ed-4445-82e0-8e6bb11903f2	17
+7fcebc4a-7df5-482c-87e6-72a33324e08f	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098613+00	e48774c7-a125-4c7a-ac04-e7d68e11a398	17
+aae94764-0d18-4e03-a846-0bf4d1160836	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098625+00	35219df4-7983-4510-9fa5-fe808159ffc0	17
+a3103794-5dc1-45db-8caa-64fe21d99f5f	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098636+00	9a06998f-846f-4392-b453-99e4b3a62cac	17
+13bdfc70-6c96-44ce-be34-93ce7c2aa9b5	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098647+00	ca7b812d-ac5d-4613-ba72-1888927be120	17
+718c60a6-2e3f-4d5f-9fdb-e647d672bceb	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098659+00	defab93e-cba2-4113-b7c7-fd120a229c1a	17
+ab87dec2-29fc-4115-b544-4abca1617cce	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098671+00	aa146231-828d-482b-a7c9-5f8e0811c62d	17
+1cf7a231-c034-4228-bdab-91b96a7a0d69	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098684+00	caa77720-0538-438e-b90a-8e9b9fa4d593	17
+53f4182c-9c71-483d-87b2-44df9fe83bf3	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098698+00	4c452485-6f64-4024-a775-68c29e50d3af	17
+8a7dc828-2b43-4d8f-9d43-cad89f02f5d2	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098709+00	c327e88a-8fa4-445b-873e-1e23d6c10bc5	17
+0ebefa09-9ba0-4245-81a0-7f92de7f8273	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.09872+00	cabc7ee5-2039-4de6-a2c0-2f696f9afa2a	17
+4b1fa92b-c427-442f-b6ba-7901ad061f26	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098731+00	ae913769-90d4-491c-b20e-0c43d41aae75	17
+5366876f-2ef3-4a97-bf1f-658d4725b116	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098742+00	7fc31e2f-5606-4163-a12c-560a785ddee0	17
+c0f15125-ddce-457e-85f9-2e1602a7c94c	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098753+00	2050d05b-5853-45df-8b2c-6195584b7ab8	17
+764312a8-d74e-43e1-a840-af673d22fd3a	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098764+00	1410f832-cc28-44e4-b296-33f6539a3708	17
+d16ba713-ffe3-4580-b6bd-79d51e89f417	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098776+00	af15a93a-ddc9-45e3-b296-121c41e3db2a	17
+18020193-0ee1-41fe-9e21-1865682926f7	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098787+00	6b2d5f31-4a79-41e3-a0c1-da2a4bbcac19	17
+f8cb127b-fb62-461e-af45-6d0678c1e97c	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098798+00	7f9cf976-43d6-411d-8b96-9ce5dded69d9	17
+fb2f0dea-f483-4f80-8140-349d0701a0b9	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.098809+00	6ffb05a9-5755-4804-ad54-b2fab5d01a0a	17
+2b7ce3f0-3675-4f52-bd15-f91f04cf7b9d	45	2026-01-07	F		172.18.0.1	\N	\N	2026-01-08 04:24:40.09882+00	3501109d-0ecd-4877-a483-c0d23d88962b	17
+c6409713-ef10-40a0-8c6f-da77fb8d771b	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402431+00	7d5e319b-595a-4f37-af47-e2c04806a14c	18
+018dd1ad-413b-401f-b71a-47349ad8ae72	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402475+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	18
+4cad82f7-fff0-477f-84e2-b1cbc1f953c6	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402506+00	38718ab5-0656-4066-b601-9fac95d9492a	18
+b7ecdd08-f4e8-4e11-939a-68107e3cc477	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402546+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	18
+17737350-3717-4077-a2ef-d6cf541dec72	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402573+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	18
+517f4574-64bd-4212-ad19-e7e88947a1a6	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.4026+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	18
+80a684bc-e4b6-44e8-aea3-b2a434c39a0b	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402627+00	00326647-5edc-461e-b65f-42726ad3bd2a	18
+eeda3fd8-e2eb-4e10-b7fc-dd2232e21f4e	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402654+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	18
+870bdd04-2c9b-472c-9977-0934b45b4698	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.40268+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	18
+49f54866-fcfc-4177-bb81-46345986e92c	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402707+00	b589d497-0302-4714-b369-13d19154d81d	18
+235bb01b-860a-4ec1-a8cf-e34ec7663f40	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402733+00	9989826f-d987-4a00-ae38-2042644f308d	18
+ae820361-e4b2-4de1-93d0-a21ae97060d3	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402759+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	18
+453f92fe-5eb4-4bf9-9685-657c1b3fc2bb	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402785+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	18
+4578c739-d788-4f07-9d0c-8db024b79853	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402811+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	18
+0f499a79-a24c-4319-a336-a16b2ecc099c	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402836+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	18
+51a9eceb-ec76-4741-9bfe-c4dde7241a19	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402862+00	551831ad-472e-4de9-9103-ea2de80a2619	18
+a9e42d21-fee6-4ff3-b3b5-78cbd24aece3	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402887+00	c4422a47-d295-4b88-b568-a6b3584c6b10	18
+546882f2-4e7d-479c-92c0-71164fb4b6ba	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402913+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	18
+8489b615-c3c2-4bd6-99d8-fffc883c4d41	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.40294+00	31ed20fe-176a-4b27-909c-1659bc734aec	18
+415e053e-33be-4c6c-a5cc-e38ef5bd416a	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402967+00	449d0858-0344-419d-9788-0498a6117bae	18
+7c2394a0-342a-4472-9faf-5129faf8cb70	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.402994+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	18
+f22ddcec-0d23-44bb-8dce-2c882666066a	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403021+00	dffec140-7568-4a93-8621-f85e775909ab	18
+4c759f51-4769-43d0-8b5b-53bec2bce6ac	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403048+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	18
+6c49308c-ea81-499f-a6c9-69d8f83a0b94	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403074+00	236db70f-21a0-4526-8cca-77a8e49ab688	18
+133352be-efe9-4005-b96b-79c976c0000e	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403101+00	c858063a-ce79-44fc-94ce-21d7f32ae442	18
+f5847f30-6cc9-4a9b-b199-3749f5f3fdba	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403129+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	18
+4de0b6e1-29e1-4003-bf43-a7c7c8655830	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403155+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	18
+6bf0f27f-37cf-4479-845b-cc0e79aa02e1	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403181+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	18
+332fa622-733d-44da-bd2b-0ca6d029c522	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403211+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	18
+c0d309fd-a272-4dc9-9cbd-de4734a072bc	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403273+00	983e844c-3dd7-4c89-a522-73c21f24347a	18
+495a252f-8e8b-4e25-97e0-75b599d92916	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403316+00	13d7efab-6779-4c55-a521-395221c228b7	18
+b0354827-fea5-4a60-abf4-14dddf213147	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403351+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	18
+51f4ab74-293b-4cf4-b247-f219b06c321e	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403378+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	18
+722a4481-afa5-4dbc-acca-bb0ec10e9509	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403404+00	557c6013-c259-4859-b138-2e4628c7fff2	18
+77ee22a2-b5c3-4bee-8d57-4bb7cc24d935	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.40343+00	e30d5894-3181-41fe-b551-ad7affebaec1	18
+4c9b27ad-aaec-4b54-8e91-3d61ef07d0fa	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403456+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	18
+971e1827-fb2c-45be-8b72-5c7332fc4494	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403482+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	18
+95f51e23-cbe8-461e-bbe8-c7464af07039	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403507+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	18
+83fe91c9-6b22-45d7-b498-f1fe1d553aeb	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403546+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	18
+23fa73fd-0d16-45fc-884a-d77fe4332b79	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403574+00	7332b3a4-598d-47fc-9216-24312f9e41cd	18
+22fb00bb-5b00-480f-9acf-7376f0203ca6	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.4036+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	18
+2a8d8d4f-769e-4d56-a037-f31e3fa7d9b7	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403626+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	18
+281632df-9b1b-4584-b67e-c1422271f9ba	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403652+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	18
+eb710ac9-90a8-4c1f-80a4-27b039ae5c98	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403678+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	18
+e60f7b7f-60e5-40f6-9fa7-c3a9fde731cc	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403704+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	18
+ef31da5c-4019-41c2-b9e2-bd80a1da2bea	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403729+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	18
+e3005ea7-b659-42ff-a381-5422c82e7a3d	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403754+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	18
+1aac801c-0575-4634-bbbf-c22c8293a070	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403783+00	142a1b22-c085-4deb-9827-7e8c23d28399	18
+f39cfe3e-f0e0-49f3-a7df-e1a5ea182859	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403809+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	18
+9ba0deee-f50e-4c8c-9e7a-d75eeda0eaca	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403835+00	04992f10-5370-4559-893b-acc0b6c814bf	18
+405681f0-c232-4c1a-81b0-8a97f467e6d3	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403861+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	18
+3c45b5e1-5dc9-46de-ac8b-52e8ae3999fe	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403887+00	3b33febd-5417-4e80-85b0-518c042bcaeb	18
+6844e391-bfe2-4277-a2bf-fff220d9d50e	45	2026-01-07	F		0.0.0.0	\N	\N	2026-01-08 04:27:50.403912+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	18
 \.
 
 
@@ -2388,6 +2709,10 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 114	Can change Progreso de Sesión	29	change_sessionprogress
 115	Can delete Progreso de Sesión	29	delete_sessionprogress
 116	Can view Progreso de Sesión	29	view_sessionprogress
+117	Can add Reserva de Aula	30	add_classroomreservation
+118	Can change Reserva de Aula	30	change_classroomreservation
+119	Can delete Reserva de Aula	30	delete_classroomreservation
+120	Can view Reserva de Aula	30	view_classroomreservation
 \.
 
 
@@ -2396,6 +2721,14 @@ COPY public.auth_permission (id, name, content_type_id, codename) FROM stdin;
 --
 
 COPY public.authtoken_token (key, created, user_id) FROM stdin;
+\.
+
+
+--
+-- Data for Name: classroom_reservations; Type: TABLE DATA; Schema: public; Owner: sgac_user
+--
+
+COPY public.classroom_reservations (reservation_id, reservation_date, start_time, end_time, purpose, status, created_at, approved_at, rejection_reason, approved_by_id, classroom_id, professor_id) FROM stdin;
 \.
 
 
@@ -2550,6 +2883,17 @@ COPY public.django_admin_log (id, action_time, object_id, object_repr, action_fl
 6	2025-11-15 08:08:07.433353+00	bcc6c216-4936-4369-aa8c-b1c5de60d322	1002117 - A (Viernes 06:09:00-06:08:00)	3		13	1
 7	2025-11-17 15:21:08.049443+00	f05ec626-fdef-4c35-92e5-35adab60cabb	1 - Aula 201	2	[{"changed": {"fields": ["Code"]}}]	11	1
 8	2025-12-02 04:50:04.300122+00	23919d7b-eabe-438c-a6e6-c71ae0367284	2501211 - LINGUISTICA, COMPRENSION Y REDACCION ACADEMICA	2	[{"changed": {"fields": ["Course name"]}}]	10	1
+9	2026-01-08 04:20:58.960208+00	c9fc8e2a-692d-4654-a779-c1ab97db78b8	Campaña 1703237	3		18	1
+10	2026-01-08 04:22:13.15731+00	3e3c62df-183c-4cbf-844e-87cbca800df2	2025-B	2	[{"changed": {"fields": ["End date"]}}]	9	1
+11	2026-01-08 04:22:39.994981+00	0fca50f1-1b4e-4d27-9c6f-2b1c982ce09b	1703237 - Lab B	3		14	1
+12	2026-01-08 04:22:43.382979+00	08e36447-6899-43e9-9996-d26d0d838c72	1703237 - Lab A	3		14	1
+13	2026-01-08 04:40:30.77759+00	755dc4d4-0977-427f-9e92-26dd82400a6b	1703240 - Continua 1 (10.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+14	2026-01-08 04:40:39.425132+00	b7511b6d-4e0a-437a-a633-05de6b831e77	1703240 - Examen 1 (9.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+15	2026-01-08 04:40:47.187688+00	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	1703240 - Continua 2 (10.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+16	2026-01-08 04:40:55.189304+00	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	1703240 - Examen 2 (9.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+17	2026-01-08 04:41:14.141012+00	d73e37d4-2370-4c0e-9714-81670a8f4f97	1703240 - Continua 3 (24.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+18	2026-01-08 04:41:55.765656+00	d73e37d4-2370-4c0e-9714-81670a8f4f97	1703240 - Continua 3 (30.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
+19	2026-01-08 04:42:15.148106+00	1648e95b-a686-499c-8709-a1d1e5f99d20	1703240 - Examen 3 (32.00%)	2	[{"changed": {"fields": ["Percentage"]}}]	15	1
 \.
 
 
@@ -2587,6 +2931,7 @@ COPY public.django_content_type (id, app_label, model) FROM stdin;
 27	persistence	externalprofessor
 28	persistence	syllabusunit
 29	persistence	sessionprogress
+30	persistence	classroomreservation
 \.
 
 
@@ -2629,6 +2974,7 @@ COPY public.django_migrations (id, app, name, applied) FROM stdin;
 32	persistence	0010_alter_syllabus_credits_extracted_and_more	2025-11-30 05:33:18.288874+00
 33	persistence	0011_graderecord_is_locked_and_more	2025-12-04 00:46:28.568957+00
 34	persistence	0002_alter_studentpostulation_options_and_more	2025-12-14 05:14:46.006594+00
+35	persistence	0003_classroomreservation_and_more	2026-01-07 02:18:02.811822+00
 \.
 
 
@@ -2648,18 +2994,18 @@ zvn8na8ymxi00wu4s7q4uy4x0rz7jkb1	.eJxVjDEOgzAQBP_iOrJsg32QMj1vQHfnIyaJsIShivL3GI
 --
 
 COPY public.evaluations (evaluation_id, name, evaluation_type, unit, percentage, due_date, created_at, course_id, "order") FROM stdin;
-755dc4d4-0977-427f-9e92-26dd82400a6b	Continua 1	CONTINUA	1	15.00	\N	2025-11-19 00:40:37.836009+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
-b7511b6d-4e0a-437a-a633-05de6b831e77	Examen 1	EXAMEN	1	20.00	\N	2025-11-19 00:40:37.845011+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
-4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	Continua 2	CONTINUA	2	15.00	\N	2025-11-19 00:40:37.856325+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
-25a5eb3e-eeec-4823-a47a-a32f86ac7a51	Examen 2	EXAMEN	2	20.00	\N	2025-11-19 00:40:37.866716+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
-d73e37d4-2370-4c0e-9714-81670a8f4f97	Continua 3	CONTINUA	3	15.00	\N	2025-11-19 00:40:37.879208+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
-1648e95b-a686-499c-8709-a1d1e5f99d20	Examen 3	EXAMEN	3	15.00	\N	2025-11-19 00:40:37.888571+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
 f6392933-1a58-4214-90a8-200812f4f5c7	EC1	CONTINUA	1	15.00	\N	2025-12-02 02:55:09.8766+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	1
 5e935636-9216-481e-9c6d-24162c7b5a52	EP1	EXAMEN	1	15.00	\N	2025-12-02 02:55:09.877155+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	2
 066c04f1-19c1-4971-a8e9-7b854ff8c5fe	EC2	CONTINUA	2	15.00	\N	2025-12-02 02:55:09.87743+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	3
 6b86a942-9fff-4374-9ec5-3154956da616	EP2	EXAMEN	2	15.00	\N	2025-12-02 02:55:09.877667+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	4
 1c7e0ada-0e16-4ee9-9791-e05043cc9338	EC3	CONTINUA	3	20.00	\N	2025-12-02 02:55:09.877897+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	5
 13bd6ca6-a8e4-4490-b8cb-a5720a1156ce	EP3	EXAMEN	3	20.00	\N	2025-12-02 02:55:09.878125+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	6
+755dc4d4-0977-427f-9e92-26dd82400a6b	Continua 1	CONTINUA	1	10.00	\N	2025-11-19 00:40:37.836009+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
+b7511b6d-4e0a-437a-a633-05de6b831e77	Examen 1	EXAMEN	1	9.00	\N	2025-11-19 00:40:37.845011+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
+4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	Continua 2	CONTINUA	2	10.00	\N	2025-11-19 00:40:37.856325+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
+25a5eb3e-eeec-4823-a47a-a32f86ac7a51	Examen 2	EXAMEN	2	9.00	\N	2025-11-19 00:40:37.866716+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
+d73e37d4-2370-4c0e-9714-81670a8f4f97	Continua 3	CONTINUA	3	30.00	\N	2025-11-19 00:40:37.879208+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
+1648e95b-a686-499c-8709-a1d1e5f99d20	Examen 3	EXAMEN	3	32.00	\N	2025-11-19 00:40:37.888571+00	69ef36ee-c239-43ba-9926-8247aaca8531	0
 \.
 
 
@@ -2676,112 +3022,6 @@ COPY public.external_professors (external_prof_id, full_name, email, phone, spec
 --
 
 COPY public.grade_records (record_id, raw_score, rounded_score, recorded_at, enrollment_id, evaluation_id, recorded_by_id, is_locked) FROM stdin;
-669e04d0-3dfc-49b8-97da-45732c67fe90	6.00	6.00	2025-11-19 02:18:47.203586+00	7d5e319b-595a-4f37-af47-e2c04806a14c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-ebe73347-e733-450e-875c-6ac3d2621424	16.00	16.00	2025-11-19 02:18:47.205216+00	7d5e319b-595a-4f37-af47-e2c04806a14c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-ec781469-8a3b-4f9f-bfdc-e5daec6050ba	19.00	19.00	2025-11-19 02:18:47.214475+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-da3434bd-a8f7-4765-88f1-02b2c2c14282	3.00	3.00	2025-11-19 02:18:47.216144+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-55d5ade7-d4bf-4573-931c-5bc3c2d26952	14.00	14.00	2025-11-19 02:18:47.224247+00	38718ab5-0656-4066-b601-9fac95d9492a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-9c606862-42a2-4bc9-88d5-610320373829	17.00	17.00	2025-11-19 02:18:47.225978+00	38718ab5-0656-4066-b601-9fac95d9492a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-bac4b7e1-af8c-4dd8-a401-690b6cbe79d3	10.00	10.00	2025-11-19 02:18:47.234805+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-5755d636-3c99-43fb-9c97-6d125cd8a9d5	7.00	7.00	2025-11-19 02:18:47.236978+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-2f50d12b-78b1-4386-b98d-e3e767a7cef5	7.00	7.00	2025-11-19 02:18:47.246541+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-51bce535-bcf0-4787-ba7e-e148c58b3b42	3.00	3.00	2025-11-19 02:18:47.248703+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-703f078c-af66-45cd-a9b0-4fa16d71ab3b	20.00	20.00	2025-11-19 02:18:47.257279+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-de1e087f-fac2-4370-abe1-0971b6825c6e	1.00	1.00	2025-11-19 02:18:47.259152+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-00bef1c9-5521-42e3-b08e-a5f6ede427b7	6.00	6.00	2025-11-19 02:18:47.267363+00	b589d497-0302-4714-b369-13d19154d81d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-dd02340f-3d80-4eac-a077-e9a0a550f4d4	5.00	5.00	2025-11-19 02:18:47.269229+00	b589d497-0302-4714-b369-13d19154d81d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-ece10677-5c0d-4ecd-a82e-671af64653dc	18.00	18.00	2025-11-19 02:18:47.277349+00	00326647-5edc-461e-b65f-42726ad3bd2a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-66d25595-a844-48f7-b6b2-2f4093a02eff	9.00	9.00	2025-11-19 02:18:47.279206+00	00326647-5edc-461e-b65f-42726ad3bd2a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-256e29eb-32d9-4c5a-9e69-2fda522aa895	10.00	10.00	2025-11-19 02:18:47.287346+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-2b428093-9aa4-4b53-a6a4-c8f7d4922073	3.00	3.00	2025-11-19 02:18:47.289218+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-28a0bc60-7f71-48bc-af2d-88705df3d6d2	10.00	10.00	2025-11-19 02:18:47.297338+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-3066a115-75bd-4701-94a9-7553136860c8	17.00	17.00	2025-11-19 02:18:47.299201+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-50b0b918-0ddc-4f86-89ff-2217d8081017	20.00	20.00	2025-11-19 02:18:47.307276+00	9989826f-d987-4a00-ae38-2042644f308d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-835e5f26-394c-4be8-ac61-c327f7862187	11.00	11.00	2025-11-19 02:18:47.309127+00	9989826f-d987-4a00-ae38-2042644f308d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-70d71e18-bae0-4c90-a340-6acf020cd657	3.00	3.00	2025-11-19 02:18:47.317222+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-663f5248-d718-428d-b257-563cf81dded0	1.00	1.00	2025-11-19 02:18:47.319073+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-17715b8a-6c53-4e5e-9fc7-84ba73652bc8	7.00	7.00	2025-11-19 02:18:47.327146+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-ec8bf3f5-b7cc-4173-af8b-2b0c11325260	9.00	9.00	2025-11-19 02:18:47.328994+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-5111dd4c-9196-4123-a715-00f9970cf822	2.00	2.00	2025-11-19 02:18:47.337778+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-22c4222a-45e4-442b-8002-aad581cbda0b	3.00	3.00	2025-11-19 02:18:47.339649+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-e08c07f9-a43e-4406-944b-e4af1c36d613	20.00	20.00	2025-11-19 02:18:47.347768+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-640431e9-6bcb-4e7e-ba7b-8019032a9d82	13.00	13.00	2025-11-19 02:18:47.349636+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-8c853f80-8189-408d-b26a-f1341d7f0fc0	1.00	1.00	2025-11-19 02:18:47.35774+00	551831ad-472e-4de9-9103-ea2de80a2619	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-e141d3fb-620e-45c9-8b1e-cdc1dc633b1a	15.00	15.00	2025-11-19 02:18:47.359608+00	551831ad-472e-4de9-9103-ea2de80a2619	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-d05f45dc-4e37-45e4-afb5-b56fe4fb45d9	11.00	11.00	2025-11-19 02:18:47.367681+00	c4422a47-d295-4b88-b568-a6b3584c6b10	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-84f29b5a-beb4-48aa-a458-66a3e1673c47	14.00	14.00	2025-11-19 02:18:47.369559+00	c4422a47-d295-4b88-b568-a6b3584c6b10	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-d8519918-8d96-4b14-a759-128a57b23ae9	5.00	5.00	2025-11-19 02:18:47.377735+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-05d92b0d-f087-40db-8241-a35e4500849e	7.00	7.00	2025-11-19 02:18:47.379607+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-127133ee-ad2d-4192-9fab-e68e51aa9b61	1.00	1.00	2025-11-19 02:18:47.387698+00	31ed20fe-176a-4b27-909c-1659bc734aec	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-12e700e1-15b0-4b5f-949d-15b634d99521	13.00	13.00	2025-11-19 02:18:47.389567+00	31ed20fe-176a-4b27-909c-1659bc734aec	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-8f9a484d-7b34-4104-8cf9-421c0db88a15	20.00	20.00	2025-11-19 02:18:47.3974+00	449d0858-0344-419d-9788-0498a6117bae	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-56f0da28-6331-491e-8b6a-3b3f3ab44b44	7.00	7.00	2025-11-19 02:18:47.399246+00	449d0858-0344-419d-9788-0498a6117bae	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-77277d6f-f405-4e53-bef8-ac7cf05bd953	0.00	0.00	2025-11-19 02:18:47.405906+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-4daa832e-ed2e-4992-ac6e-ca179990da6c	20.00	20.00	2025-11-19 02:18:47.407339+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-55963821-23d6-4994-ba1c-416d9bfdc7c7	11.00	11.00	2025-11-19 02:18:47.413675+00	dffec140-7568-4a93-8621-f85e775909ab	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-62a0ac65-f1cc-4f39-be6c-a50f87b50fb2	15.00	15.00	2025-11-19 02:18:47.415117+00	dffec140-7568-4a93-8621-f85e775909ab	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-753e8f3f-11f5-4fc1-911a-a91e80116545	11.00	11.00	2025-11-19 02:18:47.421454+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-2752c7dd-ace9-4ad7-a3d5-fc34e3a8d719	12.00	12.00	2025-11-19 02:18:47.422891+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-fe333eac-f7e0-4890-9e45-2e75b339f51b	16.00	16.00	2025-11-19 02:18:47.429279+00	236db70f-21a0-4526-8cca-77a8e49ab688	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-67e2c63f-4c66-4bd1-987f-66c6e4c8e630	17.00	17.00	2025-11-19 02:18:47.430738+00	236db70f-21a0-4526-8cca-77a8e49ab688	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-c1b5df23-3a91-4654-8a81-34c66241a7d9	9.00	9.00	2025-11-19 02:18:47.437224+00	c858063a-ce79-44fc-94ce-21d7f32ae442	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-5fdeb9ab-c633-45d0-bcff-4600a5236266	14.00	14.00	2025-11-19 02:18:47.438674+00	c858063a-ce79-44fc-94ce-21d7f32ae442	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-f6450a45-8eac-485b-a75b-9eb11edfe8ec	15.00	15.00	2025-11-19 02:18:47.445055+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-fec4d3eb-2aa9-4d58-8a0f-ff76038e4c6e	20.00	20.00	2025-11-19 02:18:47.446523+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-e89d8930-3b08-4d99-b7fe-7b24bd87f8ec	14.00	14.00	2025-11-19 02:18:47.452873+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-7ba987dc-a43d-4ca2-9400-f19c2db1e725	12.00	12.00	2025-11-19 02:18:47.454319+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-892e1452-94eb-472a-90bf-9422443f3365	14.00	14.00	2025-11-19 02:18:47.460646+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-f3165357-3e26-42f8-a1a6-407a988e63de	8.00	8.00	2025-11-19 02:18:47.46209+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-dde43735-2d28-4c4d-9464-f3a12c653460	18.00	18.00	2025-11-19 02:18:47.468406+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-04403ba5-5013-4d8f-813a-6295c927609b	14.00	14.00	2025-11-19 02:18:47.469871+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-d5dcc83f-bf8a-44c3-b345-841739909978	11.00	11.00	2025-11-19 02:18:47.476242+00	983e844c-3dd7-4c89-a522-73c21f24347a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-ab3b092a-682d-4fd4-b8f4-6bbea85f84f4	12.00	12.00	2025-11-19 02:18:47.477694+00	983e844c-3dd7-4c89-a522-73c21f24347a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-7d0c870b-c7d9-4446-a046-453d7bb53148	19.00	19.00	2025-11-19 02:18:47.484031+00	13d7efab-6779-4c55-a521-395221c228b7	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-b47c0f83-24bc-4127-b78a-8c612b49faa8	0.00	0.00	2025-11-19 02:18:47.485476+00	13d7efab-6779-4c55-a521-395221c228b7	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-f8549826-231b-4636-b01c-f951d83ec5df	2.00	2.00	2025-11-19 02:18:47.491824+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-ef52dace-b67a-4e93-8729-ac251fa36a1a	6.00	6.00	2025-11-19 02:18:47.493279+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-cc80ceb4-0019-48db-8262-d50ab3ec9486	4.00	4.00	2025-11-19 02:18:47.499613+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-9ab12a41-1af6-44bc-b807-2e3dd6036f9f	8.00	8.00	2025-11-19 02:18:47.501056+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-cba03d92-358a-4388-8d05-0fc2b123fe76	18.00	18.00	2025-11-19 02:18:47.507373+00	557c6013-c259-4859-b138-2e4628c7fff2	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-87a6c354-3c29-4c45-b632-0079bb02b015	0.00	0.00	2025-11-19 02:18:47.508824+00	557c6013-c259-4859-b138-2e4628c7fff2	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-03b8c00e-064e-469c-ad0a-11c1ae52b507	6.00	6.00	2025-11-19 02:18:47.515099+00	e30d5894-3181-41fe-b551-ad7affebaec1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-39c1c545-af74-4c8d-93e5-22fadd8e3140	11.00	11.00	2025-11-19 02:18:47.516551+00	e30d5894-3181-41fe-b551-ad7affebaec1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-6feca02d-5310-4541-a858-0c5633bc6409	20.00	20.00	2025-11-19 02:18:47.5231+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-c2c14080-9d5b-42e5-9b6f-66d76c55a07a	7.00	7.00	2025-11-19 02:18:47.52457+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-3c09fdc5-3e99-4596-b872-005d06eff3a9	8.00	8.00	2025-11-19 02:18:47.530906+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-cef24dd4-8452-4780-a1c7-d885518c9800	10.00	10.00	2025-11-19 02:18:47.53237+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-f76fa1a6-eb3c-431e-8def-5069af9ce911	6.00	6.00	2025-11-19 02:18:47.538678+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-f1682432-cf67-4026-8105-10828e27c645	18.00	18.00	2025-11-19 02:18:47.540116+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-a5ea3c31-71b9-4097-a624-e70049bb7eb9	17.00	17.00	2025-11-19 02:18:47.545366+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-1ca47648-2810-4e79-ae1c-fdff5e055b6c	16.00	16.00	2025-11-19 02:18:47.546321+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-647c2dae-0ed5-4deb-8fe8-cd7d5825e5d0	3.00	3.00	2025-11-19 02:18:47.550512+00	7332b3a4-598d-47fc-9216-24312f9e41cd	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-81f32689-04ff-4be5-9742-09c9355f48a9	7.00	7.00	2025-11-19 02:18:47.551469+00	7332b3a4-598d-47fc-9216-24312f9e41cd	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-c57611c9-2d52-4360-9b96-c7d5d63f5ec1	13.00	13.00	2025-11-19 02:18:47.555633+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-fc183539-2d7b-4bc6-bded-0fd203dfdf5c	2.00	2.00	2025-11-19 02:18:47.556596+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-d788356a-7805-4c9d-8f17-b218a36af031	17.00	17.00	2025-11-19 02:18:47.56079+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-06460a83-6dfa-4746-8b37-1c518dc63497	2.00	2.00	2025-11-19 02:18:47.561745+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-20fcbc88-469e-49e1-9942-eac9bcdfda1f	8.00	8.00	2025-11-19 02:18:47.565933+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-c5623a85-983b-4542-a71a-044e180ff9b0	0.00	0.00	2025-11-19 02:18:47.566889+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-61ed11c4-e60b-4669-95a4-c1c65e195bdf	20.00	20.00	2025-11-19 02:18:47.571096+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-cbfd6bf8-663b-4dfa-8f3c-1a52b199829f	4.00	4.00	2025-11-19 02:18:47.572053+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-14ec1a6d-6350-47d4-a1c3-5296174eacdb	1.00	1.00	2025-11-19 02:18:47.576243+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-2693a928-931e-4ef4-9725-9553a1a73eb5	9.00	9.00	2025-11-19 02:18:47.57719+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-7479d06d-06be-4a1a-85a8-2fb3016be8ab	19.00	19.00	2025-11-19 02:18:47.581391+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-46e609c6-2ff1-4f30-ab93-a3621afbe94a	6.00	6.00	2025-11-19 02:18:47.582346+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-14dc6d43-6b41-4e85-84f1-0e04a62f321b	14.00	14.00	2025-11-19 02:18:47.586518+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-f0efa056-8f2f-41e1-abc3-33174c641250	8.00	8.00	2025-11-19 02:18:47.587467+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-64595498-38c4-4766-8066-da0e7970e26e	6.00	6.00	2025-11-19 02:18:47.591642+00	142a1b22-c085-4deb-9827-7e8c23d28399	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-87cea04b-7b54-4d41-8aaf-4d4c81e0354a	6.00	6.00	2025-11-19 02:18:47.592598+00	142a1b22-c085-4deb-9827-7e8c23d28399	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-e9cfdddd-f433-4fa9-a32a-1c3679372946	11.00	11.00	2025-11-19 02:18:47.596802+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-caf69edf-ce07-473f-b644-660ecdd49a3a	8.00	8.00	2025-11-19 02:18:47.59776+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-a84b998f-deb9-4bd1-b4e3-7047257d8294	7.00	7.00	2025-11-19 02:18:47.601937+00	04992f10-5370-4559-893b-acc0b6c814bf	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-67c84501-4eb5-42fd-8aa5-faa93578db8c	7.00	7.00	2025-11-19 02:18:47.602893+00	04992f10-5370-4559-893b-acc0b6c814bf	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-fc9676f7-167f-4a1c-bf35-52cb7b923c81	14.00	14.00	2025-11-19 02:18:47.607085+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-c0af7d46-45e7-4ce2-8ddf-6bdbc7caefb1	11.00	11.00	2025-11-19 02:18:47.60804+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-eb9e4ff2-7970-4d08-ac7d-0fba1f990ba8	2.00	2.00	2025-11-19 02:18:47.612218+00	3b33febd-5417-4e80-85b0-518c042bcaeb	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-cc724b50-b151-4e82-b70f-45c0ba32411f	1.00	1.00	2025-11-19 02:18:47.613176+00	3b33febd-5417-4e80-85b0-518c042bcaeb	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
-c459c24b-12f8-4922-9ea4-53aa044c8754	13.00	13.00	2025-11-19 02:18:47.617338+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
-e0bf6d9a-d145-480c-8a2d-27d39ab4c829	0.00	0.00	2025-11-19 02:18:47.618293+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
 8e9c5665-62f9-420c-b8fb-cb9b574b203f	14.00	14.00	2025-12-02 05:37:24.607931+00	57449e51-40eb-4ade-8f62-a238b09cbed9	f6392933-1a58-4214-90a8-200812f4f5c7	17	f
 0427f75a-9354-4b31-a725-d8c94d0db330	15.00	15.00	2025-12-02 05:37:24.609491+00	57449e51-40eb-4ade-8f62-a238b09cbed9	5e935636-9216-481e-9c6d-24162c7b5a52	17	f
 381e3ebd-a901-4373-a0af-118354b7899f	11.00	11.00	2025-12-02 05:37:24.616453+00	886a2185-b3d8-423b-879c-b99fdd0aae61	f6392933-1a58-4214-90a8-200812f4f5c7	17	f
@@ -3022,6 +3262,218 @@ d1469827-b2eb-433f-a409-6ef3a1ebc899	7.00	7.00	2025-12-02 05:37:49.28139+00	6b2d
 c72f3228-9022-4389-aa84-51d587707d1a	14.00	14.00	2025-12-02 05:37:49.293869+00	6ffb05a9-5755-4804-ad54-b2fab5d01a0a	13bd6ca6-a8e4-4490-b8cb-a5720a1156ce	17	f
 fbd0c3f1-81fd-4304-b25a-691b83e2ab24	12.00	12.00	2025-12-02 05:37:49.29873+00	3501109d-0ecd-4877-a483-c0d23d88962b	1c7e0ada-0e16-4ee9-9791-e05043cc9338	17	f
 c5a97974-0384-478d-9910-15b8dd446b7d	11.00	11.00	2025-12-02 05:37:49.299764+00	3501109d-0ecd-4877-a483-c0d23d88962b	13bd6ca6-a8e4-4490-b8cb-a5720a1156ce	17	f
+06df2647-1dcb-4595-b037-221d0b54b888	9.50	10.00	2026-01-08 04:35:44.438601+00	7d5e319b-595a-4f37-af47-e2c04806a14c	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+0e329f12-c2ae-48a8-822f-dab5d52a69b4	0.00	0.00	2026-01-08 04:35:44.44114+00	7d5e319b-595a-4f37-af47-e2c04806a14c	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+48fc77b0-5ff5-4c7f-b2ee-8dc2edc15cf7	17.00	17.00	2026-01-08 04:35:44.451751+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+2efa5944-8736-42fa-b7f4-5d11a4077e6c	14.00	14.00	2026-01-08 04:35:44.453552+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+a285546a-147b-45c1-82c1-ba9d004baa82	15.50	16.00	2026-01-08 04:35:44.46239+00	38718ab5-0656-4066-b601-9fac95d9492a	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+866d2172-8515-4183-b03e-fc51a7851712	15.00	15.00	2026-01-08 04:35:44.464443+00	38718ab5-0656-4066-b601-9fac95d9492a	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+f0c7a0e2-55e6-4146-83f4-0805f7ad8a1d	11.00	11.00	2026-01-08 04:35:44.472118+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+bacaf64e-fd9d-40e7-b4d4-e3aebf89a83a	0.00	0.00	2026-01-08 04:35:44.47366+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+abd7fbee-0f26-483c-b131-38d9c07f2f7e	16.50	17.00	2026-01-08 04:35:44.481004+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+2ac05eeb-a2c8-4335-a94f-a649d5be3e4e	15.00	15.00	2026-01-08 04:35:44.482536+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+3c7c79e6-5d0b-4717-92f6-516427071e1e	14.00	14.00	2026-01-08 04:35:44.490799+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+f89a24a4-63c3-4266-95ed-d4137e921a2d	15.00	15.00	2026-01-08 04:35:44.492586+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+194e6918-52cf-4224-8416-e7248113446f	16.50	17.00	2026-01-08 04:35:44.49992+00	b589d497-0302-4714-b369-13d19154d81d	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+088321e6-6bad-46e2-9949-76e805a17966	14.00	14.00	2026-01-08 04:35:44.501383+00	b589d497-0302-4714-b369-13d19154d81d	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+e56fee92-48fb-434e-8667-5702b16287dd	16.00	16.00	2026-01-08 04:35:44.509496+00	00326647-5edc-461e-b65f-42726ad3bd2a	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+11488939-65a6-47ac-8d89-f02fb15f2c67	15.00	15.00	2026-01-08 04:35:44.511178+00	00326647-5edc-461e-b65f-42726ad3bd2a	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+e6fd0ae9-54e5-4948-be6a-4e564e4cbb62	19.00	19.00	2026-01-08 04:35:44.51883+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+5df3b5ce-49f6-418c-b26d-c6cdfe675d26	11.00	11.00	2026-01-08 04:35:44.520334+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+c3f88904-6ded-4c30-8090-c81b9013a740	14.00	14.00	2026-01-08 04:35:44.527907+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+f65c0cb8-7b28-40a2-b0ef-c89c2379f706	15.00	15.00	2026-01-08 04:35:44.529622+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+9c0b212c-4978-4c28-b527-1f6285cc1d8a	16.50	17.00	2026-01-08 04:35:44.537523+00	9989826f-d987-4a00-ae38-2042644f308d	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+b7e72ae0-55c2-47f2-84a0-b3700ba68e84	15.00	15.00	2026-01-08 04:35:44.539032+00	9989826f-d987-4a00-ae38-2042644f308d	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+33d248df-fe7d-4b90-a78c-8bf285be7bf3	17.00	17.00	2026-01-08 04:35:44.546227+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+6fe40253-b32b-4de4-bc95-917838d4d262	0.00	0.00	2026-01-08 04:35:44.547786+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+c533eba7-7277-4a3e-aa07-59390cb17142	16.50	17.00	2026-01-08 04:35:44.556241+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+23e57a75-170c-4261-8244-e1011e0ed974	15.00	15.00	2026-01-08 04:35:44.557979+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+da05f06f-1f59-4374-994d-f0e150c4da95	17.00	17.00	2026-01-08 04:35:44.566116+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+0390da5a-ed12-45b6-b1f0-b50c5cad57e7	14.00	14.00	2026-01-08 04:35:44.567644+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+b1cedcc1-13f8-4251-b91e-5b19c75d9292	17.50	18.00	2026-01-08 04:35:44.574922+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+a6c7218d-b544-45e4-8316-b3209097a346	13.00	13.00	2026-01-08 04:35:44.576444+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+263e5421-1280-4705-9b2d-c581408278b6	17.00	17.00	2026-01-08 04:35:44.58367+00	551831ad-472e-4de9-9103-ea2de80a2619	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+1aa12953-7031-4d02-8ebd-40ea853c85a1	12.00	12.00	2026-01-08 04:35:44.585816+00	551831ad-472e-4de9-9103-ea2de80a2619	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+307becde-fed4-48f3-8c41-87c0bccc8d7f	19.00	19.00	2026-01-08 04:35:44.593194+00	c4422a47-d295-4b88-b568-a6b3584c6b10	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+1502d762-92d4-4cd0-aadd-8be9a54b3e1a	11.00	11.00	2026-01-08 04:35:44.594762+00	c4422a47-d295-4b88-b568-a6b3584c6b10	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+dc11a719-3677-48d2-a40b-d32e672e56bc	17.00	17.00	2026-01-08 04:35:44.601287+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+b1967da4-ed95-4d66-b6de-21b21330190c	14.00	14.00	2026-01-08 04:35:44.602535+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+2d4436ce-cb0f-4b3e-8794-246d23f645d1	16.50	17.00	2026-01-08 04:35:44.610279+00	31ed20fe-176a-4b27-909c-1659bc734aec	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+814b2ea6-9363-4f69-a8a7-7c44d396a832	13.00	13.00	2026-01-08 04:35:44.612335+00	31ed20fe-176a-4b27-909c-1659bc734aec	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+6c5268df-7b40-4b20-bc9b-8fd919cef1a7	16.00	16.00	2026-01-08 04:35:44.619158+00	449d0858-0344-419d-9788-0498a6117bae	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+b47a5f00-d22b-4b5c-9562-718def881696	15.00	15.00	2026-01-08 04:35:44.620828+00	449d0858-0344-419d-9788-0498a6117bae	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+96f5ca09-66d4-417a-9db5-3d571ff14a8b	15.50	16.00	2026-01-08 04:35:44.628086+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+7fb919fd-90e1-429f-afad-2b8adb0431fe	15.00	15.00	2026-01-08 04:35:44.62945+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+e2e63626-d4b1-49a9-b23d-ae7300ca0ef3	14.00	14.00	2026-01-08 04:35:44.635191+00	dffec140-7568-4a93-8621-f85e775909ab	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+0db8ad92-8b77-4c23-9ae6-a01ec06869ee	15.00	15.00	2026-01-08 04:35:44.636355+00	dffec140-7568-4a93-8621-f85e775909ab	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+94597bf9-cc36-45ae-b381-772b5781f86f	16.50	17.00	2026-01-08 04:35:44.642734+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+5c829acd-1bba-4bd2-bc89-588ad8035d71	14.00	14.00	2026-01-08 04:35:44.644168+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+5b6bf073-5762-44d4-ac2e-b48573629731	14.00	14.00	2026-01-08 04:35:44.651719+00	236db70f-21a0-4526-8cca-77a8e49ab688	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+8bde12f5-2897-4806-95ee-91596f87b52b	15.00	15.00	2026-01-08 04:35:44.653274+00	236db70f-21a0-4526-8cca-77a8e49ab688	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+20cdae48-8e08-4583-9080-0ffccf6fa11b	8.50	9.00	2026-01-08 04:35:44.660618+00	c858063a-ce79-44fc-94ce-21d7f32ae442	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+a16dce72-3a9b-477a-9472-0b39bb668cb6	13.00	13.00	2026-01-08 04:35:44.662139+00	c858063a-ce79-44fc-94ce-21d7f32ae442	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+f642bd68-ad57-469e-9537-10bbeaeb1e57	16.00	16.00	2026-01-08 04:35:44.668669+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+eec59ded-b2ed-426d-acef-01ebb18b7f95	15.00	15.00	2026-01-08 04:35:44.670185+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+3fcb560e-e2e5-4bbc-89f5-93197a4e967e	17.50	18.00	2026-01-08 04:35:44.677041+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+5195a5dd-a4e9-479c-91a9-cdf94e329299	13.00	13.00	2026-01-08 04:35:44.678163+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+00b357b9-8f39-451d-b1c8-b321f8e2192d	7.50	8.00	2026-01-08 04:35:44.683595+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+80db6bf2-40a5-41fa-98dc-194cba62b555	0.00	0.00	2026-01-08 04:35:44.684704+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+0978e1d6-5063-444c-bcae-816a62440d42	16.50	17.00	2026-01-08 04:35:44.692093+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+2ba6b43b-3464-4757-a6f8-1b225da11cc0	14.00	14.00	2026-01-08 04:35:44.693714+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+a43bf898-86ec-4228-b041-ee69b99e6128	17.00	17.00	2026-01-08 04:35:44.701123+00	983e844c-3dd7-4c89-a522-73c21f24347a	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+66b65b53-5dc5-4469-af07-1af0ad1c3f53	12.00	12.00	2026-01-08 04:35:44.702651+00	983e844c-3dd7-4c89-a522-73c21f24347a	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+9a4ad24d-6e2c-4c28-8872-7ad98cf75e1a	15.50	16.00	2026-01-08 04:35:44.710208+00	13d7efab-6779-4c55-a521-395221c228b7	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+1de955ae-2a1f-460b-baa7-523364994f5e	15.00	15.00	2026-01-08 04:35:44.71191+00	13d7efab-6779-4c55-a521-395221c228b7	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+13f3fbc6-4791-4449-a895-31e2c750db41	16.00	16.00	2026-01-08 04:35:44.719503+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+9088df43-a677-4771-9c85-32314ab3f96d	15.00	15.00	2026-01-08 04:35:44.72106+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+23558336-bd5a-4183-8d91-e18a5440556f	9.50	10.00	2026-01-08 04:35:44.728321+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+aa158db4-da28-470e-978b-1e8fe69017a4	0.00	0.00	2026-01-08 04:35:44.729946+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+ac1f89d3-1c41-47c6-996b-814e42c79375	17.00	17.00	2026-01-08 04:35:44.737615+00	557c6013-c259-4859-b138-2e4628c7fff2	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+78bcb35a-87a5-4ea6-b294-be4854da3252	18.00	18.00	2026-01-08 04:35:44.73923+00	557c6013-c259-4859-b138-2e4628c7fff2	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+8fce9676-a8c9-4677-8236-68d6ac87e25d	16.50	17.00	2026-01-08 04:35:44.746987+00	e30d5894-3181-41fe-b551-ad7affebaec1	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+9456905f-9fb9-40a6-b355-3e0a03a55a6b	13.00	13.00	2026-01-08 04:35:44.748507+00	e30d5894-3181-41fe-b551-ad7affebaec1	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+fe60ad99-7915-48f6-9df0-f96bcc1d2e35	11.00	11.00	2026-01-08 04:35:44.755862+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+2999b381-acf2-48c7-b44e-d2d3d619aa8b	12.00	12.00	2026-01-08 04:35:44.757298+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+69f3cce7-35c4-4c23-9768-59d3a3b452a7	9.00	9.00	2026-01-08 04:35:44.76496+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+1593d3e2-d540-42bd-b051-6f748d879ec9	11.00	11.00	2026-01-08 04:35:44.766578+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+6966c7dc-a142-438f-9145-88813e6dfde2	3.50	4.00	2026-01-08 04:35:44.773895+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+19e52072-4a80-4953-b71d-3156ffef09c5	12.00	12.00	2026-01-08 04:35:44.775449+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+0cebddae-070f-4165-a5af-7115adcb35b0	16.50	17.00	2026-01-08 04:35:44.782782+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+4c0b4329-62ca-4173-aaf7-da9e58154ff1	15.00	15.00	2026-01-08 04:35:44.784262+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+642d77c8-eeb0-41e7-9e31-acafafbedb13	17.00	17.00	2026-01-08 04:35:44.79169+00	7332b3a4-598d-47fc-9216-24312f9e41cd	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+42f0f64a-9a15-4c3d-a817-a52aeef25583	14.00	14.00	2026-01-08 04:35:44.793193+00	7332b3a4-598d-47fc-9216-24312f9e41cd	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+b259054e-c314-4407-8d5a-5b843fe8ccb6	9.50	10.00	2026-01-08 04:35:44.800374+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+867af53f-5dbc-44c4-81a5-764fe1446d65	0.00	0.00	2026-01-08 04:35:44.801916+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+2844cc86-7b62-43ca-85b2-5e87b43e556e	17.00	17.00	2026-01-08 04:35:44.809347+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+30e76f39-1bd1-4ab3-8529-1da1897540f2	18.00	18.00	2026-01-08 04:35:44.810903+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+bcfc7a44-892c-4ed1-8f78-a4d7aa5e8cfb	15.50	16.00	2026-01-08 04:35:44.818534+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+9630b125-c5aa-478d-9585-98623b009303	15.00	15.00	2026-01-08 04:35:44.820077+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+9084e7ef-5a0a-432e-8b1f-cf16a8fb24a5	17.00	17.00	2026-01-08 04:35:44.827451+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+df635867-c302-48a6-b985-177f1b5ee5f1	18.00	18.00	2026-01-08 04:35:44.828991+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+caa971cb-4de0-4573-b037-920bcc22d7d3	17.50	18.00	2026-01-08 04:35:44.836411+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+bb945f0e-d20f-44d9-a3b6-5ebebf59a3ee	13.00	13.00	2026-01-08 04:35:44.837855+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+500d0c08-d7d3-497e-97a6-2363a6354591	17.00	17.00	2026-01-08 04:35:44.845045+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+74a5df53-4e74-44b7-b9db-a3744fb2e5a7	12.00	12.00	2026-01-08 04:35:44.846462+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+f1eaf065-38c6-4b66-9297-a8db3572e762	16.50	17.00	2026-01-08 04:35:44.853363+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+ae5602d5-6f4b-4057-8d10-b9f9d673bf5a	14.00	14.00	2026-01-08 04:35:44.85469+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+c9746bcd-b1c1-4cb7-8de1-2fbc1a961b4d	7.50	8.00	2026-01-08 04:35:44.861889+00	142a1b22-c085-4deb-9827-7e8c23d28399	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+881e7f24-ecf0-47d9-8f0a-61bff41dede8	12.00	12.00	2026-01-08 04:35:44.863324+00	142a1b22-c085-4deb-9827-7e8c23d28399	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+ff227d9c-e968-4175-a915-74866628a63f	16.50	17.00	2026-01-08 04:35:44.870355+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+0c0b15cf-4b8a-406d-ab24-1591a0bee9e4	13.00	13.00	2026-01-08 04:35:44.871801+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+2b396e1a-b5ce-4f54-907a-e08458642936	17.00	17.00	2026-01-08 04:35:44.879152+00	04992f10-5370-4559-893b-acc0b6c814bf	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+bb5b21db-f13b-4bbd-aa07-36cb4f827298	12.00	12.00	2026-01-08 04:35:44.880587+00	04992f10-5370-4559-893b-acc0b6c814bf	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+9e75f71a-e682-4a06-a1f7-f9bdcc6363a9	19.00	19.00	2026-01-08 04:35:44.888079+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+7af073f7-5bf5-422c-bd1a-6a4b1ee92880	11.00	11.00	2026-01-08 04:35:44.889574+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+f139a34e-d382-467b-a606-8fcf818a9e88	17.00	17.00	2026-01-08 04:35:44.896753+00	3b33febd-5417-4e80-85b0-518c042bcaeb	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+c36117f1-5f37-44b2-83d4-4c1b59bf505e	18.00	18.00	2026-01-08 04:35:44.898161+00	3b33febd-5417-4e80-85b0-518c042bcaeb	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+13fbeb4b-bbd2-4785-8504-70d44bd80131	17.50	18.00	2026-01-08 04:35:44.905424+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	4f709b7b-ca94-4d8f-b68a-cf2da18bf04a	18	f
+fbb80dfd-8801-4549-851c-6e0d7038b53a	13.00	13.00	2026-01-08 04:35:44.906996+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	25a5eb3e-eeec-4823-a47a-a32f86ac7a51	18	f
+669e04d0-3dfc-49b8-97da-45732c67fe90	4.00	6.00	2025-11-19 02:18:47.203586+00	7d5e319b-595a-4f37-af47-e2c04806a14c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+ebe73347-e733-450e-875c-6ac3d2621424	11.00	16.00	2025-11-19 02:18:47.205216+00	7d5e319b-595a-4f37-af47-e2c04806a14c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+ec781469-8a3b-4f9f-bfdc-e5daec6050ba	18.00	19.00	2025-11-19 02:18:47.214475+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+da3434bd-a8f7-4765-88f1-02b2c2c14282	16.00	3.00	2025-11-19 02:18:47.216144+00	cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+55d5ade7-d4bf-4573-931c-5bc3c2d26952	17.00	14.00	2025-11-19 02:18:47.224247+00	38718ab5-0656-4066-b601-9fac95d9492a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+9c606862-42a2-4bc9-88d5-610320373829	16.00	17.00	2025-11-19 02:18:47.225978+00	38718ab5-0656-4066-b601-9fac95d9492a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+00bef1c9-5521-42e3-b08e-a5f6ede427b7	15.50	6.00	2025-11-19 02:18:47.267363+00	b589d497-0302-4714-b369-13d19154d81d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+dd02340f-3d80-4eac-a077-e9a0a550f4d4	17.00	5.00	2025-11-19 02:18:47.269229+00	b589d497-0302-4714-b369-13d19154d81d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+bac4b7e1-af8c-4dd8-a401-690b6cbe79d3	5.00	10.00	2025-11-19 02:18:47.234805+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+5755d636-3c99-43fb-9c97-6d125cd8a9d5	11.00	7.00	2025-11-19 02:18:47.236978+00	bb4229ae-b022-4c13-90c7-d46bef1a910a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+2f50d12b-78b1-4386-b98d-e3e767a7cef5	16.00	7.00	2025-11-19 02:18:47.246541+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+51bce535-bcf0-4787-ba7e-e148c58b3b42	16.00	3.00	2025-11-19 02:18:47.248703+00	550d4055-46d4-45d6-899a-5f3d5340bc7a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+703f078c-af66-45cd-a9b0-4fa16d71ab3b	8.00	20.00	2025-11-19 02:18:47.257279+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+de1e087f-fac2-4370-abe1-0971b6825c6e	18.00	1.00	2025-11-19 02:18:47.259152+00	1bf2be96-a310-4865-bf9a-e40619c66e5d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+ece10677-5c0d-4ecd-a82e-671af64653dc	13.00	18.00	2025-11-19 02:18:47.277349+00	00326647-5edc-461e-b65f-42726ad3bd2a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+66d25595-a844-48f7-b6b2-2f4093a02eff	15.00	9.00	2025-11-19 02:18:47.279206+00	00326647-5edc-461e-b65f-42726ad3bd2a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+256e29eb-32d9-4c5a-9e69-2fda522aa895	16.00	10.00	2025-11-19 02:18:47.287346+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+2b428093-9aa4-4b53-a6a4-c8f7d4922073	16.00	3.00	2025-11-19 02:18:47.289218+00	e8def30c-9222-4199-b5f9-6adfb61c4f5f	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+28a0bc60-7f71-48bc-af2d-88705df3d6d2	17.00	10.00	2025-11-19 02:18:47.297338+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+3066a115-75bd-4701-94a9-7553136860c8	18.00	17.00	2025-11-19 02:18:47.299201+00	e04dc012-6807-4269-a09a-2b7115d9b5dc	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+50b0b918-0ddc-4f86-89ff-2217d8081017	16.00	20.00	2025-11-19 02:18:47.307276+00	9989826f-d987-4a00-ae38-2042644f308d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+835e5f26-394c-4be8-ac61-c327f7862187	16.00	11.00	2025-11-19 02:18:47.309127+00	9989826f-d987-4a00-ae38-2042644f308d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+70d71e18-bae0-4c90-a340-6acf020cd657	18.00	3.00	2025-11-19 02:18:47.317222+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+663f5248-d718-428d-b257-563cf81dded0	16.00	1.00	2025-11-19 02:18:47.319073+00	70b7e610-2be3-4c56-98d1-aaedf1d98aa6	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+17715b8a-6c53-4e5e-9fc7-84ba73652bc8	16.00	7.00	2025-11-19 02:18:47.327146+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+ec8bf3f5-b7cc-4173-af8b-2b0c11325260	16.00	9.00	2025-11-19 02:18:47.328994+00	2dba3c3b-a75f-409c-8b21-0a766565ed2b	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+5111dd4c-9196-4123-a715-00f9970cf822	18.00	2.00	2025-11-19 02:18:47.337778+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+22c4222a-45e4-442b-8002-aad581cbda0b	16.00	3.00	2025-11-19 02:18:47.339649+00	ccbfec17-0ecf-4a69-b00b-1b68528513d2	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+e08c07f9-a43e-4406-944b-e4af1c36d613	15.00	20.00	2025-11-19 02:18:47.347768+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+640431e9-6bcb-4e7e-ba7b-8019032a9d82	17.00	13.00	2025-11-19 02:18:47.349636+00	6ddf67bf-3442-4ba7-8e77-bf1094757018	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+8c853f80-8189-408d-b26a-f1341d7f0fc0	14.00	1.00	2025-11-19 02:18:47.35774+00	551831ad-472e-4de9-9103-ea2de80a2619	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+e141d3fb-620e-45c9-8b1e-cdc1dc633b1a	18.00	15.00	2025-11-19 02:18:47.359608+00	551831ad-472e-4de9-9103-ea2de80a2619	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+d05f45dc-4e37-45e4-afb5-b56fe4fb45d9	16.00	11.00	2025-11-19 02:18:47.367681+00	c4422a47-d295-4b88-b568-a6b3584c6b10	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+84f29b5a-beb4-48aa-a458-66a3e1673c47	16.00	14.00	2025-11-19 02:18:47.369559+00	c4422a47-d295-4b88-b568-a6b3584c6b10	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+d8519918-8d96-4b14-a759-128a57b23ae9	18.00	5.00	2025-11-19 02:18:47.377735+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+05d92b0d-f087-40db-8241-a35e4500849e	16.00	7.00	2025-11-19 02:18:47.379607+00	e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+127133ee-ad2d-4192-9fab-e68e51aa9b61	15.00	1.00	2025-11-19 02:18:47.387698+00	31ed20fe-176a-4b27-909c-1659bc734aec	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+12e700e1-15b0-4b5f-949d-15b634d99521	18.00	13.00	2025-11-19 02:18:47.389567+00	31ed20fe-176a-4b27-909c-1659bc734aec	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+8f9a484d-7b34-4104-8cf9-421c0db88a15	0.00	20.00	2025-11-19 02:18:47.3974+00	449d0858-0344-419d-9788-0498a6117bae	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+56f0da28-6331-491e-8b6a-3b3f3ab44b44	15.00	7.00	2025-11-19 02:18:47.399246+00	449d0858-0344-419d-9788-0498a6117bae	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+77277d6f-f405-4e53-bef8-ac7cf05bd953	17.00	0.00	2025-11-19 02:18:47.405906+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+4daa832e-ed2e-4992-ac6e-ca179990da6c	16.00	20.00	2025-11-19 02:18:47.407339+00	a9b0fffa-5038-4f53-bc77-69ce1a002be8	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+55963821-23d6-4994-ba1c-416d9bfdc7c7	17.00	11.00	2025-11-19 02:18:47.413675+00	dffec140-7568-4a93-8621-f85e775909ab	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+62a0ac65-f1cc-4f39-be6c-a50f87b50fb2	18.00	15.00	2025-11-19 02:18:47.415117+00	dffec140-7568-4a93-8621-f85e775909ab	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+753e8f3f-11f5-4fc1-911a-a91e80116545	15.50	11.00	2025-11-19 02:18:47.421454+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+2752c7dd-ace9-4ad7-a3d5-fc34e3a8d719	17.00	12.00	2025-11-19 02:18:47.422891+00	1bcf23f7-a382-4329-ac2c-d8aa85d5651d	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+fe333eac-f7e0-4890-9e45-2e75b339f51b	17.00	16.00	2025-11-19 02:18:47.429279+00	236db70f-21a0-4526-8cca-77a8e49ab688	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+67e2c63f-4c66-4bd1-987f-66c6e4c8e630	18.00	17.00	2025-11-19 02:18:47.430738+00	236db70f-21a0-4526-8cca-77a8e49ab688	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+c1b5df23-3a91-4654-8a81-34c66241a7d9	15.00	9.00	2025-11-19 02:18:47.437224+00	c858063a-ce79-44fc-94ce-21d7f32ae442	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+5fdeb9ab-c633-45d0-bcff-4600a5236266	18.00	14.00	2025-11-19 02:18:47.438674+00	c858063a-ce79-44fc-94ce-21d7f32ae442	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+f6450a45-8eac-485b-a75b-9eb11edfe8ec	13.00	15.00	2025-11-19 02:18:47.445055+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+fec4d3eb-2aa9-4d58-8a0f-ff76038e4c6e	0.00	20.00	2025-11-19 02:18:47.446523+00	26cea1b0-9d72-4bf0-9f7b-f437dab356d9	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+e89d8930-3b08-4d99-b7fe-7b24bd87f8ec	15.00	14.00	2025-11-19 02:18:47.452873+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+7ba987dc-a43d-4ca2-9400-f19c2db1e725	17.00	12.00	2025-11-19 02:18:47.454319+00	aa953cb6-09a8-4e36-819f-d6f89c461e81	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+892e1452-94eb-472a-90bf-9422443f3365	5.00	14.00	2025-11-19 02:18:47.460646+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+f3165357-3e26-42f8-a1a6-407a988e63de	11.00	8.00	2025-11-19 02:18:47.46209+00	8ec66cc1-a4e5-4e2f-89ab-c82085caec87	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+dde43735-2d28-4c4d-9464-f3a12c653460	15.50	18.00	2025-11-19 02:18:47.468406+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+04403ba5-5013-4d8f-813a-6295c927609b	17.00	14.00	2025-11-19 02:18:47.469871+00	a155475e-c28c-4daf-ae3a-f63a468ba6fb	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+d5dcc83f-bf8a-44c3-b345-841739909978	14.00	11.00	2025-11-19 02:18:47.476242+00	983e844c-3dd7-4c89-a522-73c21f24347a	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+ab3b092a-682d-4fd4-b8f4-6bbea85f84f4	18.00	12.00	2025-11-19 02:18:47.477694+00	983e844c-3dd7-4c89-a522-73c21f24347a	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+7d0c870b-c7d9-4446-a046-453d7bb53148	17.00	19.00	2025-11-19 02:18:47.484031+00	13d7efab-6779-4c55-a521-395221c228b7	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+b47c0f83-24bc-4127-b78a-8c612b49faa8	16.00	0.00	2025-11-19 02:18:47.485476+00	13d7efab-6779-4c55-a521-395221c228b7	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+f8549826-231b-4636-b01c-f951d83ec5df	13.00	2.00	2025-11-19 02:18:47.491824+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+ef52dace-b67a-4e93-8729-ac251fa36a1a	15.00	6.00	2025-11-19 02:18:47.493279+00	92d2927a-55b2-4f78-8dee-ab4485a0f521	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+cc80ceb4-0019-48db-8262-d50ab3ec9486	4.00	4.00	2025-11-19 02:18:47.499613+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+9ab12a41-1af6-44bc-b807-2e3dd6036f9f	0.00	8.00	2025-11-19 02:18:47.501056+00	ea708a0b-2812-4eb4-b89c-a95b17a6feec	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+cba03d92-358a-4388-8d05-0fc2b123fe76	16.50	18.00	2025-11-19 02:18:47.507373+00	557c6013-c259-4859-b138-2e4628c7fff2	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+87a6c354-3c29-4c45-b632-0079bb02b015	16.00	0.00	2025-11-19 02:18:47.508824+00	557c6013-c259-4859-b138-2e4628c7fff2	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+03b8c00e-064e-469c-ad0a-11c1ae52b507	15.00	6.00	2025-11-19 02:18:47.515099+00	e30d5894-3181-41fe-b551-ad7affebaec1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+39c1c545-af74-4c8d-93e5-22fadd8e3140	18.00	11.00	2025-11-19 02:18:47.516551+00	e30d5894-3181-41fe-b551-ad7affebaec1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+6feca02d-5310-4541-a858-0c5633bc6409	0.00	20.00	2025-11-19 02:18:47.5231+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+c2c14080-9d5b-42e5-9b6f-66d76c55a07a	11.00	7.00	2025-11-19 02:18:47.52457+00	d6957db7-87b8-4b0c-afa5-086d053db7a4	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+3c09fdc5-3e99-4596-b872-005d06eff3a9	16.00	8.00	2025-11-19 02:18:47.530906+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+cef24dd4-8452-4780-a1c7-d885518c9800	16.00	10.00	2025-11-19 02:18:47.53237+00	81b6a0ab-dfb1-469d-8b00-0310cf97b740	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+f76fa1a6-eb3c-431e-8def-5069af9ce911	4.00	6.00	2025-11-19 02:18:47.538678+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+f1682432-cf67-4026-8105-10828e27c645	11.00	18.00	2025-11-19 02:18:47.540116+00	4237199b-ebaa-4ca1-8593-e4c5e1fcde94	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+a5ea3c31-71b9-4097-a624-e70049bb7eb9	16.00	17.00	2025-11-19 02:18:47.545366+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+1ca47648-2810-4e79-ae1c-fdff5e055b6c	16.00	16.00	2025-11-19 02:18:47.546321+00	61c75dd3-302d-47ec-aa56-3d98ec55aa5c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+647c2dae-0ed5-4deb-8fe8-cd7d5825e5d0	18.00	3.00	2025-11-19 02:18:47.550512+00	7332b3a4-598d-47fc-9216-24312f9e41cd	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+81f32689-04ff-4be5-9742-09c9355f48a9	0.00	7.00	2025-11-19 02:18:47.551469+00	7332b3a4-598d-47fc-9216-24312f9e41cd	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+c57611c9-2d52-4360-9b96-c7d5d63f5ec1	4.00	13.00	2025-11-19 02:18:47.555633+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+fc183539-2d7b-4bc6-bded-0fd203dfdf5c	11.00	2.00	2025-11-19 02:18:47.556596+00	b881da06-d5dd-4242-9981-02d2c2ab8dbc	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+d788356a-7805-4c9d-8f17-b218a36af031	16.50	17.00	2025-11-19 02:18:47.56079+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+06460a83-6dfa-4746-8b37-1c518dc63497	16.00	2.00	2025-11-19 02:18:47.561745+00	d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+20fcbc88-469e-49e1-9942-eac9bcdfda1f	17.00	8.00	2025-11-19 02:18:47.565933+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+c5623a85-983b-4542-a71a-044e180ff9b0	16.00	0.00	2025-11-19 02:18:47.566889+00	9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+61ed11c4-e60b-4669-95a4-c1c65e195bdf	16.50	20.00	2025-11-19 02:18:47.571096+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+cbfd6bf8-663b-4dfa-8f3c-1a52b199829f	16.00	4.00	2025-11-19 02:18:47.572053+00	9f269023-4c38-4a8a-8417-d8a2c47fb6c1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+14ec1a6d-6350-47d4-a1c3-5296174eacdb	15.00	1.00	2025-11-19 02:18:47.576243+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+2693a928-931e-4ef4-9725-9553a1a73eb5	17.00	9.00	2025-11-19 02:18:47.57719+00	0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+7479d06d-06be-4a1a-85a8-2fb3016be8ab	14.00	19.00	2025-11-19 02:18:47.581391+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+46e609c6-2ff1-4f30-ab93-a3621afbe94a	18.00	6.00	2025-11-19 02:18:47.582346+00	d76d237a-b807-4d80-a3fe-f74953b18c5e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+14dc6d43-6b41-4e85-84f1-0e04a62f321b	15.50	14.00	2025-11-19 02:18:47.586518+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+f0efa056-8f2f-41e1-abc3-33174c641250	17.00	8.00	2025-11-19 02:18:47.587467+00	85540f7f-76dd-4ee6-b8a7-b4ae9353c908	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+64595498-38c4-4766-8066-da0e7970e26e	0.00	6.00	2025-11-19 02:18:47.591642+00	142a1b22-c085-4deb-9827-7e8c23d28399	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+87cea04b-7b54-4d41-8aaf-4d4c81e0354a	11.00	6.00	2025-11-19 02:18:47.592598+00	142a1b22-c085-4deb-9827-7e8c23d28399	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+e9cfdddd-f433-4fa9-a32a-1c3679372946	15.00	11.00	2025-11-19 02:18:47.596802+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+caf69edf-ce07-473f-b644-660ecdd49a3a	18.00	8.00	2025-11-19 02:18:47.59776+00	a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+a84b998f-deb9-4bd1-b4e3-7047257d8294	0.00	7.00	2025-11-19 02:18:47.601937+00	04992f10-5370-4559-893b-acc0b6c814bf	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+67c84501-4eb5-42fd-8aa5-faa93578db8c	18.00	7.00	2025-11-19 02:18:47.602893+00	04992f10-5370-4559-893b-acc0b6c814bf	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+fc9676f7-167f-4a1c-bf35-52cb7b923c81	16.00	14.00	2025-11-19 02:18:47.607085+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+c0af7d46-45e7-4ce2-8ddf-6bdbc7caefb1	16.00	11.00	2025-11-19 02:18:47.60804+00	9f7c3ac9-6664-4822-8d4e-924de2d296f1	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+eb9e4ff2-7970-4d08-ac7d-0fba1f990ba8	16.50	2.00	2025-11-19 02:18:47.612218+00	3b33febd-5417-4e80-85b0-518c042bcaeb	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+cc724b50-b151-4e82-b70f-45c0ba32411f	16.00	1.00	2025-11-19 02:18:47.613176+00	3b33febd-5417-4e80-85b0-518c042bcaeb	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
+c459c24b-12f8-4922-9ea4-53aa044c8754	15.00	13.00	2025-11-19 02:18:47.617338+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	755dc4d4-0977-427f-9e92-26dd82400a6b	18	f
+e0bf6d9a-d145-480c-8a2d-27d39ab4c829	17.00	0.00	2025-11-19 02:18:47.618293+00	473bf63d-4b5e-4441-9e7d-a4efe0506c3e	b7511b6d-4e0a-437a-a633-05de6b831e77	18	f
 \.
 
 
@@ -3038,7 +3490,6 @@ COPY public.lab_assignments (assignment_id, assignment_method, assigned_at, lab_
 --
 
 COPY public.lab_enrollment_campaigns (campaign_id, start_date, end_date, is_closed, created_at, closed_at, course_id) FROM stdin;
-c9fc8e2a-692d-4654-a779-c1ab97db78b8	2025-12-14 05:29:32.485752+00	2025-12-21 05:29:32.485752+00	f	2025-12-14 05:29:32.486073+00	\N	e9ebd666-6ff1-4798-af36-b3fe6c079986
 \.
 
 
@@ -3047,8 +3498,6 @@ c9fc8e2a-692d-4654-a779-c1ab97db78b8	2025-12-14 05:29:32.485752+00	2025-12-21 05
 --
 
 COPY public.laboratory_groups (lab_id, lab_nomenclature, capacity, day_of_week, start_time, end_time, created_at, course_id, professor_id, room_id, external_professor_id) FROM stdin;
-08e36447-6899-43e9-9996-d26d0d838c72	A	20	LUNES	08:50:00	10:30:00	2025-12-11 01:50:11.063612+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	17	afc06854-c503-4922-b5ce-772e371ab4fb	\N
-0fca50f1-1b4e-4d27-9c6f-2b1c982ce09b	B	20	LUNES	14:00:00	15:40:00	2025-12-11 01:51:36.075684+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	17	afc06854-c503-4922-b5ce-772e371ab4fb	\N
 \.
 
 
@@ -3135,7 +3584,7 @@ e30a3af0-bf43-441c-a34d-2aaaa247885d	MIERCOLES	15:50:00	17:30:00	2025-12-03 00:5
 --
 
 COPY public.semesters (semester_id, name, start_date, end_date, is_active, created_at, updated_at) FROM stdin;
-3e3c62df-183c-4cbf-844e-87cbca800df2	2025-B	2025-08-01	2025-12-31	t	2025-11-15 06:34:20.774859+00	2025-11-15 06:34:20.774874+00
+3e3c62df-183c-4cbf-844e-87cbca800df2	2025-B	2025-08-01	2026-01-18	t	2025-11-15 06:34:20.774859+00	2026-01-08 04:22:13.155924+00
 \.
 
 
@@ -3146,6 +3595,8 @@ COPY public.semesters (semester_id, name, start_date, end_date, is_active, creat
 COPY public.session_progress (progress_id, completed_date, notes, created_at, course_group_id, marked_by_id, session_id) FROM stdin;
 b96e8b04-7a15-4ad6-abfd-98c3fcb8792f	2025-12-10		2025-12-10 05:04:24.052814+00	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	17	14884c16-eef6-4ec7-a9a6-4f3cf7208ea4
 010ca13d-30fb-4ab0-b70e-6bc9d200888a	2025-12-10		2025-12-10 05:04:24.053871+00	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	17	28e51aad-4b36-44f0-9e6b-229d328574cf
+f5691390-6359-4e1b-a9c3-1c4b261e5ec3	2026-01-07		2026-01-08 04:24:44.618836+00	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	17	bb7dbd7e-449e-4df5-bb62-77a0dda1ffd4
+1c53b80c-8bb9-4215-b07e-4bed1e398a5a	2026-01-07		2026-01-08 04:24:44.619599+00	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	17	f873f633-2949-4821-a10c-266823d2dc44
 \.
 
 
@@ -3154,59 +3605,32 @@ b96e8b04-7a15-4ad6-abfd-98c3fcb8792f	2025-12-10		2025-12-10 05:04:24.052814+00	3
 --
 
 COPY public.student_enrollments (enrollment_id, status, current_attendance_percentage, final_grade, enrolled_at, updated_at, course_id, group_id, lab_assignment_id, student_id) FROM stdin;
-7d5e319b-595a-4f37-af47-e2c04806a14c	ACTIVO	0.00	4.10	2025-11-15 09:11:18.897701+00	2025-11-19 02:18:47.210797+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	44
-cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	ACTIVO	0.00	3.45	2025-11-15 09:11:19.026024+00	2025-11-19 02:18:47.220278+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	45
-38718ab5-0656-4066-b601-9fac95d9492a	ACTIVO	0.00	5.50	2025-11-15 09:11:19.152484+00	2025-11-19 02:18:47.230393+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	46
-bb4229ae-b022-4c13-90c7-d46bef1a910a	ACTIVO	0.00	2.90	2025-11-15 09:11:19.278883+00	2025-11-19 02:18:47.242155+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	47
-550d4055-46d4-45d6-899a-5f3d5340bc7a	ACTIVO	0.00	1.65	2025-11-15 09:11:19.403358+00	2025-11-19 02:18:47.253528+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	48
-1bf2be96-a310-4865-bf9a-e40619c66e5d	ACTIVO	0.00	3.20	2025-11-15 09:11:19.527483+00	2025-11-19 02:18:47.263617+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	49
-b589d497-0302-4714-b369-13d19154d81d	ACTIVO	0.00	1.90	2025-11-15 09:11:19.651955+00	2025-11-19 02:18:47.273615+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	50
-00326647-5edc-461e-b65f-42726ad3bd2a	ACTIVO	0.00	4.50	2025-11-15 09:11:19.774718+00	2025-11-19 02:18:47.283621+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	51
-e8def30c-9222-4199-b5f9-6adfb61c4f5f	ACTIVO	0.00	2.10	2025-11-15 09:11:19.896656+00	2025-11-19 02:18:47.293617+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	52
-e04dc012-6807-4269-a09a-2b7115d9b5dc	ACTIVO	0.00	4.90	2025-11-15 09:11:20.018542+00	2025-11-19 02:18:47.30358+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	53
-9989826f-d987-4a00-ae38-2042644f308d	ACTIVO	0.00	5.20	2025-11-15 09:11:20.140281+00	2025-11-19 02:18:47.313504+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	54
-70b7e610-2be3-4c56-98d1-aaedf1d98aa6	ACTIVO	0.00	0.65	2025-11-15 09:11:20.261038+00	2025-11-19 02:18:47.323453+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	55
-2dba3c3b-a75f-409c-8b21-0a766565ed2b	ACTIVO	0.00	2.85	2025-11-15 09:11:20.38208+00	2025-11-19 02:18:47.333365+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	56
-ccbfec17-0ecf-4a69-b00b-1b68528513d2	ACTIVO	0.00	0.90	2025-11-15 09:11:20.50359+00	2025-11-19 02:18:47.344013+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	57
-6ddf67bf-3442-4ba7-8e77-bf1094757018	ACTIVO	0.00	5.60	2025-11-15 09:11:20.627288+00	2025-11-19 02:18:47.353992+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	58
-551831ad-472e-4de9-9103-ea2de80a2619	ACTIVO	0.00	3.15	2025-11-15 09:11:20.753533+00	2025-11-19 02:18:47.363942+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	59
-c4422a47-d295-4b88-b568-a6b3584c6b10	ACTIVO	0.00	4.45	2025-11-15 09:11:20.879882+00	2025-11-19 02:18:47.373987+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	60
-e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	ACTIVO	0.00	2.15	2025-11-15 09:11:21.002018+00	2025-11-19 02:18:47.383955+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	61
-31ed20fe-176a-4b27-909c-1659bc734aec	ACTIVO	0.00	2.75	2025-11-15 09:11:21.123753+00	2025-11-19 02:18:47.393936+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	62
-449d0858-0344-419d-9788-0498a6117bae	ACTIVO	0.00	4.40	2025-11-15 09:11:21.248034+00	2025-11-19 02:18:47.403009+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	63
-a9b0fffa-5038-4f53-bc77-69ce1a002be8	ACTIVO	0.00	4.00	2025-11-15 09:11:21.368333+00	2025-11-19 02:18:47.410734+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	64
-dffec140-7568-4a93-8621-f85e775909ab	ACTIVO	0.00	4.65	2025-11-15 09:11:21.487534+00	2025-11-19 02:18:47.418569+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	65
-1bcf23f7-a382-4329-ac2c-d8aa85d5651d	ACTIVO	0.00	4.05	2025-11-15 09:11:21.606288+00	2025-11-19 02:18:47.426322+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	66
-236db70f-21a0-4526-8cca-77a8e49ab688	ACTIVO	0.00	5.80	2025-11-15 09:11:21.728564+00	2025-11-19 02:18:47.434284+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	67
-c858063a-ce79-44fc-94ce-21d7f32ae442	ACTIVO	0.00	4.15	2025-11-15 09:11:21.846708+00	2025-11-19 02:18:47.442122+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	68
-26cea1b0-9d72-4bf0-9f7b-f437dab356d9	ACTIVO	0.00	6.25	2025-11-15 09:11:21.967605+00	2025-11-19 02:18:47.44995+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	69
-aa953cb6-09a8-4e36-819f-d6f89c461e81	ACTIVO	0.00	4.50	2025-11-15 09:11:22.086152+00	2025-11-19 02:18:47.45773+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	70
-8ec66cc1-a4e5-4e2f-89ab-c82085caec87	ACTIVO	0.00	3.70	2025-11-15 09:11:22.206548+00	2025-11-19 02:18:47.465517+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	71
-a155475e-c28c-4daf-ae3a-f63a468ba6fb	ACTIVO	0.00	5.50	2025-11-15 09:11:22.326198+00	2025-11-19 02:18:47.473318+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	72
-983e844c-3dd7-4c89-a522-73c21f24347a	ACTIVO	0.00	4.05	2025-11-15 09:11:22.446597+00	2025-11-19 02:18:47.481106+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	73
-13d7efab-6779-4c55-a521-395221c228b7	ACTIVO	0.00	2.85	2025-11-15 09:11:22.565263+00	2025-11-19 02:18:47.488892+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	74
-92d2927a-55b2-4f78-8dee-ab4485a0f521	ACTIVO	0.00	1.50	2025-11-15 09:11:22.685212+00	2025-11-19 02:18:47.496702+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	75
-ea708a0b-2812-4eb4-b89c-a95b17a6feec	ACTIVO	0.00	2.20	2025-11-15 09:11:22.80763+00	2025-11-19 02:18:47.504482+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	76
-557c6013-c259-4859-b138-2e4628c7fff2	ACTIVO	0.00	2.70	2025-11-15 09:11:22.927292+00	2025-11-19 02:18:47.512207+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	77
-e30d5894-3181-41fe-b551-ad7affebaec1	ACTIVO	0.00	3.10	2025-11-15 09:11:23.04646+00	2025-11-19 02:18:47.520153+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	78
-d6957db7-87b8-4b0c-afa5-086d053db7a4	ACTIVO	0.00	4.40	2025-11-15 09:11:23.167258+00	2025-11-19 02:18:47.527978+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	79
-81b6a0ab-dfb1-469d-8b00-0310cf97b740	ACTIVO	0.00	3.20	2025-11-15 09:11:23.286317+00	2025-11-19 02:18:47.535783+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	80
-4237199b-ebaa-4ca1-8593-e4c5e1fcde94	ACTIVO	0.00	4.50	2025-11-15 09:11:23.406336+00	2025-11-19 02:18:47.543445+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	81
-61c75dd3-302d-47ec-aa56-3d98ec55aa5c	ACTIVO	0.00	5.75	2025-11-15 09:11:23.529823+00	2025-11-19 02:18:47.548596+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	82
-7332b3a4-598d-47fc-9216-24312f9e41cd	ACTIVO	0.00	1.85	2025-11-15 09:11:23.65114+00	2025-11-19 02:18:47.553727+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	83
-b881da06-d5dd-4242-9981-02d2c2ab8dbc	ACTIVO	0.00	2.35	2025-11-15 09:11:23.774038+00	2025-11-19 02:18:47.558859+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	84
-d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	ACTIVO	0.00	2.95	2025-11-15 09:11:23.896236+00	2025-11-19 02:18:47.564012+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	85
-9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	ACTIVO	0.00	1.20	2025-11-15 09:11:24.020462+00	2025-11-19 02:18:47.569159+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	86
-9f269023-4c38-4a8a-8417-d8a2c47fb6c1	ACTIVO	0.00	3.80	2025-11-15 09:11:24.14125+00	2025-11-19 02:18:47.574321+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	87
-0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	ACTIVO	0.00	1.95	2025-11-15 09:11:24.263563+00	2025-11-19 02:18:47.579463+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	88
-d76d237a-b807-4d80-a3fe-f74953b18c5e	ACTIVO	0.00	4.05	2025-11-15 09:11:24.384844+00	2025-11-19 02:18:47.584603+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	89
-85540f7f-76dd-4ee6-b8a7-b4ae9353c908	ACTIVO	0.00	3.70	2025-11-15 09:11:24.505244+00	2025-11-19 02:18:47.589721+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	90
-142a1b22-c085-4deb-9827-7e8c23d28399	ACTIVO	0.00	2.10	2025-11-15 09:11:24.626379+00	2025-11-19 02:18:47.594876+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	91
-a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	ACTIVO	0.00	3.25	2025-11-15 09:11:24.752973+00	2025-11-19 02:18:47.600022+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	92
-04992f10-5370-4559-893b-acc0b6c814bf	ACTIVO	0.00	2.45	2025-11-15 09:11:24.877208+00	2025-11-19 02:18:47.605161+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	93
-9f7c3ac9-6664-4822-8d4e-924de2d296f1	ACTIVO	0.00	4.30	2025-11-15 09:11:24.996591+00	2025-11-19 02:18:47.610288+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	94
-3b33febd-5417-4e80-85b0-518c042bcaeb	ACTIVO	0.00	0.50	2025-11-15 09:11:25.117552+00	2025-11-19 02:18:47.615423+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	95
-473bf63d-4b5e-4441-9e7d-a4efe0506c3e	ACTIVO	0.00	1.95	2025-11-15 09:11:25.242806+00	2025-11-19 02:18:47.620585+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	96
+7d5e319b-595a-4f37-af47-e2c04806a14c	ACTIVO	0.00	5.60	2025-11-15 09:11:18.897701+00	2026-01-08 04:38:14.730872+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	44
+cb5f0823-5aa3-488c-83d5-16ad1c0b83ca	ACTIVO	0.00	8.80	2025-11-15 09:11:19.026024+00	2026-01-08 04:38:14.736871+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	45
+38718ab5-0656-4066-b601-9fac95d9492a	ACTIVO	0.00	10.90	2025-11-15 09:11:19.152484+00	2026-01-08 04:38:14.742592+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	46
+b589d497-0302-4714-b369-13d19154d81d	ACTIVO	0.00	7.25	2025-11-15 09:11:19.651955+00	2026-01-08 04:38:14.748321+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	50
+bb4229ae-b022-4c13-90c7-d46bef1a910a	ACTIVO	0.00	4.55	2025-11-15 09:11:19.278883+00	2026-01-08 04:38:14.753843+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	47
+550d4055-46d4-45d6-899a-5f3d5340bc7a	ACTIVO	0.00	7.20	2025-11-15 09:11:19.403358+00	2026-01-08 04:38:14.759329+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	48
+1bf2be96-a310-4865-bf9a-e40619c66e5d	ACTIVO	0.00	8.30	2025-11-15 09:11:19.527483+00	2026-01-08 04:38:14.764679+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	49
+00326647-5edc-461e-b65f-42726ad3bd2a	ACTIVO	0.00	9.90	2025-11-15 09:11:19.774718+00	2026-01-08 04:38:14.770007+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	51
+e8def30c-9222-4199-b5f9-6adfb61c4f5f	ACTIVO	0.00	7.15	2025-11-15 09:11:19.896656+00	2026-01-08 04:38:14.775263+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	52
+e04dc012-6807-4269-a09a-2b7115d9b5dc	ACTIVO	0.00	10.00	2025-11-15 09:11:20.018542+00	2026-01-08 04:38:14.780546+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	53
+9989826f-d987-4a00-ae38-2042644f308d	ACTIVO	0.00	10.75	2025-11-15 09:11:20.140281+00	2026-01-08 04:38:14.785758+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	54
+70b7e610-2be3-4c56-98d1-aaedf1d98aa6	ACTIVO	0.00	3.20	2025-11-15 09:11:20.261038+00	2026-01-08 04:38:14.791091+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	55
+2dba3c3b-a75f-409c-8b21-0a766565ed2b	ACTIVO	0.00	8.40	2025-11-15 09:11:20.38208+00	2026-01-08 04:38:14.79625+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	56
+ccbfec17-0ecf-4a69-b00b-1b68528513d2	ACTIVO	0.00	6.25	2025-11-15 09:11:20.50359+00	2026-01-08 04:38:14.801358+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	57
+6ddf67bf-3442-4ba7-8e77-bf1094757018	ACTIVO	0.00	10.90	2025-11-15 09:11:20.627288+00	2026-01-08 04:38:14.806547+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	58
+551831ad-472e-4de9-9103-ea2de80a2619	ACTIVO	0.00	8.10	2025-11-15 09:11:20.753533+00	2026-01-08 04:38:14.812757+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	59
+c4422a47-d295-4b88-b568-a6b3584c6b10	ACTIVO	0.00	9.50	2025-11-15 09:11:20.879882+00	2026-01-08 04:38:14.818685+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	60
+e0ec9fe0-93c4-4ae5-8f70-dd3b0cf62606	ACTIVO	0.00	7.50	2025-11-15 09:11:21.002018+00	2026-01-08 04:38:14.823926+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	61
+31ed20fe-176a-4b27-909c-1659bc734aec	ACTIVO	0.00	7.90	2025-11-15 09:11:21.123753+00	2026-01-08 04:38:14.829093+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	62
+449d0858-0344-419d-9788-0498a6117bae	ACTIVO	0.00	9.80	2025-11-15 09:11:21.248034+00	2026-01-08 04:38:14.834438+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	63
+a9b0fffa-5038-4f53-bc77-69ce1a002be8	ACTIVO	0.00	9.40	2025-11-15 09:11:21.368333+00	2026-01-08 04:38:14.841059+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	64
+dffec140-7568-4a93-8621-f85e775909ab	ACTIVO	0.00	9.75	2025-11-15 09:11:21.487534+00	2026-01-08 04:38:14.847733+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	65
+1bcf23f7-a382-4329-ac2c-d8aa85d5651d	ACTIVO	0.00	9.40	2025-11-15 09:11:21.606288+00	2026-01-08 04:38:14.855186+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	66
+236db70f-21a0-4526-8cca-77a8e49ab688	ACTIVO	0.00	10.90	2025-11-15 09:11:21.728564+00	2026-01-08 04:38:14.86224+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	67
+c858063a-ce79-44fc-94ce-21d7f32ae442	ACTIVO	0.00	8.10	2025-11-15 09:11:21.846708+00	2026-01-08 04:38:14.869014+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	68
+26cea1b0-9d72-4bf0-9f7b-f437dab356d9	ACTIVO	0.00	11.65	2025-11-15 09:11:21.967605+00	2026-01-08 04:38:14.876125+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	69
 8bf649e3-5abc-420e-b330-3b44fd22684e	ACTIVO	0.00	\N	2025-11-18 01:49:33.935737+00	2025-11-18 01:49:33.935746+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	97
 90de732c-6541-43d9-a0fa-d079c6e08ac0	ACTIVO	0.00	\N	2025-11-18 01:49:33.938556+00	2025-11-18 01:49:33.938565+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	98
 8bcc9cf6-9b44-4ec6-bf0b-8417d28fd9a0	ACTIVO	0.00	\N	2025-11-18 01:49:33.94119+00	2025-11-18 01:49:33.941198+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	99
@@ -3234,46 +3658,73 @@ ab93907a-2982-436b-92ab-a5eadaf529bd	ACTIVO	0.00	\N	2025-11-18 01:49:33.995889+0
 b0b52e50-8701-4a9c-acc3-7f7b11e2c71d	ACTIVO	0.00	\N	2025-11-18 01:49:34.003552+00	2025-11-18 01:49:34.00356+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	121
 93f38599-290f-4d26-bd9e-66b662465fcf	ACTIVO	0.00	\N	2025-11-18 01:49:34.0061+00	2025-11-18 01:49:34.006109+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	122
 1394bf82-e9af-4a16-bc76-547b3ab2189c	ACTIVO	0.00	\N	2025-11-18 01:49:34.008741+00	2025-11-18 01:49:34.00875+00	57a1728c-880f-4948-a298-026fff257413	44dfc5fc-0ab6-4ef5-a019-c092f75291ab	\N	123
-57449e51-40eb-4ade-8f62-a238b09cbed9	ACTIVO	86.49	11.55	2025-12-02 05:11:28.900138+00	2025-12-10 05:04:23.907435+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	44
-886a2185-b3d8-423b-879c-b99fdd0aae61	ACTIVO	83.78	10.90	2025-12-02 05:11:28.90371+00	2025-12-10 05:04:23.91256+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	45
-352929cc-b8c2-44b3-8b44-aab6b0e3a451	ACTIVO	78.38	14.90	2025-12-02 05:11:28.906552+00	2025-12-10 05:04:23.9181+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	46
-56f6e8f0-4bff-4fbb-a8c9-52f670a965e3	ACTIVO	83.78	10.75	2025-12-02 05:11:28.909353+00	2025-12-10 05:04:23.92237+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	97
-7e811f49-44d5-48dc-a128-c5321e6035bd	ACTIVO	78.38	15.55	2025-12-02 05:11:28.912117+00	2025-12-10 05:04:23.92661+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	98
-e93c1638-ab36-48b3-87ed-a178e005132a	ACTIVO	86.49	13.05	2025-12-02 05:11:28.915013+00	2025-12-10 05:04:23.930763+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	99
-f4fc3a4b-c093-4a0e-98dc-e8d1faf471e6	ACTIVO	75.68	11.60	2025-12-02 05:11:28.917833+00	2025-12-10 05:04:23.934888+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	47
-64d27f31-40c5-4006-a2c1-9714cbbc7281	ACTIVO	89.19	9.60	2025-12-02 05:11:28.920671+00	2025-12-10 05:04:23.939005+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	48
-48c05e27-a206-4f5b-8d80-9705b4dc2bb7	ACTIVO	78.38	18.20	2025-12-02 05:11:28.923628+00	2025-12-10 05:04:23.943316+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	49
-b5346d03-5a8e-487e-bc14-128dc445dea0	ACTIVO	83.78	12.15	2025-12-02 05:11:28.92659+00	2025-12-10 05:04:23.947472+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	50
-9f64b136-de90-4cc7-9a6d-92264a85702f	ACTIVO	89.19	12.70	2025-12-02 05:11:28.929353+00	2025-12-10 05:04:23.951662+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	100
-b3ad5393-0a2f-4c2f-a58f-e27401629083	ACTIVO	86.49	12.15	2025-12-02 05:11:28.932307+00	2025-12-10 05:04:23.955682+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	51
-79cece18-94c6-47a7-ace7-62b644a31887	ACTIVO	86.49	13.60	2025-12-02 05:11:28.93538+00	2025-12-10 05:04:23.95982+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	52
-7e009403-3fec-4d5c-8388-577cfc21d881	ACTIVO	75.68	11.15	2025-12-02 05:11:28.938286+00	2025-12-10 05:04:23.963895+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	53
-7d57cb48-0382-45ab-a04d-8af9b527b9da	ACTIVO	81.08	18.00	2025-12-02 05:11:28.941628+00	2025-12-10 05:04:23.967817+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	101
-3576361f-f07e-4883-9d51-43333af019a0	ACTIVO	81.08	12.20	2025-12-02 05:11:28.944762+00	2025-12-10 05:04:23.971986+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	102
-5762d3ba-b991-48dc-a9f5-c398dab0648f	ACTIVO	81.08	12.55	2025-12-02 05:11:28.947685+00	2025-12-10 05:04:23.97598+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	103
-9bb32e33-1f35-4142-a54b-2f4f30c08f84	ACTIVO	86.49	13.25	2025-12-02 05:11:28.950701+00	2025-12-10 05:04:23.980049+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	54
-99c3412d-4d4a-4ccb-927d-0908d004eb2f	ACTIVO	86.49	8.55	2025-12-02 05:11:28.953827+00	2025-12-10 05:04:23.984062+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	104
-45cd7e1d-e078-43d5-9c98-201a322d5a97	ACTIVO	81.08	16.80	2025-12-02 05:11:28.956817+00	2025-12-10 05:04:23.988045+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	55
-bdfd8e7b-83ed-4445-82e0-8e6bb11903f2	ACTIVO	86.49	13.00	2025-12-02 05:11:28.959775+00	2025-12-10 05:04:23.992156+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	56
-e48774c7-a125-4c7a-ac04-e7d68e11a398	ACTIVO	89.19	12.60	2025-12-02 05:11:28.962662+00	2025-12-10 05:04:23.996115+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	57
-35219df4-7983-4510-9fa5-fe808159ffc0	ACTIVO	91.89	17.60	2025-12-02 05:11:28.965633+00	2025-12-10 05:04:23.999638+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	105
-9a06998f-846f-4392-b453-99e4b3a62cac	ACTIVO	86.49	12.10	2025-12-02 05:11:28.96867+00	2025-12-10 05:04:24.002107+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	58
-ca7b812d-ac5d-4613-ba72-1888927be120	ACTIVO	81.08	11.30	2025-12-02 05:11:28.971714+00	2025-12-10 05:04:24.004567+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	106
-defab93e-cba2-4113-b7c7-fd120a229c1a	ACTIVO	86.49	11.25	2025-12-02 05:11:28.974806+00	2025-12-10 05:04:24.007014+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	59
-aa146231-828d-482b-a7c9-5f8e0811c62d	ACTIVO	86.49	14.90	2025-12-02 05:11:28.977634+00	2025-12-10 05:04:24.009931+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	60
-caa77720-0538-438e-b90a-8e9b9fa4d593	ACTIVO	91.89	14.10	2025-12-02 05:11:28.980518+00	2025-12-10 05:04:24.013561+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	61
-4c452485-6f64-4024-a775-68c29e50d3af	ACTIVO	89.19	14.65	2025-12-02 05:11:28.983604+00	2025-12-10 05:04:24.016968+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	62
-c327e88a-8fa4-445b-873e-1e23d6c10bc5	ACTIVO	94.59	10.40	2025-12-02 05:11:28.98691+00	2025-12-10 05:04:24.019905+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	63
-cabc7ee5-2039-4de6-a2c0-2f696f9afa2a	ACTIVO	86.49	14.40	2025-12-02 05:11:28.989001+00	2025-12-10 05:04:24.022344+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	64
-ae913769-90d4-491c-b20e-0c43d41aae75	ACTIVO	81.08	13.00	2025-12-02 05:11:28.990908+00	2025-12-10 05:04:24.02487+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	65
-7fc31e2f-5606-4163-a12c-560a785ddee0	ACTIVO	78.38	13.55	2025-12-02 05:11:28.992803+00	2025-12-10 05:04:24.02735+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	107
-2050d05b-5853-45df-8b2c-6195584b7ab8	ACTIVO	86.49	18.20	2025-12-02 05:11:28.994695+00	2025-12-10 05:04:24.030239+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	66
-1410f832-cc28-44e4-b296-33f6539a3708	ACTIVO	78.38	10.50	2025-12-02 05:11:28.997212+00	2025-12-10 05:04:24.033577+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	67
-af15a93a-ddc9-45e3-b296-121c41e3db2a	ACTIVO	83.78	14.40	2025-12-02 05:11:28.999099+00	2025-12-10 05:04:24.036913+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	68
-6b2d5f31-4a79-41e3-a0c1-da2a4bbcac19	ACTIVO	75.68	8.30	2025-12-02 05:11:29.001064+00	2025-12-10 05:04:24.040497+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	69
-7f9cf976-43d6-411d-8b96-9ce5dded69d9	ACTIVO	78.38	11.80	2025-12-02 05:11:29.002926+00	2025-12-10 05:04:24.043931+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	70
-6ffb05a9-5755-4804-ad54-b2fab5d01a0a	ACTIVO	86.49	14.50	2025-12-02 05:11:29.005496+00	2025-12-10 05:04:24.047344+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	108
-3501109d-0ecd-4877-a483-c0d23d88962b	ACTIVO	81.08	11.50	2025-12-02 05:11:29.008118+00	2025-12-10 05:04:24.050768+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	71
+57449e51-40eb-4ade-8f62-a238b09cbed9	ACTIVO	82.05	11.55	2025-12-02 05:11:28.900138+00	2026-01-08 04:24:44.498204+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	44
+886a2185-b3d8-423b-879c-b99fdd0aae61	ACTIVO	79.49	10.90	2025-12-02 05:11:28.90371+00	2026-01-08 04:24:44.503392+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	45
+352929cc-b8c2-44b3-8b44-aab6b0e3a451	ACTIVO	74.36	14.90	2025-12-02 05:11:28.906552+00	2026-01-08 04:24:44.508013+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	46
+56f6e8f0-4bff-4fbb-a8c9-52f670a965e3	ACTIVO	79.49	10.75	2025-12-02 05:11:28.909353+00	2026-01-08 04:24:44.5119+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	97
+7e811f49-44d5-48dc-a128-c5321e6035bd	ACTIVO	74.36	15.55	2025-12-02 05:11:28.912117+00	2026-01-08 04:24:44.515707+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	98
+e93c1638-ab36-48b3-87ed-a178e005132a	ACTIVO	82.05	13.05	2025-12-02 05:11:28.915013+00	2026-01-08 04:24:44.520167+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	99
+f4fc3a4b-c093-4a0e-98dc-e8d1faf471e6	ACTIVO	71.79	11.60	2025-12-02 05:11:28.917833+00	2026-01-08 04:24:44.523934+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	47
+64d27f31-40c5-4006-a2c1-9714cbbc7281	ACTIVO	84.62	9.60	2025-12-02 05:11:28.920671+00	2026-01-08 04:24:44.5277+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	48
+48c05e27-a206-4f5b-8d80-9705b4dc2bb7	ACTIVO	74.36	18.20	2025-12-02 05:11:28.923628+00	2026-01-08 04:24:44.53144+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	49
+9f64b136-de90-4cc7-9a6d-92264a85702f	ACTIVO	84.62	12.70	2025-12-02 05:11:28.929353+00	2026-01-08 04:24:44.53515+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	100
+b3ad5393-0a2f-4c2f-a58f-e27401629083	ACTIVO	82.05	12.15	2025-12-02 05:11:28.932307+00	2026-01-08 04:24:44.538762+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	51
+79cece18-94c6-47a7-ace7-62b644a31887	ACTIVO	82.05	13.60	2025-12-02 05:11:28.93538+00	2026-01-08 04:24:44.542346+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	52
+7e009403-3fec-4d5c-8388-577cfc21d881	ACTIVO	71.79	11.15	2025-12-02 05:11:28.938286+00	2026-01-08 04:24:44.546153+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	53
+7d57cb48-0382-45ab-a04d-8af9b527b9da	ACTIVO	76.92	18.00	2025-12-02 05:11:28.941628+00	2026-01-08 04:24:44.550197+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	101
+b5346d03-5a8e-487e-bc14-128dc445dea0	ACTIVO	79.49	12.15	2025-12-02 05:11:28.92659+00	2026-01-08 04:24:44.554075+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	50
+3576361f-f07e-4883-9d51-43333af019a0	ACTIVO	76.92	12.20	2025-12-02 05:11:28.944762+00	2026-01-08 04:24:44.557938+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	102
+5762d3ba-b991-48dc-a9f5-c398dab0648f	ACTIVO	76.92	12.55	2025-12-02 05:11:28.947685+00	2026-01-08 04:24:44.561668+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	103
+9bb32e33-1f35-4142-a54b-2f4f30c08f84	ACTIVO	82.05	13.25	2025-12-02 05:11:28.950701+00	2026-01-08 04:24:44.565579+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	54
+99c3412d-4d4a-4ccb-927d-0908d004eb2f	ACTIVO	82.05	8.55	2025-12-02 05:11:28.953827+00	2026-01-08 04:24:44.570143+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	104
+45cd7e1d-e078-43d5-9c98-201a322d5a97	ACTIVO	76.92	16.80	2025-12-02 05:11:28.956817+00	2026-01-08 04:24:44.572814+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	55
+bdfd8e7b-83ed-4445-82e0-8e6bb11903f2	ACTIVO	82.05	13.00	2025-12-02 05:11:28.959775+00	2026-01-08 04:24:44.575056+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	56
+e48774c7-a125-4c7a-ac04-e7d68e11a398	ACTIVO	84.62	12.60	2025-12-02 05:11:28.962662+00	2026-01-08 04:24:44.577277+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	57
+35219df4-7983-4510-9fa5-fe808159ffc0	ACTIVO	87.18	17.60	2025-12-02 05:11:28.965633+00	2026-01-08 04:24:44.579482+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	105
+9a06998f-846f-4392-b453-99e4b3a62cac	ACTIVO	82.05	12.10	2025-12-02 05:11:28.96867+00	2026-01-08 04:24:44.581712+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	58
+ca7b812d-ac5d-4613-ba72-1888927be120	ACTIVO	76.92	11.30	2025-12-02 05:11:28.971714+00	2026-01-08 04:24:44.583915+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	106
+defab93e-cba2-4113-b7c7-fd120a229c1a	ACTIVO	82.05	11.25	2025-12-02 05:11:28.974806+00	2026-01-08 04:24:44.58612+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	59
+aa146231-828d-482b-a7c9-5f8e0811c62d	ACTIVO	82.05	14.90	2025-12-02 05:11:28.977634+00	2026-01-08 04:24:44.588317+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	60
+caa77720-0538-438e-b90a-8e9b9fa4d593	ACTIVO	87.18	14.10	2025-12-02 05:11:28.980518+00	2026-01-08 04:24:44.590523+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	61
+4c452485-6f64-4024-a775-68c29e50d3af	ACTIVO	84.62	14.65	2025-12-02 05:11:28.983604+00	2026-01-08 04:24:44.592716+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	62
+c327e88a-8fa4-445b-873e-1e23d6c10bc5	ACTIVO	89.74	10.40	2025-12-02 05:11:28.98691+00	2026-01-08 04:24:44.594919+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	63
+cabc7ee5-2039-4de6-a2c0-2f696f9afa2a	ACTIVO	82.05	14.40	2025-12-02 05:11:28.989001+00	2026-01-08 04:24:44.597197+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	64
+ae913769-90d4-491c-b20e-0c43d41aae75	ACTIVO	76.92	13.00	2025-12-02 05:11:28.990908+00	2026-01-08 04:24:44.599421+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	65
+7fc31e2f-5606-4163-a12c-560a785ddee0	ACTIVO	74.36	13.55	2025-12-02 05:11:28.992803+00	2026-01-08 04:24:44.601639+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	107
+2050d05b-5853-45df-8b2c-6195584b7ab8	ACTIVO	82.05	18.20	2025-12-02 05:11:28.994695+00	2026-01-08 04:24:44.603855+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	66
+1410f832-cc28-44e4-b296-33f6539a3708	ACTIVO	74.36	10.50	2025-12-02 05:11:28.997212+00	2026-01-08 04:24:44.606077+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	67
+af15a93a-ddc9-45e3-b296-121c41e3db2a	ACTIVO	79.49	14.40	2025-12-02 05:11:28.999099+00	2026-01-08 04:24:44.608293+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	68
+6b2d5f31-4a79-41e3-a0c1-da2a4bbcac19	ACTIVO	71.79	8.30	2025-12-02 05:11:29.001064+00	2026-01-08 04:24:44.610514+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	69
+7f9cf976-43d6-411d-8b96-9ce5dded69d9	ACTIVO	74.36	11.80	2025-12-02 05:11:29.002926+00	2026-01-08 04:24:44.612951+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	70
+6ffb05a9-5755-4804-ad54-b2fab5d01a0a	ACTIVO	82.05	14.50	2025-12-02 05:11:29.005496+00	2026-01-08 04:24:44.615191+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	108
+3501109d-0ecd-4877-a483-c0d23d88962b	ACTIVO	76.92	11.50	2025-12-02 05:11:29.008118+00	2026-01-08 04:24:44.617439+00	e9ebd666-6ff1-4798-af36-b3fe6c079986	33d742c3-2ba3-4d0a-8b7d-b3554165d3d9	\N	71
+aa953cb6-09a8-4e36-819f-d6f89c461e81	ACTIVO	0.00	9.80	2025-11-15 09:11:22.086152+00	2026-01-08 04:38:14.883186+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	70
+8ec66cc1-a4e5-4e2f-89ab-c82085caec87	ACTIVO	0.00	4.90	2025-11-15 09:11:22.206548+00	2026-01-08 04:38:14.889543+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	71
+a155475e-c28c-4daf-ae3a-f63a468ba6fb	ACTIVO	0.00	10.85	2025-11-15 09:11:22.326198+00	2026-01-08 04:38:14.896312+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	72
+983e844c-3dd7-4c89-a522-73c21f24347a	ACTIVO	0.00	9.00	2025-11-15 09:11:22.446597+00	2026-01-08 04:38:14.902496+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	73
+13d7efab-6779-4c55-a521-395221c228b7	ACTIVO	0.00	8.25	2025-11-15 09:11:22.565263+00	2026-01-08 04:38:14.90925+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	74
+92d2927a-55b2-4f78-8dee-ab4485a0f521	ACTIVO	0.00	6.90	2025-11-15 09:11:22.685212+00	2026-01-08 04:38:14.916341+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	75
+ea708a0b-2812-4eb4-b89c-a95b17a6feec	ACTIVO	0.00	3.70	2025-11-15 09:11:22.80763+00	2026-01-08 04:38:14.923235+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	76
+557c6013-c259-4859-b138-2e4628c7fff2	ACTIVO	0.00	8.85	2025-11-15 09:11:22.927292+00	2026-01-08 04:38:14.930056+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	77
+e30d5894-3181-41fe-b551-ad7affebaec1	ACTIVO	0.00	8.25	2025-11-15 09:11:23.04646+00	2026-01-08 04:38:14.936706+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	78
+d6957db7-87b8-4b0c-afa5-086d053db7a4	ACTIVO	0.00	8.45	2025-11-15 09:11:23.167258+00	2026-01-08 04:38:14.943373+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	79
+81b6a0ab-dfb1-469d-8b00-0310cf97b740	ACTIVO	0.00	6.75	2025-11-15 09:11:23.286317+00	2026-01-08 04:38:14.950093+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	80
+4237199b-ebaa-4ca1-8593-e4c5e1fcde94	ACTIVO	0.00	7.50	2025-11-15 09:11:23.406336+00	2026-01-08 04:38:14.956842+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	81
+61c75dd3-302d-47ec-aa56-3d98ec55aa5c	ACTIVO	0.00	11.30	2025-11-15 09:11:23.529823+00	2026-01-08 04:38:14.963422+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	82
+7332b3a4-598d-47fc-9216-24312f9e41cd	ACTIVO	0.00	7.20	2025-11-15 09:11:23.65114+00	2026-01-08 04:38:14.970554+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	83
+b881da06-d5dd-4242-9981-02d2c2ab8dbc	ACTIVO	0.00	3.85	2025-11-15 09:11:23.774038+00	2026-01-08 04:38:14.977445+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	84
+d63ebd23-50e4-498d-ae0d-de6fa90ebbf8	ACTIVO	0.00	9.10	2025-11-15 09:11:23.896236+00	2026-01-08 04:38:14.984544+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	85
+9a4d4310-6d18-4e6a-bcc4-f28a2ec8989e	ACTIVO	0.00	6.60	2025-11-15 09:11:24.020462+00	2026-01-08 04:38:14.9913+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	86
+9f269023-4c38-4a8a-8417-d8a2c47fb6c1	ACTIVO	0.00	9.95	2025-11-15 09:11:24.14125+00	2026-01-08 04:38:14.996772+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	87
+0fb0dad1-e6e8-4b00-baa6-e7e8189bc55f	ACTIVO	0.00	7.25	2025-11-15 09:11:24.263563+00	2026-01-08 04:38:15.002034+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	88
+d76d237a-b807-4d80-a3fe-f74953b18c5e	ACTIVO	0.00	9.00	2025-11-15 09:11:24.384844+00	2026-01-08 04:38:15.007302+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	89
+85540f7f-76dd-4ee6-b8a7-b4ae9353c908	ACTIVO	0.00	9.05	2025-11-15 09:11:24.505244+00	2026-01-08 04:38:15.012557+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	90
+142a1b22-c085-4deb-9827-7e8c23d28399	ACTIVO	0.00	5.70	2025-11-15 09:11:24.626379+00	2026-01-08 04:38:15.01787+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	91
+a0d4b1fe-1854-4293-8a1c-03f550a6fa5c	ACTIVO	0.00	8.40	2025-11-15 09:11:24.752973+00	2026-01-08 04:38:15.023152+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	92
+04992f10-5370-4559-893b-acc0b6c814bf	ACTIVO	0.00	7.40	2025-11-15 09:11:24.877208+00	2026-01-08 04:38:15.028498+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	93
+9f7c3ac9-6664-4822-8d4e-924de2d296f1	ACTIVO	0.00	9.35	2025-11-15 09:11:24.996591+00	2026-01-08 04:38:15.033799+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	94
+3b33febd-5417-4e80-85b0-518c042bcaeb	ACTIVO	0.00	6.65	2025-11-15 09:11:25.117552+00	2026-01-08 04:38:15.039141+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	95
+473bf63d-4b5e-4441-9e7d-a4efe0506c3e	ACTIVO	0.00	7.25	2025-11-15 09:11:25.242806+00	2026-01-08 04:38:15.044531+00	69ef36ee-c239-43ba-9926-8247aaca8531	6b6b47f3-9664-44ec-9e29-a82caeec3d83	\N	96
 \.
 
 
@@ -3282,7 +3733,6 @@ af15a93a-ddc9-45e3-b296-121c41e3db2a	ACTIVO	83.78	14.40	2025-12-02 05:11:28.9990
 --
 
 COPY public.student_postulations (postulation_id, "timestamp", status, campaign_id, lab_group_id, student_id) FROM stdin;
-0d531e05-831f-4ca0-bd44-24ffc283b526	2025-12-14 06:02:42.930913+00	PENDIENTE	c9fc8e2a-692d-4654-a779-c1ab97db78b8	08e36447-6899-43e9-9996-d26d0d838c72	47
 \.
 
 
@@ -3362,7 +3812,6 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 29	pbkdf2_sha256$600000$ESGWJqxjBkb5EQR5DV5Eqw$pCqddbQ5gC/wOPI9afq9FDtcqXIqjRHYOYMIoUuKyr0=	\N	f	jgutierrezca@unsa.edu.pe	Juan Carlos	Gutierrez Caceres	f	t	2025-11-15 06:34:24.149579+00	fe449730-2e04-47a9-8feb-4a285315fa15	jgutierrezca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.269898+00	2025-11-15 06:34:24.269902+00
 30	pbkdf2_sha256$600000$IuglCyu4YK0v3kfYg9xU9R$9i/BUuxpCfDQnHy3ZvdHnQgB888YeNiTIQMr2ztIw6U=	\N	f	wramos@unsa.edu.pe	Wilber Roberto	Ramos Lovon	f	t	2025-11-15 06:34:24.274482+00	aca3e397-45dd-4a37-a00f-bd8e3cd19c29	wramos@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.401155+00	2025-11-15 06:34:24.401159+00
 2	pbkdf2_sha256$600000$QAf1nHls0u8cN6mhAOYBrn$DWsrCLUP9b8GQHgHGvYQ0xBD6gok3higHdPQyB5V5vk=	2025-11-15 07:42:44.898013+00	f	rlinaresd@unsa.edu.pe	Rolando	Linares Delgado	f	t	2025-11-15 06:34:20.781548+00	1fc1ad18-3738-4820-85a4-80d4f7a4ceea	rlinaresd@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:20.902138+00	2025-11-15 06:34:20.902147+00
-17	pbkdf2_sha256$600000$dnvl1yXhxuzZeLPmgYd9rP$8TQOC3hVF9fO5xPHZi62rADiQzM+bToe5EW6V9QArCY=	2025-12-17 04:46:57.630967+00	f	esarmientoca@unsa.edu.pe	Edgar	Sarmiento Calisaya	f	t	2025-11-15 06:34:22.636157+00	de50ae51-b886-4a8b-8996-e226011112e5	esarmientoca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.754862+00	2025-11-15 06:34:22.754866+00
 97	pbkdf2_sha256$600000$BDpCUae7bEV3e46brUYLAf$I87TUQPWfu7IOOwrrs92L1TyXhTfvgRFlLAZVj8GJv0=	\N	f	20190652	Nelzon Jorge	Apaza Apaza	f	t	2025-11-18 00:25:58.710884+00	5a40401b-b53e-4159-a836-6844c331ecab	napaza@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:58.71115+00	2025-12-02 05:11:28.908627+00
 31	pbkdf2_sha256$600000$I2KvPwx8cSHusAPMb6Vnuq$3j7YtpxKneHb2POYGP566af3tNsU0beIEVWNmRs1UNE=	\N	f	eadriazola@unsa.edu.pe	Eliana Maria	Adriazola Herrera	f	t	2025-11-15 06:34:24.414162+00	1d496cce-cbe8-4d3f-91a7-6e39c86c89b5	eadriazola@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.534471+00	2025-11-15 06:34:24.534477+00
 32	pbkdf2_sha256$600000$c7DkDh4J1F2UtbruuM8eWn$JAjH8Kjryqex/uvNYCTToo4AJfQSlFwwjthfz8hNKyk=	\N	f	egutierrezro@unsa.edu.pe	Eddy Augusto	Gutierrez Rodriguez	f	t	2025-11-15 06:34:24.539305+00	68c4f4c2-8e96-41ed-bd0c-7922a4377dfe	egutierrezro@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:24.65826+00	2025-11-15 06:34:24.658265+00
@@ -3374,7 +3823,6 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 39	pbkdf2_sha256$600000$tn68aToz3YV69Z29G6qHa6$vHhKuT/4sCUSvES097bamwF/VhFMQiUZvpnGnHHOEdQ=	\N	f	dmonroyc@unsa.edu.pe	Daniel Jesus	Monroy Carnero	f	t	2025-11-15 06:34:25.410224+00	afad6e3e-ff22-40e0-8d24-6f51155d4a52	dmonroyc@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.531048+00	2025-11-15 06:34:25.531052+00
 40	pbkdf2_sha256$600000$5zqRWKFtLhGhls8ZnC92AR$vTqzvIDxxOxBxZpjXUn/30NxnFvYxh9lcvqvIp5FnNk=	\N	f	ltacca@unsa.edu.pe	Lorenzo Wilbert	Tacca Quispe	f	t	2025-11-15 06:34:25.537423+00	8248ed50-795c-47db-8a46-7638b66253d8	ltacca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.658183+00	2025-11-15 06:34:25.658186+00
 41	pbkdf2_sha256$600000$6AzlpHMETJ7u06SM9I4dAP$MXj7vMWBrnGWSoXViQl/fC/38+qrm+tkc5i/WbLgjMI=	\N	f	storresg@unsa.edu.pe	Selene Belen	Torres Gonzales	f	t	2025-11-15 06:34:25.660461+00	61acd5e9-06cf-42b7-933f-9894c88dee3d	storresg@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:25.779785+00	2025-11-15 06:34:25.779789+00
-42	pbkdf2_sha256$600000$Gsai0frsH4rmB5ykEF5Ahj$0GdyKudWSKND+kI+YuO1h0iGwPz4lMRXkruVyj+50Jk=	2025-12-17 04:52:44.066499+00	f	secretaria@unsa.edu.pe	Raquel	Gonzales	f	t	2025-11-15 07:14:22+00	8aec098c-fb2b-42f4-8087-a07057f6eabb	secretaria@unsa.edu.pe	\N	\N	SECRETARIA	ACTIVO	0	\N	2025-11-15 07:14:22.332688+00	2025-11-15 07:15:08.714023+00
 23	pbkdf2_sha256$600000$nGuWuanrAITD7utSdRzVTY$DtcMb9mrdAVtUGPRTwnhXDuEFFNJn/aqY7F+d3Lnez4=	2025-11-15 07:40:35.421932+00	f	amamaniali@unsa.edu.pe	Alvaro Henry	Mamani Aliaga	f	t	2025-11-15 06:34:23.379007+00	4fcfe094-a6c9-4314-a17a-d0c082941984	amamaniali@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:23.501783+00	2025-11-15 06:34:23.50179+00
 99	pbkdf2_sha256$600000$2wGdyaIc1fh4xHZUddqHgQ$jiaMaFS7d4yESf/c3E4DKbB/C3WRwLYRaezCQsotMQE=	\N	f	20204682	Jayan Michael	Caceres Cuba	f	t	2025-11-18 00:25:58.964223+00	284f578b-f38b-4fda-9a6b-d6a336f8c8fd	jcaceres@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:58.964407+00	2025-12-02 05:11:28.91429+00
 100	pbkdf2_sha256$600000$3mRRrKDvfx2E4uMlrAq6ld$yeBIuxgW2zUF6cEkl4AN7d95JWUopTmeg0FVIDR3wGA=	\N	f	20190755	Alessander Jesus	Carazas Quispe	f	t	2025-11-18 00:25:59.087979+00	6f4f609d-2131-4b85-adff-628e5b889b03	acarazas@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:25:59.088171+00	2025-12-02 05:11:28.928671+00
@@ -3404,12 +3852,9 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 57	pbkdf2_sha256$600000$9QStSuLDngX8MQIYI7pyUW$hwBXbcyjFg8hoHnqGf3g2l+Fl8BdKR8ypYHO2GQDd0E=	\N	f	20232279	Mauricio Andres	Cornejo Alvarez	f	t	2025-11-15 09:11:20.502728+00	cd427cc8-7d37-4162-883e-0de29fe78a23	mcornejo@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.502906+00	2025-12-02 05:11:28.961922+00
 58	pbkdf2_sha256$600000$hpLC7VgCo9nFQNOWvAYnt1$zikh03TYmn/zHYVS5MbezH6TikAmx3W7fXNwolfrQR0=	\N	f	20200364	Kathia Yerardine	Cuevas Apaza	f	t	2025-11-15 09:11:20.626552+00	2637b698-2142-48d9-a238-a7995bcdddbf	kcuevas@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.626711+00	2025-12-02 05:11:28.967905+00
 44	pbkdf2_sha256$600000$EUs0oyeK1IHJl0BHgQyE5o$bWJsl4bF3tfPNE67RVoL6Hbv8HbajMpIUzbMUtU08cg=	\N	f	20233590	Diego Daniel	Abensur Romero	f	t	2025-11-15 09:11:18.895384+00	ee196c44-93a0-41ae-9c36-c7b0bab87f15	dabensur@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:18.895676+00	2025-12-02 05:11:28.898055+00
-47	pbkdf2_sha256$600000$AXhc8MMYPWsnCOIlfzwIks$l+zI2tmKGbT+Ktmc/q2mG5hwdQiTrqr4rD3ZqYIksTM=	2025-12-17 04:15:39.743025+00	f	20213145	Jhosep Angel	Cacsire Sanchez	f	t	2025-11-15 09:11:19.27794+00	7e4e0b12-59cd-4e39-a795-d7f648cdb0e9	jcacsire@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.278138+00	2025-12-07 03:35:11.320814+00
 45	pbkdf2_sha256$600000$5T3k9LUipZNGowHwnBmyOP$61Mi+a6ppDan63O6sDVlergnNSF+q5LIepgF7T+mgQA=	\N	f	20232284	Diogo Andres	Alcazar Medina	f	t	2025-11-15 09:11:19.02509+00	05d580e1-909d-40bc-9416-4de2a6dc6fcf	dalcazar@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.025295+00	2025-12-02 05:11:28.902932+00
 46	pbkdf2_sha256$600000$CpcY9mPZ2Z4KTz9xJq8fh1$0jKKP0PY5IOJ80eWasBZZ3RooXa6xYwJ8/1UYI0yNvQ=	\N	f	20230573	Jose Javier	Alva Cornejo	f	t	2025-11-15 09:11:19.151592+00	94df95c6-d318-4131-aff0-fdc4997491c4	jalva@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.151788+00	2025-12-02 05:11:28.905829+00
-18	pbkdf2_sha256$600000$dg0unf4OhCDi8javzwiUVE$gqoRTzYtuhGdVe8GDhlpN9/+qCD9/ITG3Gghbjjrrjc=	2025-12-04 03:05:59.175276+00	f	yyarira@unsa.edu.pe	Yessenia Deysi	Yari Ramos	f	t	2025-11-15 06:34:22.759636+00	718c6776-5833-45f9-bc81-0b06f1e89efd	yyarira@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.878282+00	2025-11-15 06:34:22.878287+00
 48	pbkdf2_sha256$600000$yBrym9KNdFOwbqfKnJq1KJ$rXU87hg0ipkJld+e3yhSu17Oe0zSardA1XE820vHnFY=	\N	f	20231537	Sergio Eliseo	Calcina Muchica	f	t	2025-11-15 09:11:19.402483+00	0664aa83-1608-477c-ba00-96927b2782a8	scalcina@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.402668+00	2025-12-02 05:11:28.919923+00
-1	pbkdf2_sha256$600000$LHuCBTmVBzXq1YZZop5wUe$l25Z/M0QMbAEx2JMxWQndQvwLhWha5va2okgpYuIgbk=	2025-12-10 03:58:11.439858+00	t	admin			t	t	2025-11-15 06:25:18+00	6a744607-b3a3-422c-b757-1110be126746	admin@unsa.edu.pe	\N	\N	ADMIN	INACTIVO	0	\N	2025-11-15 06:25:18.482544+00	2025-11-15 06:35:15.517462+00
 49	pbkdf2_sha256$600000$Yqo08dN80nvlpITYQmUPFG$Ux7W7wP5MlidGYQKwZBq1YH6Czah82SQXXWWt775L9U=	\N	f	20233598	Jose Luis	Calizaya Quispe	f	t	2025-11-15 09:11:19.526625+00	d932a110-cbed-42cc-b112-ffd664ef44cb	jcalizaya@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.526802+00	2025-12-02 05:11:28.922847+00
 52	pbkdf2_sha256$600000$jcz0tJogOqp4GI0ipr3gv6$xJ1YCI3W5vvF8l1ibqFNHUxXj5SMuHPLF1FNH5OeTMI=	\N	f	20222179	Jose Rodrigo	Cari Almiron	f	t	2025-11-15 09:11:19.895771+00	edb144f3-7a5a-4ad2-a19b-3a3444b941ba	jcari@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.895912+00	2025-12-02 05:11:28.934813+00
 54	pbkdf2_sha256$600000$9H1k1laHSW24tb6TAnWncu$R6pXc/hqZV99Rqf2HIwkczeRMvIggBMaD5kC93vxxsY=	\N	f	20221737	Fernando Jesus	Chavez Medina	f	t	2025-11-15 09:11:20.139519+00	88bb9dbf-8885-4d63-90e7-88f4614efed1	fchavez@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:20.139673+00	2025-12-02 05:11:28.949929+00
@@ -3426,6 +3871,8 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 62	pbkdf2_sha256$600000$IGTW0GL6HsZRHD4p7HHlAL$DfxKK1pY+GndR0klmfrLYQGLFxaWtFt0+avQ8YvUuZU=	\N	f	20230585	Sophia Alejandra	Esteba Feria	f	t	2025-11-15 09:11:21.122978+00	dd839ae8-7bc5-4647-8890-e1bdb7c4059d	sesteba@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:21.123163+00	2025-12-02 05:11:28.982802+00
 63	pbkdf2_sha256$600000$L1DIMVBKC2m3GxOcuJFzu8$foE/ZbRyZbel9T0Jg3jd9aKArMC+e4DFXKvtSBYuOBA=	\N	f	20220724	Leonardo Gustavo	Gaona Briceño	f	t	2025-11-15 09:11:21.247479+00	7f58952c-321b-4cb4-9ba7-e69688ab765a	lgaona@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:21.247601+00	2025-12-02 05:11:28.986007+00
 64	pbkdf2_sha256$600000$PalUuRIL3rnv7Ui73Yk86h$ClG21OxI7D+PWdLB4nw2m5KhbJr4bq4zSN6ieQ+JUHs=	\N	f	20232274	Valeria	Guzman Avalos	f	t	2025-11-15 09:11:21.367764+00	d0943433-bc3f-472d-9879-cdfcec78ca98	vguzman@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:21.367892+00	2025-12-02 05:11:28.98851+00
+47	pbkdf2_sha256$600000$AXhc8MMYPWsnCOIlfzwIks$l+zI2tmKGbT+Ktmc/q2mG5hwdQiTrqr4rD3ZqYIksTM=	2026-01-08 04:23:24.561484+00	f	20213145	Jhosep Angel	Cacsire Sanchez	f	t	2025-11-15 09:11:19.27794+00	7e4e0b12-59cd-4e39-a795-d7f648cdb0e9	jcacsire@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:19.278138+00	2025-12-07 03:35:11.320814+00
+18	pbkdf2_sha256$600000$dg0unf4OhCDi8javzwiUVE$gqoRTzYtuhGdVe8GDhlpN9/+qCD9/ITG3Gghbjjrrjc=	2026-01-08 04:42:33.927809+00	f	yyarira@unsa.edu.pe	Yessenia Deysi	Yari Ramos	f	t	2025-11-15 06:34:22.759636+00	718c6776-5833-45f9-bc81-0b06f1e89efd	yyarira@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.878282+00	2025-11-15 06:34:22.878287+00
 65	pbkdf2_sha256$600000$oiqCCk2kZ9WKunnwecoTvt$ccFUluCRzCvznA4xOEA6V0dUDRZyPX9OU1nflwlmG/w=	\N	f	20233595	Cesar Alejandro	Hañari Cutipa	f	t	2025-11-15 09:11:21.486838+00	4e5fb15c-27b6-4e5f-8eca-3373dd92b9c0	chañari@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:21.486988+00	2025-12-02 05:11:28.990425+00
 66	pbkdf2_sha256$600000$3glmexyn9BGy1Gh1RRzTan$QtBellByXoUBmPSq8Wt6ImFUljfXHJfLQauvBj95YD0=	\N	f	20224274	Lenin Michael	Huayhua Carlos	f	t	2025-11-15 09:11:21.605609+00	75a0b0a4-60ff-4036-9a20-ad8c5b587e33	lhuayhua@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:21.605746+00	2025-12-02 05:11:28.994221+00
 109	pbkdf2_sha256$600000$wANkG7NLCUUHA8fRWnVJ4F$xQTvbRcQ9wsT5sPDmiZbk5VC84c7GPdKV8OA82NRDrI=	\N	f	20212159	Andrea Del Rosario	Lopez Condori	f	t	2025-11-18 00:26:00.204791+00	ecbd6bde-6b93-41a5-8018-a1d160f9486e	alopez@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-18 00:26:00.204978+00	2025-11-18 01:49:33.969904+00
@@ -3458,6 +3905,9 @@ COPY public.users (id, password, last_login, is_superuser, username, first_name,
 94	pbkdf2_sha256$600000$oC1rEKq4iF0eP9WFDm49Ds$Wrnf2OX94anlsLeceonzJV6ItIUP4I5nvlaD92OISo8=	\N	f	20210194	Jair David	Torres Barra	f	t	2025-11-15 09:11:24.995772+00	23b4b52c-f618-4a6f-be1f-29ae0afc8591	jtorres@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:24.99595+00	2025-11-18 01:49:21.061269+00
 95	pbkdf2_sha256$600000$mpK4wlg8nIjrkoxkxdsV59$OEIijQD6i+Q05YxRkyi4XZq+7Hr20VTAu/06NbSC6ds=	\N	f	20230582	Gonzalo Rodrigo	Zapana Pariapaza	f	t	2025-11-15 09:11:25.116694+00	91908a30-fcf5-4e96-ae79-a669e9d5db87	gzapana@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:25.116874+00	2025-11-18 01:49:21.064255+00
 96	pbkdf2_sha256$600000$O1hI5QfwzXaBnLZbvd4KUT$JrFnQoiJEm7D2uiDBBUwVfPpcEuuv8NNhfHnRTHUeaQ=	\N	f	20222142	Katherin Milagros	Zenayuca Corimanya	f	t	2025-11-15 09:11:25.241903+00	344fe6a5-5a12-471d-ad0e-217c51679884	kzenayuca@unsa.edu.pe	\N	\N	ALUMNO	ACTIVO	0	\N	2025-11-15 09:11:25.242097+00	2025-11-18 01:49:21.066909+00
+17	pbkdf2_sha256$600000$dnvl1yXhxuzZeLPmgYd9rP$8TQOC3hVF9fO5xPHZi62rADiQzM+bToe5EW6V9QArCY=	2026-01-08 04:24:24.60361+00	f	esarmientoca@unsa.edu.pe	Edgar	Sarmiento Calisaya	f	t	2025-11-15 06:34:22.636157+00	de50ae51-b886-4a8b-8996-e226011112e5	esarmientoca@unsa.edu.pe	\N	\N	PROFESOR	ACTIVO	0	\N	2025-11-15 06:34:22.754862+00	2025-11-15 06:34:22.754866+00
+1	pbkdf2_sha256$600000$LHuCBTmVBzXq1YZZop5wUe$l25Z/M0QMbAEx2JMxWQndQvwLhWha5va2okgpYuIgbk=	2026-01-08 04:39:06.546545+00	t	admin			t	t	2025-11-15 06:25:18+00	6a744607-b3a3-422c-b757-1110be126746	admin@unsa.edu.pe	\N	\N	ADMIN	INACTIVO	0	\N	2025-11-15 06:25:18.482544+00	2025-11-15 06:35:15.517462+00
+42	pbkdf2_sha256$600000$Gsai0frsH4rmB5ykEF5Ahj$0GdyKudWSKND+kI+YuO1h0iGwPz4lMRXkruVyj+50Jk=	2026-01-08 04:43:43.661121+00	f	secretaria@unsa.edu.pe	Raquel	Gonzales	f	t	2025-11-15 07:14:22+00	8aec098c-fb2b-42f4-8087-a07057f6eabb	secretaria@unsa.edu.pe	\N	\N	SECRETARIA	ACTIVO	0	\N	2025-11-15 07:14:22.332688+00	2025-11-15 07:15:08.714023+00
 \.
 
 
@@ -3495,28 +3945,28 @@ SELECT pg_catalog.setval('public.auth_group_permissions_id_seq', 1, false);
 -- Name: auth_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sgac_user
 --
 
-SELECT pg_catalog.setval('public.auth_permission_id_seq', 116, true);
+SELECT pg_catalog.setval('public.auth_permission_id_seq', 120, true);
 
 
 --
 -- Name: django_admin_log_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sgac_user
 --
 
-SELECT pg_catalog.setval('public.django_admin_log_id_seq', 8, true);
+SELECT pg_catalog.setval('public.django_admin_log_id_seq', 19, true);
 
 
 --
 -- Name: django_content_type_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sgac_user
 --
 
-SELECT pg_catalog.setval('public.django_content_type_id_seq', 29, true);
+SELECT pg_catalog.setval('public.django_content_type_id_seq', 30, true);
 
 
 --
 -- Name: django_migrations_id_seq; Type: SEQUENCE SET; Schema: public; Owner: sgac_user
 --
 
-SELECT pg_catalog.setval('public.django_migrations_id_seq', 34, true);
+SELECT pg_catalog.setval('public.django_migrations_id_seq', 35, true);
 
 
 --
@@ -3626,6 +4076,14 @@ ALTER TABLE ONLY public.authtoken_token
 
 ALTER TABLE ONLY public.authtoken_token
     ADD CONSTRAINT authtoken_token_user_id_key UNIQUE (user_id);
+
+
+--
+-- Name: classroom_reservations classroom_reservations_pkey; Type: CONSTRAINT; Schema: public; Owner: sgac_user
+--
+
+ALTER TABLE ONLY public.classroom_reservations
+    ADD CONSTRAINT classroom_reservations_pkey PRIMARY KEY (reservation_id);
 
 
 --
@@ -4036,6 +4494,41 @@ CREATE INDEX campaign_course_closed_idx ON public.lab_enrollment_campaigns USING
 
 
 --
+-- Name: classroom_r_profess_4ddf6e_idx; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX classroom_r_profess_4ddf6e_idx ON public.classroom_reservations USING btree (professor_id, status);
+
+
+--
+-- Name: classroom_r_reserva_983ca7_idx; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX classroom_r_reserva_983ca7_idx ON public.classroom_reservations USING btree (reservation_date, status);
+
+
+--
+-- Name: classroom_reservations_approved_by_id_d51565c8; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX classroom_reservations_approved_by_id_d51565c8 ON public.classroom_reservations USING btree (approved_by_id);
+
+
+--
+-- Name: classroom_reservations_classroom_id_4180e833; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX classroom_reservations_classroom_id_4180e833 ON public.classroom_reservations USING btree (classroom_id);
+
+
+--
+-- Name: classroom_reservations_professor_id_5348db87; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE INDEX classroom_reservations_professor_id_5348db87 ON public.classroom_reservations USING btree (professor_id);
+
+
+--
 -- Name: classrooms_code_85ae9b8a_like; Type: INDEX; Schema: public; Owner: sgac_user
 --
 
@@ -4281,6 +4774,13 @@ CREATE INDEX syllabus_units_syllabus_id_5d917911 ON public.syllabus_units USING 
 
 
 --
+-- Name: unique_active_reservation; Type: INDEX; Schema: public; Owner: sgac_user
+--
+
+CREATE UNIQUE INDEX unique_active_reservation ON public.classroom_reservations USING btree (classroom_id, reservation_date, start_time, end_time) WHERE ((status)::text = ANY ((ARRAY['PENDIENTE'::character varying, 'APROBADA'::character varying])::text[]));
+
+
+--
 -- Name: users_email_0ea73cca_like; Type: INDEX; Schema: public; Owner: sgac_user
 --
 
@@ -4376,6 +4876,30 @@ ALTER TABLE ONLY public.auth_permission
 
 ALTER TABLE ONLY public.authtoken_token
     ADD CONSTRAINT authtoken_token_user_id_35299eff_fk_users_id FOREIGN KEY (user_id) REFERENCES public.users(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: classroom_reservations classroom_reservatio_classroom_id_4180e833_fk_classroom; Type: FK CONSTRAINT; Schema: public; Owner: sgac_user
+--
+
+ALTER TABLE ONLY public.classroom_reservations
+    ADD CONSTRAINT classroom_reservatio_classroom_id_4180e833_fk_classroom FOREIGN KEY (classroom_id) REFERENCES public.classrooms(classroom_id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: classroom_reservations classroom_reservations_approved_by_id_d51565c8_fk_users_id; Type: FK CONSTRAINT; Schema: public; Owner: sgac_user
+--
+
+ALTER TABLE ONLY public.classroom_reservations
+    ADD CONSTRAINT classroom_reservations_approved_by_id_d51565c8_fk_users_id FOREIGN KEY (approved_by_id) REFERENCES public.users(id) DEFERRABLE INITIALLY DEFERRED;
+
+
+--
+-- Name: classroom_reservations classroom_reservations_professor_id_5348db87_fk_users_id; Type: FK CONSTRAINT; Schema: public; Owner: sgac_user
+--
+
+ALTER TABLE ONLY public.classroom_reservations
+    ADD CONSTRAINT classroom_reservations_professor_id_5348db87_fk_users_id FOREIGN KEY (professor_id) REFERENCES public.users(id) DEFERRABLE INITIALLY DEFERRED;
 
 
 --
@@ -4675,8 +5199,15 @@ ALTER TABLE ONLY public.users_user_permissions
 
 
 --
+-- Name: SCHEMA public; Type: ACL; Schema: -; Owner: sgac_user
+--
+
+REVOKE USAGE ON SCHEMA public FROM PUBLIC;
+
+
+--
 -- PostgreSQL database dump complete
 --
 
-\unrestrict jHHR4gfVtqj4eHfKOocYiRoGaF9ANrWXIdwUOEHo0XlS8LPyGDwjecJ7AHVB7kj
+\unrestrict q8Uv2GZhmC9ucFM3UqvpO6al5N7L93LWyLDB9JiqapoNn2WohQq8juVypcj31K2
 

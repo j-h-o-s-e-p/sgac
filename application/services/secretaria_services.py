@@ -543,7 +543,7 @@ class SecretariaService:
         """
         Paso 2: ¡Abrir las puertas!
         Si todo está en orden, creamos la campaña. Esto permite que los botones
-        de "Inscribirse" aparezcan en la pantalla de los alumnos.
+        de "Matricularse" aparezcan en la pantalla de los alumnos.
         """
         result = {"success": False, "errors": []}
 
@@ -721,120 +721,23 @@ class SecretariaService:
     @staticmethod
     @transaction.atomic
     def close_lab_enrollment(course_id):
-        """
-        Algoritmo de Asignación.
-        """
-        result = {"success": False, "errors": [], "redistributions": []}
+        """Solo cierra la campaña, los alumnos ya están matriculados."""
+        result = {"success": False, "errors": []}
 
         try:
             campaign = LabEnrollmentCampaign.objects.filter(
                 course_id=course_id, is_closed=False
             ).first()
+            
             if not campaign:
-                result["errors"].append("No hay nada que cerrar.")
+                result["errors"].append("No hay campaña activa para cerrar.")
                 return result
 
-            labs = list(LaboratoryGroup.objects.filter(course_id=course_id))
-
-            # Analizamos laboratorio por laboratorio
-            for lab in labs:
-                # Traemos a todos los que pidieron este lab, en orden de llegada
-                postulations = (
-                    StudentPostulation.objects.filter(
-                        campaign=campaign, lab_group=lab, status="PENDIENTE"
-                    )
-                    .select_related("student")
-                    .order_by("timestamp")
-                )
-
-                enrolled_count = postulations.count()
-
-                # --- CASO 1: Todos caben ---
-                if enrolled_count <= lab.capacity:
-                    for post in postulations:
-                        SecretariaService._assign_student(post, lab, "DIRECTO")
-
-                # --- CASO 2: Sobrevendido (Hay más alumnos que sillas) ---
-                else:
-                    result["redistributions"].append(
-                        {
-                            "lab": lab.lab_nomenclature,
-                            "original_count": enrolled_count,
-                            "capacity": lab.capacity,
-                        }
-                    )
-
-                    # Dividimos a los alumnos en dos grupos:
-                    immovable = (
-                        []
-                    )  # Los que tienen cruce en otros horarios (Prioridad Alta)
-                    movable = []  # Los que tienen agenda libre (Pueden ser movidos)
-
-                    for post in postulations:
-                        if SecretariaService._check_student_schedule_conflict(
-                            post.student.user_id, lab
-                        ):
-                            immovable.append(post)  # Este alumno sufre si lo mueves
-                        else:
-                            movable.append(post)  # Este alumno es flexible
-
-                    # REGLA DE EMERGENCIA: Si hay demasiados "inamovibles", ampliamos el salón a la fuerza
-                    if len(immovable) > lab.capacity:
-                        new_capacity = (
-                            len(immovable) + 10
-                        )  # Les damos espacio extra por si acaso
-                        lab.capacity = new_capacity
-                        lab.save()
-
-                    # A. Asignamos a los inamovibles primero (se quedan con su cupo)
-                    for post in immovable:
-                        SecretariaService._assign_student(post, lab, "CONFLICTO")
-
-                    # B. Llenamos los espacios restantes con los "movibles"
-                    remaining_capacity = max(0, lab.capacity - len(immovable))
-                    can_stay = movable[:remaining_capacity]
-                    must_move = movable[remaining_capacity:]
-
-                    for post in can_stay:
-                        SecretariaService._assign_student(post, lab, "DIRECTO")
-
-                    # C. Reubicación automática de los sobrantes
-                    for post in must_move:
-                        assigned = False
-                        # Buscamos en los otros grupos del mismo curso
-                        for other_lab in labs:
-                            if other_lab.lab_id == lab.lab_id:
-                                continue
-
-                            # Chequeamos si el otro grupo tiene espacio Y el alumno no tiene cruce
-                            current_assigned = LabAssignment.objects.filter(
-                                lab_group=other_lab
-                            ).count()
-
-                            if current_assigned < other_lab.capacity:
-                                if not SecretariaService._check_student_schedule_conflict(
-                                    post.student.user_id, other_lab
-                                ):
-                                    # ¡Encontramos sitio! Lo movemos aquí
-                                    SecretariaService._assign_student(
-                                        post, other_lab, "REDISTRIBUIDO"
-                                    )
-                                    post.status = (
-                                        "REASIGNADO"  # Marca especial para avisarle
-                                    )
-                                    post.save()
-                                    assigned = True
-                                    break
-
-                        if not assigned:
-                            # Caso triste: No hubo sitio en ningún lado
-                            post.status = "RECHAZADO"
-                            post.save()
-
-            # Cerramos el telón
+            # Solo cerrar la campaña
             campaign.is_closed = True
             campaign.closed_at = timezone.now()
             campaign.save()
+            
             result["success"] = True
 
         except Exception as e:
@@ -1007,3 +910,137 @@ class SecretariaService:
             "total_professors": professors.count(),
             "avg_class_size": round(avg_size or 0, 1),
         }
+
+    # ==================== GESTIÓN DE RESERVAS ====================
+    
+    @staticmethod
+    def get_pending_reservations():
+        """
+        Obtiene todas las reservas pendientes de aprobación.
+        Ordenadas por fecha más cercana primero.
+        """
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        return ClassroomReservation.objects.filter(
+            status='PENDIENTE',
+            reservation_date__gte=date.today()
+        ).select_related(
+            'classroom', 'professor'
+        ).order_by('reservation_date', 'start_time')
+    
+    @staticmethod
+    def get_all_reservations(status_filter=None):
+        """
+        Obtiene todas las reservas con filtro opcional por estado.
+        """
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        qs = ClassroomReservation.objects.select_related(
+            'classroom', 'professor', 'approved_by'
+        ).order_by('-reservation_date', '-start_time')
+        
+        if status_filter:
+            qs = qs.filter(status=status_filter)
+        
+        return qs
+    
+    @staticmethod
+    @transaction.atomic
+    def approve_reservation(reservation_id, secretaria_user):
+        """
+        Aprueba una reserva pendiente.
+        """
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        try:
+            reservation = ClassroomReservation.objects.get(
+                reservation_id=reservation_id,
+                status='PENDIENTE'
+            )
+            
+            # Verificar disponibilidad nuevamente (por si acaso)
+            conflicts = SecretariaService._check_reservation_conflicts(
+                reservation.classroom_id,
+                reservation.reservation_date,
+                reservation.start_time,
+                reservation.end_time,
+                exclude_id=reservation_id
+            )
+            
+            if conflicts:
+                return {
+                    'success': False,
+                    'error': f'Conflicto detectado: {conflicts[0]}'
+                }
+            
+            reservation.status = 'APROBADA'
+            reservation.approved_by = secretaria_user
+            reservation.approved_at = timezone.now()
+            reservation.save()
+            
+            return {
+                'success': True,
+                'message': 'Reserva aprobada correctamente'
+            }
+            
+        except ClassroomReservation.DoesNotExist:
+            return {'success': False, 'error': 'Reserva no encontrada'}
+    
+    @staticmethod
+    @transaction.atomic
+    def reject_reservation(reservation_id, secretaria_user, reason=''):
+        """
+        Rechaza una reserva con motivo opcional.
+        """
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        try:
+            reservation = ClassroomReservation.objects.get(
+                reservation_id=reservation_id,
+                status='PENDIENTE'
+            )
+            
+            reservation.status = 'RECHAZADA'
+            reservation.approved_by = secretaria_user
+            reservation.approved_at = timezone.now()
+            reservation.rejection_reason = reason
+            reservation.save()
+            
+            return {
+                'success': True,
+                'message': 'Reserva rechazada'
+            }
+            
+        except ClassroomReservation.DoesNotExist:
+            return {'success': False, 'error': 'Reserva no encontrada'}
+    
+    @staticmethod
+    def _check_reservation_conflicts(classroom_id, date_obj, start_time, end_time, exclude_id=None):
+        """
+        Helper privado para detectar conflictos de una reserva.
+        Retorna lista de mensajes de conflicto (vacía si no hay).
+        """
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        def time_overlap(s1, e1, s2, e2):
+            return s1 < e2 and s2 < e1
+        
+        conflicts = []
+        
+        # Verificar otras reservas aprobadas/pendientes
+        other_reservations = ClassroomReservation.objects.filter(
+            classroom_id=classroom_id,
+            reservation_date=date_obj,
+            status__in=['PENDIENTE', 'APROBADA']
+        )
+        
+        if exclude_id:
+            other_reservations = other_reservations.exclude(reservation_id=exclude_id)
+        
+        for res in other_reservations:
+            if time_overlap(start_time, end_time, res.start_time, res.end_time):
+                conflicts.append(
+                    f"Conflicto con reserva de {res.professor.get_full_name()}"
+                )
+        
+        return conflicts

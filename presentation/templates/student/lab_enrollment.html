@@ -73,7 +73,7 @@
 <div class="card mb-4 shadow-sm border-0 border-start border-warning border-4">
     <div class="card-header bg-white py-3">
         <h5 class="mb-0 text-warning">
-            <i class="bi bi-hourglass-split me-2"></i>Mis Postulaciones
+            <i class="bi bi-hourglass-split me-2"></i>Mis Matriculas
         </h5>
     </div>
     <div class="card-body">
@@ -147,13 +147,13 @@
                     </h5>
                     <small class="text-muted">
                         <i class="bi bi-calendar-check me-1"></i>
-                        Inscripción hasta: {{ campaign_item.campaign.end_date|date:"d/m/Y H:i" }}
+                        Matricula hasta: {{ campaign_item.campaign.end_date|date:"d/m/Y H:i" }}
                     </small>
                 </div>
                 
                 {% if campaign_item.already_postulated %}
                 <span class="badge pending-badge text-white px-3 py-2">
-                    <i class="bi bi-hourglass-split me-1"></i>Ya Postulaste
+                    <i class="bi bi-hourglass-split me-1"></i>Ya te matriculaste
                 </span>
                 {% endif %}
             </div>
@@ -161,12 +161,12 @@
             {% if not campaign_item.can_postulate %}
             <div class="alert alert-warning py-2 px-3 small mb-3">
                 <i class="bi bi-info-circle-fill me-2"></i>
-                Ya postulaste a un laboratorio. Espera la confirmación de asignación.
+                Ya te matriculaste a un laboratorio.
             </div>
             {% else %}
             <div class="alert alert-info py-2 px-3 small mb-3">
                 <i class="bi bi-info-circle-fill me-2"></i>
-                Selecciona tu laboratorio preferido. La asignación final se confirmará al cierre de inscripciones.
+                Selecciona tu laboratorio preferido.
             </div>
             {% endif %}
             
@@ -245,7 +245,7 @@
                                 </button>
                             {% elif not campaign_item.can_postulate %}
                                 <button class="btn btn-outline-secondary w-100" disabled>
-                                    <i class="bi bi-check-circle me-2"></i>Ya postulaste
+                                    <i class="bi bi-check-circle me-2"></i>Ya te matriculaste
                                 </button>
                             {% elif lab_item.is_full %}
                                 <button class="btn btn-outline-secondary w-100" disabled>
@@ -257,8 +257,8 @@
                                         data-lab-id="{{ lab_item.lab.lab_id }}"
                                         data-lab-name="Lab {{ lab_item.lab.lab_nomenclature }}"
                                         data-course-name="{{ campaign_item.enrollment.course.course_name }}"
-                                        data-url-details="{% url 'presentation:student_lab_details' 0 %}">
-                                    <i class="bi bi-check-circle me-2"></i>Postular
+                                        data-url-details="{% url 'presentation:student_lab_details' lab_item.lab.lab_id %}">
+                                    <i class="bi bi-check-circle me-2"></i>Matricular
                                 </button>
                             {% endif %}
                         </div>
@@ -277,43 +277,24 @@
         <i class="bi bi-check-circle display-1 text-success opacity-25"></i>
         <p class="text-muted mt-3 fw-bold">¡Todo listo!</p>
         <p class="text-muted small">
-            No hay inscripciones de laboratorio disponibles en este momento.
+            No hay matriculas de laboratorio disponibles en este momento.
         </p>
     </div>
     {% endif %}
 {% endif %}
 
-<div class="mt-4 p-3 bg-light rounded border text-muted small">
-    <h6 class="fw-bold">
-        <i class="bi bi-question-circle-fill me-2"></i>¿Cómo funciona?
-    </h6>
-    <ul class="mb-0">
-        <li class="mb-2">
-            <strong>1. Revisa los horarios:</strong> Asegúrate de no tener cruces con tus clases.
-        </li>
-        <li class="mb-2">
-            <strong>2. Postula a tu preferencia:</strong> Selecciona el laboratorio que mejor se ajuste a tu horario.
-        </li>
-        <li class="mb-2">
-            <strong>3. Espera la asignación:</strong> Al cierre de inscripciones, se procesarán las postulaciones.
-        </li>
-        <li>
-            <strong>4. Recibe confirmación:</strong> Verás tu asignación final en "Laboratorios Asignados".
-        </li>
-    </ul>
-</div>
 
 <div class="modal fade" id="confirmPostulationModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered">
         <div class="modal-content border-0 shadow">
             <div class="modal-header bg-primary text-white">
                 <h5 class="modal-title fs-6 fw-bold">
-                    <i class="bi bi-check-circle me-2"></i>Confirmar Postulación
+                    <i class="bi bi-check-circle me-2"></i>Confirmar Matricula
                 </h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body py-4">
-                <p class="mb-3">¿Confirmas tu postulación a este laboratorio?</p>
+                <p class="mb-3">¿Confirmas tu matricula a este laboratorio?</p>
                 
                 <div class="bg-light p-3 rounded mb-3">
                     <h6 class="fw-bold mb-2" id="modalCourseName"></h6>
@@ -337,8 +318,7 @@
                 
                 <div class="alert alert-warning py-2 px-3 small mb-0">
                     <i class="bi bi-info-circle me-2"></i>
-                    <strong>Importante:</strong> Solo puedes postular a un laboratorio por curso. 
-                    La asignación final se confirmará al cierre de inscripciones.
+                    <strong>Importante:</strong> Solo puedes matricularte a un laboratorio por curso. 
                 </div>
             </div>
             <div class="modal-footer justify-content-center bg-light border-0">
@@ -348,7 +328,7 @@
                 <button type="button" class="btn btn-primary btn-sm px-4 fw-bold" 
                         id="btnConfirmPostulation"
                         data-url-postulate="{% url 'presentation:student_lab_postulate' %}">
-                    <i class="bi bi-check-circle me-1"></i>Sí, Postular
+                    <i class="bi bi-check-circle me-1"></i>Sí, Matricular
                 </button>
             </div>
         </div>

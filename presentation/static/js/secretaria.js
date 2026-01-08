@@ -1,13 +1,9 @@
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('Sistema de Secretaría cargado correctamente.');
-
+    
     // ==========================================================
     // 0. HELPERS GLOBALES
     // ==========================================================
     
-    /**
-     * Obtiene el CSRF Token de las cookies para peticiones AJAX seguras.
-     */
     function getCookie(name) {
         let cookieValue = null;
         if (document.cookie && document.cookie !== '') {
@@ -27,7 +23,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 1. INTERFAZ GENERAL Y UI
     // ==========================================================
 
-    // A. Auto-estilizado de formularios Django
+    // A. Auto-estilizado de formularios
     const classroomForm = document.getElementById('classroomForm');
     if (classroomForm) {
         const inputs = classroomForm.querySelectorAll('input, select, textarea');
@@ -38,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // B. Auto-ocultar alertas (Flash Messages)
+    // B. Auto-ocultar alertas
     const alerts = document.querySelectorAll('.alert:not(.alert-permanent, .conflict-alert)');
     alerts.forEach(alert => {
         setTimeout(() => {
@@ -57,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const name = button.dataset.name;
             
             const deleteForm = deleteModal.querySelector('#deleteForm');
-            const nameEl = deleteModal.querySelector('#modalClassroomName, #modalLabName'); // Soporta ambos IDs
+            const nameEl = deleteModal.querySelector('#modalClassroomName, #modalLabName');
             
             if(deleteForm) deleteForm.action = deleteUrl;
             if(nameEl) nameEl.textContent = name;
@@ -68,7 +64,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 2. GESTIÓN DE LABORATORIOS
     // ==========================================================
 
-    // A. Botón "Crear Nuevo Grupo": Calcula capacidad sugerida
+    // A. Calcular capacidad sugerida
     document.querySelectorAll('.btn-toggle-lab-form').forEach(btn => {
         btn.addEventListener('click', function() {
             const courseId = this.dataset.courseId;
@@ -88,11 +84,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // B. Toggle Profesor Interno vs Externo
+    // B. Toggle Profesor Interno/Externo
     document.querySelectorAll('.prof-type-radio').forEach(radio => {
         radio.addEventListener('change', function() {
             const form = this.closest('form');
-            const targetType = this.value; // 'internal' o 'external'
+            const targetType = this.value;
             
             const internalSelect = form.querySelector('.internal-prof-select');
             const externalInput = form.querySelector('.external-prof-input');
@@ -112,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // C. Verificación de Conflictos (AJAX) - Delegación de Eventos
+    // C. Verificación de Conflictos (Labs)
     document.body.addEventListener('change', function(e) {
         if (e.target.classList.contains('lab-schedule-input')) {
             const form = e.target.closest('form');
@@ -132,7 +128,6 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (!day || !startTime || !endTime || !urlInput) return;
 
-        // UI Update
         const alertBox = form.querySelector('.conflict-alert');
         const messageBox = form.querySelector('.conflict-message');
         const iconBox = form.querySelector('.alert-icon');
@@ -145,16 +140,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
         fetch(urlInput.value, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': csrfToken
-            },
+            headers: { 'Content-Type': 'application/json', 'X-CSRFToken': csrfToken },
             body: JSON.stringify({
-                course_id: courseId,
-                day_of_week: day,
-                start_time: startTime,
-                end_time: endTime,
-                room_id: roomId
+                course_id: courseId, day_of_week: day, start_time: startTime, end_time: endTime, room_id: roomId
             })
         })
         .then(res => res.json())
@@ -177,40 +165,34 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // D. Actualización en tiempo real (Status Campañas)
+    // D. Actualización status campañas
     const activeCampaigns = document.querySelectorAll('[data-course-id]');
     if (activeCampaigns.length > 0) {
         setInterval(() => {
             activeCampaigns.forEach(card => {
                 const courseId = card.dataset.courseId;
-                if (typeof updateCampaignStatus === 'function') {
-                    updateCampaignStatus(courseId);
-                }
+                if (typeof updateCampaignStatus === 'function') updateCampaignStatus(courseId);
             });
-        }, 30000); // 30 segundos
+        }, 30000);
     }
 
     // ==========================================================
     // 3. PROGRAMACIÓN DE HORARIOS (TEORÍA)
     // ==========================================================
-    
     const scheduleModalEl = document.getElementById('scheduleModal');
     let scheduleModalInstance = null;
     
     if (scheduleModalEl) {
         scheduleModalInstance = new bootstrap.Modal(scheduleModalEl);
-        
         const entriesContainer = document.getElementById('schedule-entries-container');
         const addBtn = document.getElementById('add-schedule-entry');
         const saveBtn = document.getElementById('btn-save-schedule');
         const errorMsg = document.getElementById('modal-error-message');
         const template = document.getElementById('schedule-entry-template');
 
-        // Función para renderizar una fila
         const createRow = (data = null) => {
             const clone = template.content.cloneNode(true);
             const row = clone.querySelector('.schedule-entry');
-            
             const daySelect = row.querySelector('.field-day');
             const roomSelect = row.querySelector('.field-room');
             const startInput = row.querySelector('.field-start');
@@ -222,17 +204,14 @@ document.addEventListener('DOMContentLoaded', function() {
                 startInput.value = data.start_time;
                 endInput.value = data.end_time;
             }
-            
             row.querySelector('.btn-remove-entry').addEventListener('click', () => row.remove());
             entriesContainer.appendChild(row);
         };
 
-        // Abrir Modal
         document.querySelectorAll('.btn-edit-schedule').forEach(btn => {
             btn.addEventListener('click', function() {
                 const groupId = this.dataset.groupId;
                 const groupName = this.dataset.groupName;
-                
                 entriesContainer.innerHTML = '';
                 errorMsg.classList.add('d-none');
                 document.getElementById('modal_course_group_id').value = groupId;
@@ -242,24 +221,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 try {
                     const rawJson = this.dataset.schedules;
                     if (rawJson && rawJson !== "None") schedules = JSON.parse(rawJson);
-                } catch (e) {
-                    console.error("Error parseando horarios:", e);
-                }
+                } catch (e) { console.error(e); }
                 
-                if (schedules && schedules.length > 0) {
-                    schedules.forEach(s => createRow(s));
-                } else {
-                    createRow();
-                }
+                if (schedules && schedules.length > 0) schedules.forEach(s => createRow(s));
+                else createRow();
                 
                 scheduleModalInstance.show();
             });
         });
 
-        // Botones Modal
         if(addBtn) addBtn.addEventListener('click', () => createRow());
 
-        // Guardar Horarios
         if(saveBtn) {
             saveBtn.addEventListener('click', function() {
                 errorMsg.classList.add('d-none');
@@ -273,15 +245,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     const start = row.querySelector('.field-start').value;
                     const end = row.querySelector('.field-end').value;
                     
-                    if (!day || !room || !start || !end) {
-                        hasError = true; return;
-                    }
-                    if (start >= end) {
-                        hasError = true; 
-                        alert('La hora de inicio debe ser menor a la hora fin.');
-                        return;
-                    }
-                    
+                    if (!day || !room || !start || !end) { hasError = true; return; }
+                    if (start >= end) { hasError = true; alert('La hora de inicio debe ser menor a la hora fin.'); return; }
                     horarios.push({ day, room_id: room, start_time: start, end_time: end });
                 });
                 
@@ -296,10 +261,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 fetch(url, {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': getCookie('csrftoken')
-                    },
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
                     body: JSON.stringify({ course_group_id: groupId, horarios: horarios })
                 })
                 .then(res => res.json())
@@ -327,17 +289,14 @@ document.addEventListener('DOMContentLoaded', function() {
             const filter = this.value.toLowerCase();
             const rows = document.querySelectorAll('#groupsTable .group-row');
             let hasVisible = false;
-
             rows.forEach(row => {
                 const text = row.innerText.toLowerCase();
                 const visible = text.includes(filter);
                 row.style.display = visible ? '' : 'none';
                 if (visible) hasVisible = true;
             });
-
             const noResMsg = document.getElementById('noResultsMessage');
             const table = document.getElementById('groupsTable');
-            
             if (noResMsg) {
                 noResMsg.classList.toggle('d-none', hasVisible);
                 if(table) table.classList.toggle('d-none', !hasVisible);
@@ -350,7 +309,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // ==========================================================
     const initCharts = () => {
         const saturationEl = document.getElementById('data-saturation');
-        
         if (saturationEl && typeof Chart !== 'undefined') {
             try {
                 const parseDjangoData = (id) => {
@@ -371,7 +329,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 Chart.defaults.color = '#64748b';
                 Chart.defaults.maintainAspectRatio = false;
 
-                // 1. Gráfico de Saturación (Doughnut)
                 if (document.getElementById('saturationChart')) {
                     new Chart(document.getElementById('saturationChart'), {
                         type: 'doughnut',
@@ -383,77 +340,145 @@ document.addEventListener('DOMContentLoaded', function() {
                                 borderWidth: 2, borderColor: '#ffffff'
                             }]
                         },
-                        options: {
-                            cutout: '65%',
-                            plugins: {
-                                legend: { position: 'right', labels: { usePointStyle: true } }
-                            }
-                        }
+                        options: { cutout: '65%', plugins: { legend: { position: 'right', labels: { usePointStyle: true } } } }
                     });
                 }
-
-                // 2. Gráfico Top Cursos (Bar Horizontal)
                 if (document.getElementById('courseChart')) {
                     const richLabels = (courseData.labels || []).map((code, i) => {
                         const name = courseData.names ? courseData.names[i] : '';
                         return name ? `${code} - ${name}` : code;
                     });
-
                     new Chart(document.getElementById('courseChart'), {
                         type: 'bar',
                         data: {
                             labels: richLabels,
-                            datasets: [{
-                                label: 'Alumnos',
-                                data: courseData.data,
-                                backgroundColor: '#0e7490',
-                                borderRadius: 4, barThickness: 20
-                            }]
+                            datasets: [{ label: 'Alumnos', data: courseData.data, backgroundColor: '#0e7490', borderRadius: 4, barThickness: 20 }]
                         },
                         options: {
                             indexAxis: 'y',
                             scales: {
                                 x: { grid: { display: false } },
-                                y: { 
-                                    grid: { display: false },
-                                    ticks: {
-                                        callback: function(val) {
-                                            const label = this.getLabelForValue(val);
-                                            return label.length > 25 ? label.substr(0, 25) + '...' : label;
-                                        }
-                                    }
-                                }
+                                y: { grid: { display: false }, ticks: { callback: function(val) { const label = this.getLabelForValue(val); return label.length > 25 ? label.substr(0, 25) + '...' : label; } } }
                             },
                             plugins: { legend: { display: false } }
                         }
                     });
                 }
-
-                // 3. Gráfico Carga Docente (Bar Vertical)
                 if (document.getElementById('professorsChart')) {
                     new Chart(document.getElementById('professorsChart'), {
                         type: 'bar',
-                        data: {
-                            labels: professorsData.labels,
-                            datasets: [{
-                                label: 'Horas Semanales',
-                                data: professorsData.data,
-                                backgroundColor: 'rgba(139, 92, 246, 0.8)',
-                                borderRadius: 4
-                            }]
-                        },
-                        options: {
-                            plugins: { legend: { display: false } },
-                            scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } }
-                        }
+                        data: { labels: professorsData.labels, datasets: [{ label: 'Horas Semanales', data: professorsData.data, backgroundColor: 'rgba(139, 92, 246, 0.8)', borderRadius: 4 }] },
+                        options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { borderDash: [2, 4] } } } }
                     });
                 }
-
-            } catch (error) {
-                console.error("Error inicializando gráficos:", error);
-            }
+            } catch (error) { console.error("Error charts:", error); }
         }
     };
 
+    // ==========================================================
+    // 6. GESTIÓN DE RESERVAS DE AULAS
+    // ==========================================================
+    
+    // Variables globales de estado
+    let currentReservationId = null;
+    const approveModalEl = document.getElementById('approveReservationModal');
+    const rejectModalEl = document.getElementById('rejectReservationModal');
+    
+    // Instanciar Modales (Verificación de existencia)
+    let approveModalInstance = approveModalEl ? new bootstrap.Modal(approveModalEl) : null;
+    let rejectModalInstance = rejectModalEl ? new bootstrap.Modal(rejectModalEl) : null;
+
+    // Delegación de Eventos (Clics globales)
+    document.addEventListener('click', function(e) {
+        
+        // Botón APROBAR
+        const btnApprove = e.target.closest('.btn-approve-reservation');
+        if (btnApprove) {
+            e.preventDefault();
+            currentReservationId = btnApprove.dataset.id;
+            if (approveModalInstance) approveModalInstance.show();
+        }
+
+        // Botón RECHAZAR
+        const btnReject = e.target.closest('.btn-reject-reservation');
+        if (btnReject) {
+            e.preventDefault();
+            currentReservationId = btnReject.dataset.id;
+            const reasonInput = document.getElementById('rejectionReasonInput');
+            if(reasonInput) reasonInput.value = '';
+            if (rejectModalInstance) rejectModalInstance.show();
+        }
+    });
+
+    // Lógica: Confirmar APROBACIÓN
+    const btnConfirmApprove = document.getElementById('btnConfirmApproveReservation');
+    if (btnConfirmApprove) {
+        btnConfirmApprove.addEventListener('click', async function() {
+            if (!currentReservationId) return;
+
+            const originalText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+
+            try {
+                const response = await fetch('/secretaria/classroom-reservations/approve/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ reservation_id: currentReservationId })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    if (approveModalInstance) approveModalInstance.hide();
+                    location.reload(); 
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error de conexión.');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Lógica: Confirmar RECHAZO
+    const btnConfirmReject = document.getElementById('btnConfirmRejectReservation');
+    if (btnConfirmReject) {
+        btnConfirmReject.addEventListener('click', async function() {
+            if (!currentReservationId) return;
+            const reason = document.getElementById('rejectionReasonInput')?.value || '';
+
+            const originalText = this.innerHTML;
+            this.disabled = true;
+            this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+
+            try {
+                const response = await fetch('/secretaria/classroom-reservations/reject/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                    body: JSON.stringify({ reservation_id: currentReservationId, reason: reason })
+                });
+                const data = await response.json();
+
+                if (data.success) {
+                    if (rejectModalInstance) rejectModalInstance.hide();
+                    location.reload();
+                } else {
+                    alert('Error: ' + data.error);
+                }
+            } catch (error) {
+                console.error(error);
+                alert('Error de conexión.');
+            } finally {
+                this.disabled = false;
+                this.innerHTML = originalText;
+            }
+        });
+    }
+
+    // Inicializar gráficos al final
     initCharts();
 });

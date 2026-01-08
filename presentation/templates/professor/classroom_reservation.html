@@ -1,0 +1,266 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reserva de Aulas - Profesor{% endblock %}
+{% block sidebar %}
+    {% include 'includes/professor_sidebar.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="h3 mb-1 fw-bold text-dark">Reserva de Aulas</h1>
+        <p class="text-muted mb-0">Gestiona tus reservas de salones para actividades académicas</p>
+    </div>
+    <button class="btn btn-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#newReservationModal">
+        <i class="bi bi-plus-lg me-2"></i>Nueva Reserva
+    </button>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-warning bg-opacity-10 p-3">
+                            <i class="bi bi-clock-history text-warning fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h3 class="mb-0 fw-bold">{{ stats.pending }}</h3>
+                        <p class="text-muted mb-0 small">Pendientes</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-success bg-opacity-10 p-3">
+                            <i class="bi bi-check-circle text-success fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h3 class="mb-0 fw-bold">{{ stats.approved }}</h3>
+                        <p class="text-muted mb-0 small">Aprobadas</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card border-0 shadow-sm">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="flex-shrink-0">
+                        <div class="rounded-circle bg-primary bg-opacity-10 p-3">
+                            <i class="bi bi-calendar-check text-primary fs-4"></i>
+                        </div>
+                    </div>
+                    <div class="flex-grow-1 ms-3">
+                        <h3 class="mb-0 fw-bold">{{ stats.total }}</h3>
+                        <p class="text-muted mb-0 small">Total Historial</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if active_reservations %}
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 fw-bold text-primary">
+            <i class="bi bi-calendar-event me-2"></i>Reservas Activas
+        </h5>
+    </div>
+    <div class="card-body">
+        <div class="row g-3">
+            {% for reservation in active_reservations %}
+            <div class="col-md-6">
+                <div class="reservation-card card border-0 shadow-sm status-{{ reservation.status|lower }}">
+                    <div class="card-body">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0">{{ reservation.classroom.name }}</h6>
+                            {% if reservation.status == 'PENDIENTE' %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% elif reservation.status == 'APROBADA' %}
+                                <span class="badge bg-success">Aprobada</span>
+                            {% endif %}
+                        </div>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>{{ reservation.classroom.location }}
+                        </p>
+                        <div class="d-flex align-items-center mb-2">
+                            <i class="bi bi-calendar3 me-2 text-primary"></i>
+                            <strong>{{ reservation.reservation_date|date:"d/m/Y" }}</strong>
+                            <span class="mx-2">•</span>
+                            <i class="bi bi-clock me-2 text-primary"></i>
+                            <span>{{ reservation.start_time|time:"H:i" }} - {{ reservation.end_time|time:"H:i" }}</span>
+                        </div>
+                        <p class="mb-3 small">
+                            <strong>Motivo:</strong> {{ reservation.purpose|truncatewords:15 }}
+                        </p>
+                        {% if reservation.can_cancel %}
+                        <button class="btn btn-sm btn-outline-danger btn-cancel-reservation" 
+                                data-id="{{ reservation.reservation_id }}">
+                            <i class="bi bi-x-circle me-1"></i>Cancelar
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="alert alert-info">
+    <i class="bi bi-info-circle me-2"></i>
+    No tienes reservas activas. Haz clic en "Nueva Reserva" para comenzar.
+</div>
+{% endif %}
+
+<div class="card shadow-sm border-0">
+    <div class="card-header bg-white py-3 border-bottom">
+        <h5 class="mb-0 fw-bold text-secondary">
+            <i class="bi bi-clock-history me-2"></i>Historial Reciente
+        </h5>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-4">Aula</th>
+                        <th>Fecha</th>
+                        <th>Horario</th>
+                        <th>Estado</th>
+                        <th>Motivo</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for res in history %}
+                    <tr>
+                        <td class="ps-4 fw-bold">{{ res.classroom.code }}</td>
+                        <td>{{ res.reservation_date|date:"d/m/Y" }}</td>
+                        <td class="small">{{ res.start_time|time:"H:i" }} - {{ res.end_time|time:"H:i" }}</td>
+                        <td>
+                            {% if res.status == 'PENDIENTE' %}
+                                <span class="badge bg-warning">Pendiente</span>
+                            {% elif res.status == 'APROBADA' %}
+                                <span class="badge bg-success">Aprobada</span>
+                            {% elif res.status == 'RECHAZADA' %}
+                                <span class="badge bg-danger">Rechazada</span>
+                            {% else %}
+                                <span class="badge bg-secondary">Cancelada</span>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ res.purpose|truncatewords:10 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="text-center py-4 text-muted">
+                            Sin historial de reservas
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="newReservationModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title fw-bold">
+                    <i class="bi bi-calendar-plus me-2"></i>Nueva Reserva de Aula
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="step1">
+                    <h6 class="fw-bold mb-3">Paso 1: Selecciona Fecha y Horario</h6>
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Fecha</label>
+                            <input type="date" class="form-control" id="reservationDate" 
+                                   min="{{ today|date:'Y-m-d' }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Hora Inicio</label>
+                            <input type="time" class="form-control" id="reservationStartTime" 
+                                   min="07:00" max="20:10" value="08:00">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label fw-bold">Hora Fin</label>
+                            <input type="time" class="form-control" id="reservationEndTime" 
+                                   min="07:00" max="20:10" value="10:00">
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3" 
+                            id="btnSearchClassrooms"
+                            data-url="{% url 'presentation:professor_available_classrooms_api' %}">
+                        <i class="bi bi-search me-2"></i>Buscar Aulas Disponibles
+                    </button>
+                </div>
+
+                <div id="step2" class="d-none mt-4">
+                    <h6 class="fw-bold mb-3">Paso 2: Selecciona un Aula Disponible</h6>
+                    <div id="availableClassroomsContainer" class="row g-3">
+                        </div>
+                </div>
+
+                <div id="step3" class="d-none mt-4">
+                    <h6 class="fw-bold mb-3">Paso 3: Indica el Motivo</h6>
+                    <textarea class="form-control" id="reservationPurpose" rows="3" 
+                              placeholder="Ej: Asesoría de tesis, Clase de recuperación, Reunión académica..."></textarea>
+                </div>
+
+                <div id="errorContainer" class="alert alert-danger mt-3 d-none"></div>
+            </div>
+            <div class="modal-footer bg-light">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-success d-none" 
+                        id="btnConfirmReservation"
+                        data-url="{% url 'presentation:professor_create_reservation_api' %}">
+                    <i class="bi bi-check-lg me-2"></i>Confirmar Reserva
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="cancelReservationModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white border-0">
+                <h5 class="modal-title fw-bold">Cancelar Reserva</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            
+            <div class="modal-body text-center py-4">
+                <i class="bi bi-exclamation-triangle text-danger mb-3" style="font-size: 4rem;"></i>
+                <h5 class="fw-bold">¿Estás seguro?</h5>
+                <p class="text-muted mb-0">Esta acción quedará registrada en el sistema.</p>
+            </div>
+            
+            <div class="modal-footer justify-content-center border-0 pb-4">
+                <button type="button" class="btn btn-secondary px-4" data-bs-dismiss="modal">No, mantener</button>
+                <button type="button" class="btn btn-danger px-4" 
+                        id="btnConfirmCancel"
+                        data-url="{% url 'presentation:professor_cancel_reservation_api' %}">
+                    Sí, cancelar reserva
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

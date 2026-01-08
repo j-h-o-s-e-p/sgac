@@ -264,7 +264,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const walk = (x - startX) * 2;
             container.scrollLeft = scrollLeft - walk;
         });
-        // Navegación con teclado si el mouse entra
         container.addEventListener('mouseenter', () => {
             document.onkeydown = function(e) {
                 if (e.key === 'ArrowLeft') container.scrollLeft -= 50;
@@ -277,13 +276,11 @@ document.addEventListener('DOMContentLoaded', function() {
     // 7. GRÁFICOS (CHART.JS) PARA ESTADÍSTICAS
     const labelsElement = document.getElementById('data-labels');
     if (labelsElement) {
-        // Recuperar datos
         const labels = JSON.parse(labelsElement.textContent);
         const gradesData = JSON.parse(document.getElementById('data-grades').textContent);
         const attendanceData = JSON.parse(document.getElementById('data-attendance').textContent);
         const countsData = JSON.parse(document.getElementById('data-counts').textContent);
 
-        // Helper para mensaje de "Sin datos"
         function drawNoDataMessage(canvasElement) {
             const ctx = canvasElement.getContext('2d');
             ctx.clearRect(0, 0, canvasElement.width, canvasElement.height);
@@ -297,10 +294,8 @@ document.addEventListener('DOMContentLoaded', function() {
             Chart.defaults.font.family = "'Segoe UI', 'Helvetica Neue', 'Arial', sans-serif";
             Chart.defaults.color = '#858796';
 
-            // Variable global para guardar instancias (útil para redimensionar al imprimir)
             window.myCharts = {};
 
-            // Gráfico Barras
             const ctxCourse = document.getElementById('courseChart');
             if (ctxCourse && labels.length > 0) {
                 window.myCharts.courseChart = new Chart(ctxCourse.getContext('2d'), {
@@ -323,7 +318,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             } else if (ctxCourse) { drawNoDataMessage(ctxCourse); }
 
-            // Gráfico Dona
             const ctxStatus = document.getElementById('statusChart');
             const totalAlumnos = countsData.aprobados + countsData.desaprobados;
             if (ctxStatus && totalAlumnos > 0) {
@@ -341,12 +335,250 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 8. EVENTOS DE IMPRESIÓN (REDIMENSIONAR CHARTJS)
     window.onbeforeprint = () => {
         if (window.myCharts) { for (let key in window.myCharts) { window.myCharts[key].resize(); } }
     };
     window.onafterprint = () => {
         if (window.myCharts) { for (let key in window.myCharts) { window.myCharts[key].resize(); } }
     };
+
+    // ==========================================================
+    // 9. GESTIÓN DE RESERVAS DE AULAS (DOCENTE)
+    // ==========================================================
+    
+    const reservationModal = document.getElementById('newReservationModal');
+    
+    if (reservationModal) {
+        let selectedClassroomId = null;
+        let reservationToCancel = null;
+        
+        // A. BUSCAR AULAS DISPONIBLES
+        const btnSearch = document.getElementById('btnSearchClassrooms');
+        if (btnSearch) {
+            btnSearch.addEventListener('click', async function() {
+                const date = document.getElementById('reservationDate').value;
+                const startTime = document.getElementById('reservationStartTime').value;
+                const endTime = document.getElementById('reservationEndTime').value;
+                const searchUrl = this.getAttribute('data-url'); // URL dinámica desde HTML
+                const errorContainer = document.getElementById('errorContainer');
+                
+                const showError = (msg) => {
+                    errorContainer.textContent = msg;
+                    errorContainer.classList.remove('d-none');
+                    setTimeout(() => errorContainer.classList.add('d-none'), 5000);
+                };
+
+                if (!date || !startTime || !endTime) {
+                    showError('Por favor completa todos los campos de fecha y hora.');
+                    return;
+                }
+                
+                if (startTime >= endTime) {
+                    showError('La hora de fin debe ser mayor a la de inicio.');
+                    return;
+                }
+                
+                const originalText = this.innerHTML;
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Buscando...';
+                
+                try {
+                    const url = `${searchUrl}?date=${date}&start_time=${startTime}&end_time=${endTime}`;
+                    
+                    const response = await fetch(url, {
+                        method: 'GET',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        displayAvailableClassrooms(data.classrooms);
+                        document.getElementById('step2').classList.remove('d-none');
+                        selectedClassroomId = null;
+                        document.getElementById('step3').classList.add('d-none');
+                        document.getElementById('btnConfirmReservation').classList.add('d-none');
+                    } else {
+                        showError(data.error || 'No se pudieron obtener las aulas.');
+                    }
+                } catch (error) {
+                    console.error(error);
+                    showError('Error de conexión al buscar aulas.');
+                } finally {
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }
+            });
+        }
+
+        // B. RENDERIZAR AULAS
+        function displayAvailableClassrooms(classrooms) {
+            const container = document.getElementById('availableClassroomsContainer');
+            
+            if (classrooms.length === 0) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-warning border-0 shadow-sm">
+                            <i class="bi bi-exclamation-triangle me-2"></i>
+                            No hay aulas disponibles en ese horario exacto. Intenta ajustar las horas.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = classrooms.map(c => `
+                <div class="col-md-6 col-lg-4">
+                    <div class="classroom-card h-100" data-id="${c.id}">
+                        <div class="d-flex justify-content-between align-items-start mb-2">
+                            <h6 class="fw-bold mb-0 text-dark">${c.code}</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary border-opacity-10">${c.type}</span>
+                        </div>
+                        <p class="mb-1 text-dark"><strong>${c.name}</strong></p>
+                        <p class="text-muted small mb-2">
+                            <i class="bi bi-geo-alt me-1"></i>${c.location}
+                        </p>
+                        <p class="mb-0 small text-secondary">
+                            <i class="bi bi-people me-1"></i>Capacidad: <strong>${c.capacity}</strong>
+                        </p>
+                    </div>
+                </div>
+            `).join('');
+            
+            container.querySelectorAll('.classroom-card').forEach(card => {
+                card.addEventListener('click', function() {
+                    container.querySelectorAll('.classroom-card').forEach(c => c.classList.remove('selected'));
+                    this.classList.add('selected');
+                    selectedClassroomId = this.dataset.id;
+                    
+                    document.getElementById('step3').classList.remove('d-none');
+                    document.getElementById('btnConfirmReservation').classList.remove('d-none');
+                    
+                    setTimeout(() => {
+                        document.getElementById('reservationPurpose').focus();
+                    }, 100);
+                });
+            });
+        }
+        
+        // C. CONFIRMAR RESERVA
+        const btnConfirm = document.getElementById('btnConfirmReservation');
+        if (btnConfirm) {
+            btnConfirm.addEventListener('click', async function() {
+                const purpose = document.getElementById('reservationPurpose').value.trim();
+                const createUrl = this.getAttribute('data-url');
+                const errorContainer = document.getElementById('errorContainer');
+                
+                if (!purpose) {
+                    errorContainer.textContent = 'Por favor indica el motivo de la reserva.';
+                    errorContainer.classList.remove('d-none');
+                    return;
+                }
+                
+                if (!selectedClassroomId) {
+                    errorContainer.textContent = 'Error: No se ha seleccionado un aula.';
+                    errorContainer.classList.remove('d-none');
+                    return;
+                }
+                
+                const originalText = this.innerHTML;
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Procesando...';
+                
+                try {
+                    const response = await fetch(createUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken') 
+                        },
+                        body: JSON.stringify({
+                            classroom_id: selectedClassroomId,
+                            date: document.getElementById('reservationDate').value,
+                            start_time: document.getElementById('reservationStartTime').value,
+                            end_time: document.getElementById('reservationEndTime').value,
+                            purpose: purpose
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        if (typeof Swal !== 'undefined') {
+                            Swal.fire({
+                                icon: 'success', title: 'Solicitud Enviada', text: 'Tu reserva está pendiente de aprobación.', confirmButtonColor: '#10b981'
+                            }).then(() => window.location.reload());
+                        } else {
+                            window.location.reload();
+                        }
+                    } else {
+                        errorContainer.textContent = Array.isArray(data.errors) ? data.errors.join(', ') : (data.error || 'Error al procesar.');
+                        errorContainer.classList.remove('d-none');
+                        this.disabled = false;
+                        this.innerHTML = originalText;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    errorContainer.textContent = 'Error de conexión con el servidor.';
+                    errorContainer.classList.remove('d-none');
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }
+            });
+        }
+    }
+
+    // D. CANCELAR RESERVA
+    const cancelModal = document.getElementById('cancelReservationModal');
+    if (cancelModal) {
+        let reservationIdToCancel = null;
+
+        document.body.addEventListener('click', function(e) {
+            const btn = e.target.closest('.btn-cancel-reservation');
+            if (btn) {
+                reservationIdToCancel = btn.dataset.id;
+                const bsModal = new bootstrap.Modal(cancelModal);
+                bsModal.show();
+            }
+        });
+
+        const btnConfirmCancel = document.getElementById('btnConfirmCancel');
+        if (btnConfirmCancel) {
+            btnConfirmCancel.addEventListener('click', async function() {
+                if (!reservationIdToCancel) return;
+                
+                const cancelUrl = this.getAttribute('data-url');
+                const originalText = this.innerHTML;
+                this.disabled = true;
+                this.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Cancelando...';
+
+                try {
+                    const response = await fetch(cancelUrl, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': getCookie('csrftoken')
+                        },
+                        body: JSON.stringify({ reservation_id: reservationIdToCancel })
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        window.location.reload();
+                    } else {
+                        alert(data.error || 'No se pudo cancelar la reserva.');
+                        this.disabled = false;
+                        this.innerHTML = originalText;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    alert('Error de conexión.');
+                    this.disabled = false;
+                    this.innerHTML = originalText;
+                }
+            });
+        }
+    }
 
 });

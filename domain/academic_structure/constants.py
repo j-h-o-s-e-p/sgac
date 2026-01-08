@@ -33,3 +33,12 @@ ATTENDANCE_STATUS_CHOICES = [
     ("F", "Falta"),
     ("J", "Falta Justificada"),
 ]
+
+# ==================== RESERVAS ====================
+
+RESERVATION_STATUS_CHOICES = [
+    ('PENDIENTE', 'Pendiente de Aprobación'),
+    ('APROBADA', 'Aprobada'),
+    ('RECHAZADA', 'Rechazada'),
+    ('CANCELADA', 'Cancelada por Profesor'),
+]

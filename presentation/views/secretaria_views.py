@@ -32,6 +32,37 @@ class ClassroomListView(SecretariaRequiredMixin, ListView):
     template_name = "secretaria/secretaria_classroom_list.html"
     context_object_name = "classroom_list"
     queryset = Classroom.objects.filter(is_active=True).order_by("name")
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        
+        # Agregar reservas de aulas
+        from infrastructure.persistence.models import ClassroomReservation
+        
+        # Filtro por estado
+        status_filter = self.request.GET.get('reservation_status', '')
+        
+        if status_filter:
+            reservations = ClassroomReservation.objects.filter(
+                status=status_filter
+            ).select_related('classroom', 'professor', 'approved_by').order_by('-reservation_date', '-start_time')[:50]
+        else:
+            # Por defecto: pendientes primero, luego las más recientes
+            pending = ClassroomReservation.objects.filter(
+                status='PENDIENTE'
+            ).select_related('classroom', 'professor').order_by('reservation_date', 'start_time')
+            
+            others = ClassroomReservation.objects.exclude(
+                status='PENDIENTE'
+            ).select_related('classroom', 'professor', 'approved_by').order_by('-reservation_date', '-start_time')[:30]
+            
+            reservations = list(pending) + list(others)
+        
+        context['classroom_reservations'] = reservations
+        context['pending_reservations_count'] = ClassroomReservation.objects.filter(status='PENDIENTE').count()
+        context['reservation_status_filter'] = status_filter
+        
+        return context
 
 
 class ClassroomCreateView(SecretariaRequiredMixin, CreateView):
@@ -170,3 +201,52 @@ def download_grades_excel(request, group_id):
     except Exception as e:
         messages.error(request, f"Error generando reporte: {e}")
         return redirect("presentation:secretaria_grade_report")
+
+
+# ==================== RESERVAS DE AULAS ====================
+
+def approve_reservation_api(request):
+    """API para aprobar una reserva"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    if request.user.user_role != 'SECRETARIA':
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        reservation_id = data.get('reservation_id')
+        
+        result = SecretariaService.approve_reservation(reservation_id, request.user)
+        
+        if result['success']:
+            messages.success(request, result['message'])
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)
+
+
+def reject_reservation_api(request):
+    """API para rechazar una reserva"""
+    if request.method != 'POST':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+    
+    if request.user.user_role != 'SECRETARIA':
+        return JsonResponse({'error': 'No autorizado'}, status=403)
+    
+    try:
+        data = json.loads(request.body)
+        reservation_id = data.get('reservation_id')
+        reason = data.get('reason', '')
+        
+        result = SecretariaService.reject_reservation(reservation_id, request.user, reason)
+        
+        if result['success']:
+            messages.success(request, result['message'])
+        
+        return JsonResponse(result)
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'error': str(e)}, status=500)

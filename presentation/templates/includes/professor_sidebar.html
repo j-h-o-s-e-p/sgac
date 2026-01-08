@@ -14,6 +14,14 @@
     </li>
 
     <li class="nav-item">
+        <a class="nav-link {% if request.resolver_match.url_name == 'professor_classroom_reservation' %}active{% endif %}" 
+        href="{% url 'presentation:professor_classroom_reservation' %}">
+            <i class="bi bi-calendar-check"></i>
+            <span>Reserva de Aulas</span>
+        </a>
+    </li>
+
+    <li class="nav-item">
         <a class="nav-link {% if request.resolver_match.url_name == 'professor_my_courses' or request.resolver_match.url_name == 'professor_record_attendance' %}active{% endif %}" 
            href="{% url 'presentation:professor_my_courses' %}">
             <i class="bi bi-collection"></i> Mis Cursos
