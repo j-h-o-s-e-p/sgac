@@ -7,32 +7,50 @@ from django.contrib.messages import constants as messages
 # ==================== RUTAS BASE ====================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# ==================== SEGURIDAD ====================
+# ==================== SECRETOS & DEBUG ====================
 SECRET_KEY = config("SECRET_KEY", default="django-insecure-dev-key")
 DEBUG = config("DEBUG", default=True, cast=bool)
 
+# ==================== CONFIGURACIÓN DE RED Y CODESPACES ====================
+# Hosts permitidos base
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="localhost,127.0.0.1,web").split(",")
 
-# Lógica automática para Codespaces (detecta el entorno y permite el host)
+# Variables de entorno de Codespaces
 CODESPACE_NAME = os.getenv("CODESPACE_NAME")
 CODESPACE_DOMAIN = os.getenv("GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN")
 
+# 1. Agregar Host dinámico de Codespaces a ALLOWED_HOSTS
 if CODESPACE_NAME and CODESPACE_DOMAIN:
     host = f"{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}"
     if host not in ALLOWED_HOSTS:
         ALLOWED_HOSTS.append(host)
 
-# Orígenes confiables para protección CSRF
+# ==================== SEGURIDAD (ANTI-BLOQUEOS 403) ====================
+# IMPORTANTE: Configuración para evitar errores CSRF en Docker/Codespaces
+
+# Confiar en el proxy HTTPS de GitHub
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+
+# Cookies seguras (Necesario porque Codespaces fuerza HTTPS)
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+
+# Lista maestra de orígenes confiables (Incluye wildcards para cubrir todo)
 CSRF_TRUSTED_ORIGINS = [
     "http://localhost:8000",
     "http://127.0.0.1:8000",
+    "https://localhost:8000",
+    "https://127.0.0.1:8000",
     "https://*.github.dev",
     "https://*.app.github.dev",
+    "https://*.preview.app.github.dev",
 ]
 
-# Si detectamos codespace, lo agregamos explícitamente también por seguridad
+# Agregar explícitamente la URL dinámica del Codespace actual a los orígenes confiables
 if CODESPACE_NAME and CODESPACE_DOMAIN:
-    CSRF_TRUSTED_ORIGINS.append(f"https://{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}")
+    dynamic_origin = f"https://{CODESPACE_NAME}-8000.{CODESPACE_DOMAIN}"
+    if dynamic_origin not in CSRF_TRUSTED_ORIGINS:
+        CSRF_TRUSTED_ORIGINS.append(dynamic_origin)
 
 X_FRAME_OPTIONS = "SAMEORIGIN"
 
@@ -48,19 +66,17 @@ INSTALLED_APPS = [
     # Librerías de terceros
     "rest_framework",
     "rest_framework.authtoken",
-    "drf_spectacular",  # Documentación API
-    "corsheaders",  # Manejo de CORS
+    "drf_spectacular",
+    "corsheaders",
     # --- Arquitectura Limpia (Apps Locales) ---
-    # Infraestructura: Persistencia y modelos de datos
     "infrastructure.persistence.apps.PersistenceConfig",
-    # Presentación: Web, Vistas, Templates
     "presentation",
 ]
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",  # Servir estáticos optimizados
-    "corsheaders.middleware.CorsMiddleware",  # Headers CORS antes de respuestas comunes
+    "whitenoise.middleware.WhiteNoiseMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     "django.middleware.common.CommonMiddleware",
@@ -75,7 +91,7 @@ ROOT_URLCONF = "config.urls"
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",
-        "DIRS": [BASE_DIR / "presentation" / "templates"],  # Ruta explícita a templates
+        "DIRS": [BASE_DIR / "presentation" / "templates"],
         "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
@@ -91,7 +107,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "config.wsgi.application"
 
 # ==================== BASE DE DATOS ====================
-# Configuración vía variables de entorno (DB_*)
 DATABASES = {
     "default": {
         "ENGINE": config("DB_ENGINE", default="django.db.backends.postgresql"),
@@ -103,19 +118,17 @@ DATABASES = {
     }
 }
 
-# Modelo de Usuario Personalizado (Esencial definirlo al inicio del proyecto)
+# Modelo de Usuario Personalizado
 AUTH_USER_MODEL = "persistence.CustomUser"
 
 # ==================== CACHE & CELERY (REDIS) ====================
 REDIS_URL = config("REDIS_URL", default="redis://localhost:6379/0")
 
-# Configuración Celery
 CELERY_BROKER_URL = REDIS_URL
 CELERY_RESULT_BACKEND = REDIS_URL
 CELERY_ACCEPT_CONTENT = ["json"]
 CELERY_TASK_SERIALIZER = "json"
 
-# Configuración Caché (Usando Redis)
 CACHES = {
     "default": {
         "BACKEND": "django_redis.cache.RedisCache",
@@ -146,20 +159,16 @@ USE_I18N = True
 USE_TZ = True
 
 # ==================== ESTÁTICOS Y MEDIA ====================
-# URLs
 STATIC_URL = "/static/"
 MEDIA_URL = "/media/"
 
-# Rutas físicas
-STATIC_ROOT = BASE_DIR / "staticfiles"  # Donde WhiteNoise recolecta los estáticos
-MEDIA_ROOT = BASE_DIR / "media"  # Archivos subidos por usuario
+STATIC_ROOT = BASE_DIR / "staticfiles"
+MEDIA_ROOT = BASE_DIR / "media"
 
-# Carpetas adicionales de estáticos (desarrollo)
 STATICFILES_DIRS = [
     BASE_DIR / "presentation" / "static",
 ]
 
-# Motores de almacenamiento (Whitenoise para producción)
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage",
@@ -192,7 +201,7 @@ SPECTACULAR_SETTINGS = {
     "SERVE_INCLUDE_SCHEMA": False,
 }
 
-# Configuración CORS (Permitir frontend React/Vue/etc)
+# ==================== CORS ====================
 CORS_ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "http://127.0.0.1:3000",
@@ -200,7 +209,6 @@ CORS_ALLOWED_ORIGINS = [
 CORS_ALLOW_CREDENTIALS = True
 
 # ==================== LOGGING ====================
-
 LOG_DIR = BASE_DIR / "logs"
 os.makedirs(LOG_DIR, exist_ok=True)
 
@@ -244,7 +252,6 @@ if os.getenv("PYTEST_CURRENT_TEST"):
     LOGGING_CONFIG = None
 
 # ==================== UI HELPERS ====================
-# Mapeo de etiquetas de mensajes de Django a clases de Bootstrap 5
 MESSAGE_TAGS = {
     messages.DEBUG: "secondary",
     messages.INFO: "info",
@@ -252,7 +259,6 @@ MESSAGE_TAGS = {
     messages.WARNING: "warning",
     messages.ERROR: "danger",
 }
-
 
 LOGIN_URL = 'presentation:login'
 LOGOUT_REDIRECT_URL = 'presentation:login'
