@@ -74,7 +74,7 @@ def lab_enrollment(request):
     # 2. Laboratorios ya asignados y confirmados
     enrolled_labs = StudentService.get_enrolled_labs(request.user)
 
-    # 3. Postulaciones en proceso 
+    # 3. Postulaciones en proceso
     postulations = StudentService.get_student_postulations(request.user)
 
     context = {

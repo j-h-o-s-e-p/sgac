@@ -90,7 +90,25 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock 
     depends_on:
       - web
+  
+  sonarqube:
+    image: sonarqube:community
+    container_name: sgac_sonarqube
+    restart: unless-stopped
+    ports:
+      - "9000:9000"
+    environment:
+      - SONAR_ES_BOOTSTRAP_CHECKS_DISABLE=true
+    volumes:
+      - sonarqube_data:/opt/sonarqube/data
+      - sonarqube_extensions:/opt/sonarqube/extensions
+      - sonarqube_logs:/opt/sonarqube/logs
+    depends_on:
+      - db
 
 volumes:
   postgres_data:
   jenkins_home:
+  sonarqube_data:       
+  sonarqube_extensions: 
+  sonarqube_logs:       

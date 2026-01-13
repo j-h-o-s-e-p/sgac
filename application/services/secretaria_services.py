@@ -728,7 +728,7 @@ class SecretariaService:
             campaign = LabEnrollmentCampaign.objects.filter(
                 course_id=course_id, is_closed=False
             ).first()
-            
+
             if not campaign:
                 result["errors"].append("No hay campaña activa para cerrar.")
                 return result
@@ -737,7 +737,7 @@ class SecretariaService:
             campaign.is_closed = True
             campaign.closed_at = timezone.now()
             campaign.save()
-            
+
             result["success"] = True
 
         except Exception as e:
@@ -912,7 +912,7 @@ class SecretariaService:
         }
 
     # ==================== GESTIÓN DE RESERVAS ====================
-    
+
     @staticmethod
     def get_pending_reservations():
         """
@@ -920,30 +920,31 @@ class SecretariaService:
         Ordenadas por fecha más cercana primero.
         """
         from infrastructure.persistence.models import ClassroomReservation
-        
-        return ClassroomReservation.objects.filter(
-            status='PENDIENTE',
-            reservation_date__gte=date.today()
-        ).select_related(
-            'classroom', 'professor'
-        ).order_by('reservation_date', 'start_time')
-    
+
+        return (
+            ClassroomReservation.objects.filter(
+                status="PENDIENTE", reservation_date__gte=date.today()
+            )
+            .select_related("classroom", "professor")
+            .order_by("reservation_date", "start_time")
+        )
+
     @staticmethod
     def get_all_reservations(status_filter=None):
         """
         Obtiene todas las reservas con filtro opcional por estado.
         """
         from infrastructure.persistence.models import ClassroomReservation
-        
+
         qs = ClassroomReservation.objects.select_related(
-            'classroom', 'professor', 'approved_by'
-        ).order_by('-reservation_date', '-start_time')
-        
+            "classroom", "professor", "approved_by"
+        ).order_by("-reservation_date", "-start_time")
+
         if status_filter:
             qs = qs.filter(status=status_filter)
-        
+
         return qs
-    
+
     @staticmethod
     @transaction.atomic
     def approve_reservation(reservation_id, secretaria_user):
@@ -951,96 +952,90 @@ class SecretariaService:
         Aprueba una reserva pendiente.
         """
         from infrastructure.persistence.models import ClassroomReservation
-        
+
         try:
             reservation = ClassroomReservation.objects.get(
-                reservation_id=reservation_id,
-                status='PENDIENTE'
+                reservation_id=reservation_id, status="PENDIENTE"
             )
-            
+
             # Verificar disponibilidad nuevamente (por si acaso)
             conflicts = SecretariaService._check_reservation_conflicts(
                 reservation.classroom_id,
                 reservation.reservation_date,
                 reservation.start_time,
                 reservation.end_time,
-                exclude_id=reservation_id
+                exclude_id=reservation_id,
             )
-            
+
             if conflicts:
                 return {
-                    'success': False,
-                    'error': f'Conflicto detectado: {conflicts[0]}'
+                    "success": False,
+                    "error": f"Conflicto detectado: {conflicts[0]}",
                 }
-            
-            reservation.status = 'APROBADA'
+
+            reservation.status = "APROBADA"
             reservation.approved_by = secretaria_user
             reservation.approved_at = timezone.now()
             reservation.save()
-            
-            return {
-                'success': True,
-                'message': 'Reserva aprobada correctamente'
-            }
-            
+
+            return {"success": True, "message": "Reserva aprobada correctamente"}
+
         except ClassroomReservation.DoesNotExist:
-            return {'success': False, 'error': 'Reserva no encontrada'}
-    
+            return {"success": False, "error": "Reserva no encontrada"}
+
     @staticmethod
     @transaction.atomic
-    def reject_reservation(reservation_id, secretaria_user, reason=''):
+    def reject_reservation(reservation_id, secretaria_user, reason=""):
         """
         Rechaza una reserva con motivo opcional.
         """
         from infrastructure.persistence.models import ClassroomReservation
-        
+
         try:
             reservation = ClassroomReservation.objects.get(
-                reservation_id=reservation_id,
-                status='PENDIENTE'
+                reservation_id=reservation_id, status="PENDIENTE"
             )
-            
-            reservation.status = 'RECHAZADA'
+
+            reservation.status = "RECHAZADA"
             reservation.approved_by = secretaria_user
             reservation.approved_at = timezone.now()
             reservation.rejection_reason = reason
             reservation.save()
-            
-            return {
-                'success': True,
-                'message': 'Reserva rechazada'
-            }
-            
+
+            return {"success": True, "message": "Reserva rechazada"}
+
         except ClassroomReservation.DoesNotExist:
-            return {'success': False, 'error': 'Reserva no encontrada'}
-    
+            return {"success": False, "error": "Reserva no encontrada"}
+
     @staticmethod
-    def _check_reservation_conflicts(classroom_id, date_obj, start_time, end_time, exclude_id=None):
+    def _check_reservation_conflicts(
+        classroom_id, date_obj, start_time, end_time, exclude_id=None
+    ):
         """
         Helper privado para detectar conflictos de una reserva.
         Retorna lista de mensajes de conflicto (vacía si no hay).
         """
         from infrastructure.persistence.models import ClassroomReservation
-        
+
         def time_overlap(s1, e1, s2, e2):
             return s1 < e2 and s2 < e1
-        
+
         conflicts = []
-        
+
         # Verificar otras reservas aprobadas/pendientes
         other_reservations = ClassroomReservation.objects.filter(
             classroom_id=classroom_id,
             reservation_date=date_obj,
-            status__in=['PENDIENTE', 'APROBADA']
+            status__in=["PENDIENTE", "APROBADA"],
         )
-        
+
         if exclude_id:
             other_reservations = other_reservations.exclude(reservation_id=exclude_id)
-        
+
         for res in other_reservations:
             if time_overlap(start_time, end_time, res.start_time, res.end_time):
                 conflicts.append(
                     f"Conflicto con reserva de {res.professor.get_full_name()}"
                 )
-        
+
         return conflicts

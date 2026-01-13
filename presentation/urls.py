@@ -20,15 +20,12 @@ urlpatterns = [
     path("login/", auth_views.login_view, name="login"),
     path("logout/", auth_views.logout_view, name="logout"),
     path("change-password/", auth_views.change_password_view, name="change_password"),
-    
     # ==================== STUDENT ====================
     path("student/dashboard/", student_views.dashboard, name="student_dashboard"),
     path("student/schedule/", student_views.schedule, name="student_schedule"),
     path("student/grades/", student_views.grades, name="student_grades"),
     path(
-        "student/syllabus/", 
-        student_views.syllabus_list, 
-        name="student_syllabus_list"
+        "student/syllabus/", student_views.syllabus_list, name="student_syllabus_list"
     ),
     path(
         "student/syllabus/<uuid:course_id>/",
@@ -60,19 +57,14 @@ urlpatterns = [
         student_views.get_lab_details,
         name="student_lab_details",
     ),
-    
     # ==================== PROFESSOR ====================
     path("professor/dashboard/", professor_views.dashboard, name="professor_dashboard"),
     path(
-        "professor/my-courses/", 
-        professor_views.my_courses, 
-        name="professor_my_courses"
+        "professor/my-courses/", professor_views.my_courses, name="professor_my_courses"
     ),
     path("professor/schedule/", professor_views.schedule, name="professor_schedule"),
     path(
-        "professor/statistics/", 
-        professor_views.statistics, 
-        name="professor_statistics"
+        "professor/statistics/", professor_views.statistics, name="professor_statistics"
     ),
     path(
         "professor/upload-syllabus/<uuid:course_id>/",
@@ -104,7 +96,6 @@ urlpatterns = [
         professor_views.get_course_progress_api,
         name="professor_progress_api",
     ),
-    
     # --- PROFESSOR: RESERVAS DE AULAS ---
     path(
         "professor/classroom-reservation/",
@@ -126,7 +117,6 @@ urlpatterns = [
         professor_views.cancel_reservation_api,
         name="professor_cancel_reservation_api",
     ),
-    
     # ==================== SECRETARÍA: DASHBOARD Y AULAS ====================
     path(
         "secretaria/dashboard/",
@@ -153,7 +143,6 @@ urlpatterns = [
         secretaria_views.ClassroomDeleteView.as_view(),
         name="secretaria_classroom_delete",
     ),
-    
     # --- SECRETARÍA: APIs DE RESERVAS ---
     path(
         "secretaria/classroom-reservations/approve/",
@@ -165,7 +154,6 @@ urlpatterns = [
         secretaria_views.reject_reservation_api,
         name="secretaria_reject_reservation_api",
     ),
-    
     # ==================== SECRETARÍA: PROGRAMACIÓN ====================
     path(
         "secretaria/schedule/",
@@ -177,7 +165,6 @@ urlpatterns = [
         secretaria_views.save_course_group_schedule,
         name="api_save_schedule",
     ),
-    
     # ==================== SECRETARÍA: CARGA Y REPORTES ====================
     path(
         "secretaria/bulk-upload/",
@@ -199,7 +186,6 @@ urlpatterns = [
         secretaria_views.download_grades_excel,
         name="secretaria_download_grades",
     ),
-    
     # ==================== SECRETARÍA: SÍLABOS ====================
     path(
         "secretaria/syllabus/",
@@ -216,7 +202,6 @@ urlpatterns = [
         secretaria_syllabus_views.ReprocessAllSyllabusesView.as_view(),
         name="secretaria_reprocess_all",
     ),
-    
     # ==================== SECRETARÍA: LABORATORIOS ====================
     path(
         "secretaria/laboratories/",
@@ -243,7 +228,6 @@ urlpatterns = [
         secretaria_lab_views.GetAvailableClassroomsView.as_view(),
         name="secretaria_lab_available_classrooms",
     ),
-    
     # --- SECRETARÍA: LABORATORIOS - CAMPAÑA DE INSCRIPCIÓN ---
     path(
         "secretaria/laboratories/enable-enrollment/<uuid:course_id>/",
@@ -265,7 +249,6 @@ urlpatterns = [
         secretaria_lab_views.CloseLabEnrollmentView.as_view(),
         name="secretaria_lab_close_enrollment",
     ),
-    
     # ==================== SECRETARÍA: ESTADÍSTICAS ====================
     path(
         "secretaria/statistics/",

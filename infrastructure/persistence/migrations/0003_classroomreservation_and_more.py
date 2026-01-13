@@ -9,36 +9,97 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('persistence', '0002_alter_studentpostulation_options_and_more'),
+        ("persistence", "0002_alter_studentpostulation_options_and_more"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='ClassroomReservation',
+            name="ClassroomReservation",
             fields=[
-                ('reservation_id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
-                ('reservation_date', models.DateField(verbose_name='Fecha de Reserva')),
-                ('start_time', models.TimeField(verbose_name='Hora Inicio')),
-                ('end_time', models.TimeField(verbose_name='Hora Fin')),
-                ('purpose', models.TextField(verbose_name='Motivo/Propósito')),
-                ('status', models.CharField(choices=[('PENDIENTE', 'Pendiente de Aprobación'), ('APROBADA', 'Aprobada'), ('RECHAZADA', 'Rechazada'), ('CANCELADA', 'Cancelada por Profesor')], default='PENDIENTE', max_length=20)),
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('approved_at', models.DateTimeField(blank=True, null=True)),
-                ('rejection_reason', models.TextField(blank=True, verbose_name='Motivo de Rechazo')),
-                ('approved_by', models.ForeignKey(blank=True, limit_choices_to={'user_role': 'SECRETARIA'}, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='reservations_approved', to=settings.AUTH_USER_MODEL)),
-                ('classroom', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='reservations', to='persistence.classroom')),
-                ('professor', models.ForeignKey(limit_choices_to={'user_role': 'PROFESOR'}, on_delete=django.db.models.deletion.CASCADE, related_name='classroom_reservations', to=settings.AUTH_USER_MODEL)),
+                (
+                    "reservation_id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        editable=False,
+                        primary_key=True,
+                        serialize=False,
+                    ),
+                ),
+                ("reservation_date", models.DateField(verbose_name="Fecha de Reserva")),
+                ("start_time", models.TimeField(verbose_name="Hora Inicio")),
+                ("end_time", models.TimeField(verbose_name="Hora Fin")),
+                ("purpose", models.TextField(verbose_name="Motivo/Propósito")),
+                (
+                    "status",
+                    models.CharField(
+                        choices=[
+                            ("PENDIENTE", "Pendiente de Aprobación"),
+                            ("APROBADA", "Aprobada"),
+                            ("RECHAZADA", "Rechazada"),
+                            ("CANCELADA", "Cancelada por Profesor"),
+                        ],
+                        default="PENDIENTE",
+                        max_length=20,
+                    ),
+                ),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("approved_at", models.DateTimeField(blank=True, null=True)),
+                (
+                    "rejection_reason",
+                    models.TextField(blank=True, verbose_name="Motivo de Rechazo"),
+                ),
+                (
+                    "approved_by",
+                    models.ForeignKey(
+                        blank=True,
+                        limit_choices_to={"user_role": "SECRETARIA"},
+                        null=True,
+                        on_delete=django.db.models.deletion.SET_NULL,
+                        related_name="reservations_approved",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
+                (
+                    "classroom",
+                    models.ForeignKey(
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="reservations",
+                        to="persistence.classroom",
+                    ),
+                ),
+                (
+                    "professor",
+                    models.ForeignKey(
+                        limit_choices_to={"user_role": "PROFESOR"},
+                        on_delete=django.db.models.deletion.CASCADE,
+                        related_name="classroom_reservations",
+                        to=settings.AUTH_USER_MODEL,
+                    ),
+                ),
             ],
             options={
-                'verbose_name': 'Reserva de Aula',
-                'verbose_name_plural': 'Reservas de Aulas',
-                'db_table': 'classroom_reservations',
-                'ordering': ['-reservation_date', '-start_time'],
-                'indexes': [models.Index(fields=['reservation_date', 'status'], name='classroom_r_reserva_983ca7_idx'), models.Index(fields=['professor', 'status'], name='classroom_r_profess_4ddf6e_idx')],
+                "verbose_name": "Reserva de Aula",
+                "verbose_name_plural": "Reservas de Aulas",
+                "db_table": "classroom_reservations",
+                "ordering": ["-reservation_date", "-start_time"],
+                "indexes": [
+                    models.Index(
+                        fields=["reservation_date", "status"],
+                        name="classroom_r_reserva_983ca7_idx",
+                    ),
+                    models.Index(
+                        fields=["professor", "status"],
+                        name="classroom_r_profess_4ddf6e_idx",
+                    ),
+                ],
             },
         ),
         migrations.AddConstraint(
-            model_name='classroomreservation',
-            constraint=models.UniqueConstraint(condition=models.Q(('status__in', ['PENDIENTE', 'APROBADA'])), fields=('classroom', 'reservation_date', 'start_time', 'end_time'), name='unique_active_reservation'),
+            model_name="classroomreservation",
+            constraint=models.UniqueConstraint(
+                condition=models.Q(("status__in", ["PENDIENTE", "APROBADA"])),
+                fields=("classroom", "reservation_date", "start_time", "end_time"),
+                name="unique_active_reservation",
+            ),
         ),
     ]

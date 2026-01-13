@@ -799,39 +799,33 @@ class ClassroomReservation(models.Model):
     Sistema de reservas de aulas para profesores.
     Requiere aprobación de secretaría.
     """
-    
+
     reservation_id = models.UUIDField(
-        primary_key=True, 
-        default=uuid.uuid4, 
-        editable=False
+        primary_key=True, default=uuid.uuid4, editable=False
     )
-    
+
     # Relaciones
     classroom = models.ForeignKey(
-        Classroom,
-        on_delete=models.CASCADE,
-        related_name='reservations'
+        Classroom, on_delete=models.CASCADE, related_name="reservations"
     )
     professor = models.ForeignKey(
         CustomUser,
         on_delete=models.CASCADE,
-        related_name='classroom_reservations',
-        limit_choices_to={'user_role': 'PROFESOR'}
+        related_name="classroom_reservations",
+        limit_choices_to={"user_role": "PROFESOR"},
     )
-    
+
     # Detalles de la reserva
     reservation_date = models.DateField(verbose_name="Fecha de Reserva")
     start_time = models.TimeField(verbose_name="Hora Inicio")
     end_time = models.TimeField(verbose_name="Hora Fin")
     purpose = models.TextField(verbose_name="Motivo/Propósito")
-    
+
     # Estado y aprobación
     status = models.CharField(
-        max_length=20, 
-        choices=RESERVATION_STATUS_CHOICES,
-        default='PENDIENTE'
+        max_length=20, choices=RESERVATION_STATUS_CHOICES, default="PENDIENTE"
     )
-    
+
     # Auditoría
     created_at = models.DateTimeField(auto_now_add=True)
     approved_by = models.ForeignKey(
@@ -839,48 +833,48 @@ class ClassroomReservation(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         blank=True,
-        related_name='reservations_approved',
-        limit_choices_to={'user_role': 'SECRETARIA'}
+        related_name="reservations_approved",
+        limit_choices_to={"user_role": "SECRETARIA"},
     )
     approved_at = models.DateTimeField(null=True, blank=True)
     rejection_reason = models.TextField(blank=True, verbose_name="Motivo de Rechazo")
-    
+
     class Meta:
-        db_table = 'classroom_reservations'
-        ordering = ['-reservation_date', '-start_time']
-        verbose_name = 'Reserva de Aula'
-        verbose_name_plural = 'Reservas de Aulas'
-        
+        db_table = "classroom_reservations"
+        ordering = ["-reservation_date", "-start_time"]
+        verbose_name = "Reserva de Aula"
+        verbose_name_plural = "Reservas de Aulas"
+
         # Evitar reservas duplicadas
         constraints = [
             models.UniqueConstraint(
-                fields=['classroom', 'reservation_date', 'start_time', 'end_time'],
-                condition=Q(status__in=['PENDIENTE', 'APROBADA']),
-                name='unique_active_reservation'
+                fields=["classroom", "reservation_date", "start_time", "end_time"],
+                condition=Q(status__in=["PENDIENTE", "APROBADA"]),
+                name="unique_active_reservation",
             )
         ]
-        
+
         indexes = [
-            models.Index(fields=['reservation_date', 'status']),
-            models.Index(fields=['professor', 'status']),
+            models.Index(fields=["reservation_date", "status"]),
+            models.Index(fields=["professor", "status"]),
         ]
-    
+
     def __str__(self):
         return f"{self.classroom.code} - {self.professor.get_full_name()} ({self.reservation_date})"
-    
+
     def get_duration_hours(self):
         """Calcula duración en horas"""
         start = datetime.combine(date.today(), self.start_time)
         end = datetime.combine(date.today(), self.end_time)
         duration = (end - start).total_seconds() / 3600
         return round(duration, 1)
-    
+
     def is_editable(self):
         """Solo editable si está pendiente"""
-        return self.status == 'PENDIENTE'
-    
+        return self.status == "PENDIENTE"
+
     def can_cancel(self):
         """Cancelable si está pendiente o aprobada y es futuro"""
-        if self.status not in ['PENDIENTE', 'APROBADA']:
+        if self.status not in ["PENDIENTE", "APROBADA"]:
             return False
         return self.reservation_date >= date.today()

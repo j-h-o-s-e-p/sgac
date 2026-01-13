@@ -576,7 +576,9 @@ class StudentService:
             ).count()
 
             if current_enrolled >= lab.capacity:
-                result["errors"].append("Este laboratorio ya no tiene cupos disponibles.")
+                result["errors"].append(
+                    "Este laboratorio ya no tiene cupos disponibles."
+                )
                 return result
 
             # 7. Crear postulación Y asignar inmediatamente
@@ -589,7 +591,7 @@ class StudentService:
                 postulation=postulation,
                 student=student,
                 lab_group=lab,
-                assignment_method="DIRECTO"
+                assignment_method="DIRECTO",
             )
 
             # 9. Actualizar matrícula

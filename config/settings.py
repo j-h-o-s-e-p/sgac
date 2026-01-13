@@ -62,12 +62,12 @@ MIDDLEWARE = [
     "whitenoise.middleware.WhiteNoiseMiddleware",  # Servir estáticos optimizados
     "corsheaders.middleware.CorsMiddleware",  # Headers CORS antes de respuestas comunes
     "django.contrib.sessions.middleware.SessionMiddleware",
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    'config.middleware.NoCacheMiddleware',
+    "config.middleware.NoCacheMiddleware",
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -254,5 +254,5 @@ MESSAGE_TAGS = {
 }
 
 
-LOGIN_URL = 'presentation:login'
-LOGOUT_REDIRECT_URL = 'presentation:login'
+LOGIN_URL = "presentation:login"
+LOGOUT_REDIRECT_URL = "presentation:login"

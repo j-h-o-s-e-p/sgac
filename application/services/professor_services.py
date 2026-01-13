@@ -213,7 +213,7 @@ class ProfessorService:
 
             # Cargar mapa de asistencia (inicia en 'F' si es hoy y está vacío)
             attendance_map = self._get_or_create_attendance_map(
-                group, enrollments, current_session, user
+                enrollments, current_session, user
             )
 
             # Si es teoría y es editable, cargar temas
@@ -437,9 +437,28 @@ class ProfessorService:
             "matrix_data": matrix_data,
         }
 
+
+    def _parse_grade(self, raw, student_name, errors):
+        """Parse and validate grade value"""
+        if not raw or not raw.strip():
+            return None
+
+        try:
+            val = Decimal(raw)
+        except InvalidOperation:
+            errors.append(f"Error formato: {student_name}")
+            return None
+
+        if not (0 <= val <= 20):
+            errors.append(f"Nota fuera de rango: {student_name}")
+            return None
+
+        return val
+
+
     def save_grades_batch(self, course, unit_to_save, post_data, user):
         """Guarda notas masivamente desde formulario"""
-        all_evaluations = Evaluation.objects.filter(course=course, unit=unit_to_save)
+        evaluations = Evaluation.objects.filter(course=course, unit=unit_to_save)
         enrollments = StudentEnrollment.objects.filter(course=course, status="ACTIVO")
 
         count = 0
@@ -447,37 +466,56 @@ class ProfessorService:
 
         with transaction.atomic():
             for enrollment in enrollments:
-                for evaluation in all_evaluations:
-                    input_name = (
-                        f"grade_{enrollment.enrollment_id}_{evaluation.evaluation_id}"
-                    )
+                student_name = enrollment.student.get_full_name()
+
+                for evaluation in evaluations:
+                    input_name = f"grade_{enrollment.enrollment_id}_{evaluation.evaluation_id}"
                     raw = post_data.get(input_name)
 
-                    if raw and raw.strip():
-                        try:
-                            val = Decimal(raw)
-                            if 0 <= val <= 20:
-                                GradeRecord.objects.update_or_create(
-                                    enrollment=enrollment,
-                                    evaluation=evaluation,
-                                    defaults={
-                                        "raw_score": val,
-                                        "recorded_by": user,
-                                        "is_locked": False,
-                                    },
-                                )
-                                count += 1
-                            else:
-                                errors.append(
-                                    f"Nota fuera de rango: {enrollment.student.get_full_name()}"
-                                )
-                        except:
-                            errors.append(
-                                f"Error formato: {enrollment.student.get_full_name()}"
-                            )
+                    val = self._parse_grade(raw, student_name, errors)
+                    if val is None:
+                        continue
+
+                    GradeRecord.objects.update_or_create(
+                        enrollment=enrollment,
+                        evaluation=evaluation,
+                        defaults={
+                            "raw_score": val,
+                            "recorded_by": user,
+                            "is_locked": False,
+                        },
+                    )
+                    count += 1
 
                 enrollment.calculate_final_grade()
+
         return count, errors
+
+
+    def _save_csv_grade(self, raw_value, enrollment, evaluation, user):
+        """Validate and save a single grade from CSV"""
+        if not raw_value:
+            return False
+
+        try:
+            val = Decimal(raw_value)
+        except InvalidOperation:
+            return False
+
+        if not (0 <= val <= 20):
+            return False
+
+        GradeRecord.objects.update_or_create(
+            enrollment=enrollment,
+            evaluation=evaluation,
+            defaults={
+                "raw_score": val,
+                "recorded_by": user,
+                "is_locked": False,
+            },
+        )
+        return True
+
 
     def process_csv_grades(self, csv_file, course, unit_number, user):
         """Procesa carga masiva de notas desde CSV"""
@@ -491,9 +529,9 @@ class ProfessorService:
         if not (eval_cont and eval_exam):
             raise ValueError("Faltan evaluaciones configuradas para esta unidad")
 
-        # Nombres de columna esperados
         col_c = f"continua{unit_number}"
         col_e = f"examen{unit_number}"
+
         success = 0
         errors = []
 
@@ -509,26 +547,19 @@ class ProfessorService:
                         student=student, course=course, status="ACTIVO"
                     )
 
-                    for col, obj in [(col_c, eval_cont), (col_e, eval_exam)]:
-                        if row.get(col):
-                            val = Decimal(row.get(col))
-                            if 0 <= val <= 20:
-                                GradeRecord.objects.update_or_create(
-                                    enrollment=enrollment,
-                                    evaluation=obj,
-                                    defaults={
-                                        "raw_score": val,
-                                        "recorded_by": user,
-                                        "is_locked": False,
-                                    },
-                                )
-                                success += 1
+                    for col, evaluation in ((col_c, eval_cont), (col_e, eval_exam)):
+                        if self._save_csv_grade(
+                            row.get(col), enrollment, evaluation, user
+                        ):
+                            success += 1
 
                     enrollment.calculate_final_grade()
+
                 except Exception as e:
                     errors.append(f"CUI {cui}: {str(e)}")
 
         return success, errors
+
 
     # =========================================================================
     # 4. ESTADÍSTICAS Y REPORTES
@@ -778,9 +809,12 @@ class ProfessorService:
                 pass
 
         today = next((s for s in all_sessions if s["is_today"]), None)
-        return today if today else (all_sessions[-1] if all_sessions else None)
 
-    def _get_or_create_attendance_map(self, group, enrollments, session, user):
+        last_session = all_sessions[-1] if all_sessions else None
+        return today if today else last_session
+
+
+    def _get_or_create_attendance_map(self, enrollments, session, user):
         """Obtiene asistencias existentes o crea 'F' por defecto si es hoy"""
         records = AttendanceRecord.objects.filter(
             enrollment__in=enrollments, session_number=session["number"]
@@ -893,22 +927,25 @@ class ProfessorService:
         """Retorna temas no completados"""
         try:
             syllabus = group.course.syllabus
-        except:
+        except AttributeError:
             return []
+
         done = SessionProgress.objects.filter(course_group=group).values_list(
             "session_id", flat=True
         )
+
         return (
             SyllabusSession.objects.filter(syllabus=syllabus)
             .exclude(session_id__in=done)
             .order_by("session_number")
         )
 
+
     def get_topics_covered_today_count(self, group, date_obj):
         return SessionProgress.objects.filter(
             course_group=group, completed_date=date_obj
         ).count()
-    
+
     # =========================================================================
     # 6. RESERVAS DE AULAS
     # =========================================================================
@@ -918,72 +955,69 @@ class ProfessorService:
         Busca aulas disponibles para reserva en una fecha/hora específica.
         Considera: horarios regulares, labs, y otras reservas aprobadas.
         """
-        
+
         def time_overlap(s1, e1, s2, e2):
             """Helper para detectar cruces de horario"""
             return s1 < e2 and s2 < e1
-        
+
         # Obtener día de la semana
-        day_name = date_obj.strftime('%A').upper()
+        day_name = date_obj.strftime("%A").upper()
         day_mapping = {
-            'MONDAY': 'LUNES',
-            'TUESDAY': 'MARTES', 
-            'WEDNESDAY': 'MIERCOLES',
-            'THURSDAY': 'JUEVES',
-            'FRIDAY': 'VIERNES',
+            "MONDAY": "LUNES",
+            "TUESDAY": "MARTES",
+            "WEDNESDAY": "MIERCOLES",
+            "THURSDAY": "JUEVES",
+            "FRIDAY": "VIERNES",
         }
-        day_spanish = day_mapping.get(day_name, 'LUNES')
-        
+        day_spanish = day_mapping.get(day_name, "LUNES")
+
         occupied_ids = set()
-        
+
         # 1. Aulas ocupadas por horarios regulares de teoría
         regular_schedules = Schedule.objects.filter(
             day_of_week=day_spanish
-        ).select_related('room')
-        
+        ).select_related("room")
+
         for schedule in regular_schedules:
             if schedule.room and time_overlap(
-                start_time, end_time, 
-                schedule.start_time, schedule.end_time
+                start_time, end_time, schedule.start_time, schedule.end_time
             ):
                 occupied_ids.add(schedule.room.classroom_id)
-        
+
         # 2. Aulas ocupadas por laboratorios
-        labs = LaboratoryGroup.objects.filter(
-            day_of_week=day_spanish
-        ).select_related('room')
-        
+        labs = LaboratoryGroup.objects.filter(day_of_week=day_spanish).select_related(
+            "room"
+        )
+
         for lab in labs:
             if lab.room and time_overlap(
-                start_time, end_time,
-                lab.start_time, lab.end_time
+                start_time, end_time, lab.start_time, lab.end_time
             ):
                 occupied_ids.add(lab.room.classroom_id)
-        
+
         # 3. Aulas con reservas aprobadas o pendientes en esa fecha
         reservations = ClassroomReservation.objects.filter(
-            reservation_date=date_obj,
-            status__in=['PENDIENTE', 'APROBADA']
-        ).select_related('classroom')
-        
+            reservation_date=date_obj, status__in=["PENDIENTE", "APROBADA"]
+        ).select_related("classroom")
+
         for reservation in reservations:
             if time_overlap(
-                start_time, end_time,
-                reservation.start_time, reservation.end_time
+                start_time, end_time, reservation.start_time, reservation.end_time
             ):
                 occupied_ids.add(reservation.classroom.classroom_id)
-        
+
         # Retornar aulas disponibles
-        available = Classroom.objects.filter(
-            is_active=True
-        ).exclude(
-            classroom_id__in=occupied_ids
-        ).order_by('classroom_type', 'name')
-        
+        available = (
+            Classroom.objects.filter(is_active=True)
+            .exclude(classroom_id__in=occupied_ids)
+            .order_by("classroom_type", "name")
+        )
+
         return available
 
-    def create_classroom_reservation(self, professor, classroom_id, date_obj, 
-                                    start_time, end_time, purpose):
+    def create_classroom_reservation(
+        self, professor, classroom_id, date_obj, start_time, end_time, purpose
+    ):
         """
         Crea una nueva reserva de aula (estado PENDIENTE).
         Valida:
@@ -991,25 +1025,27 @@ class ProfessorService:
         - Disponibilidad del aula
         - Duración mínima 1 hora
         """
-        
+
         errors = []
-        
+
         # Validación 1: Horario permitido
         MIN_TIME = time(7, 0)
         MAX_TIME = time(20, 10)
-        
+
         if start_time < MIN_TIME or end_time > MAX_TIME:
             errors.append("El horario debe estar entre 7:00 AM y 8:10 PM")
-        
+
         # Validación 2: Duración mínima
-        duration = datetime.combine(date.min, end_time) - datetime.combine(date.min, start_time)
+        duration = datetime.combine(date.min, end_time) - datetime.combine(
+            date.min, start_time
+        )
         if duration.total_seconds() < 3600:  # 1 hora mínimo
             errors.append("La reserva debe ser de al menos 1 hora")
-        
+
         # Validación 3: Fecha no pasada
         if date_obj < date.today():
             errors.append("No puedes reservar fechas pasadas")
-        
+
         # Validación 4: Disponibilidad
         if not errors:
             available = self.get_available_classrooms_for_reservation(
@@ -1017,10 +1053,10 @@ class ProfessorService:
             )
             if not available.filter(classroom_id=classroom_id).exists():
                 errors.append("El aula no está disponible en ese horario")
-        
+
         if errors:
-            return {'success': False, 'errors': errors}
-        
+            return {"success": False, "errors": errors}
+
         # Crear reserva
         try:
             with transaction.atomic():
@@ -1031,16 +1067,16 @@ class ProfessorService:
                     start_time=start_time,
                     end_time=end_time,
                     purpose=purpose,
-                    status='PENDIENTE'
+                    status="PENDIENTE",
                 )
-                
+
                 return {
-                    'success': True, 
-                    'reservation_id': str(reservation.reservation_id),
-                    'message': 'Reserva creada. Pendiente de aprobación por Secretaría.'
+                    "success": True,
+                    "reservation_id": str(reservation.reservation_id),
+                    "message": "Reserva creada. Pendiente de aprobación por Secretaría.",
                 }
         except Exception as e:
-            return {'success': False, 'errors': [str(e)]}
+            return {"success": False, "errors": [str(e)]}
 
     def get_professor_reservations(self, professor, include_history=False):
         """
@@ -1048,43 +1084,38 @@ class ProfessorService:
         Si include_history=False, solo muestra activas (PENDIENTE/APROBADA).
         Si True, muestra todo el historial.
         """
-        
-        qs = ClassroomReservation.objects.filter(
-            professor=professor
-        ).select_related('classroom', 'approved_by')
-        
+
+        qs = ClassroomReservation.objects.filter(professor=professor).select_related(
+            "classroom", "approved_by"
+        )
+
         if not include_history:
             qs = qs.filter(
-                status__in=['PENDIENTE', 'APROBADA'],
-                reservation_date__gte=date.today()
+                status__in=["PENDIENTE", "APROBADA"], reservation_date__gte=date.today()
             )
-        
-        return qs.order_by('-reservation_date', '-start_time')
+
+        return qs.order_by("-reservation_date", "-start_time")
 
     def cancel_reservation(self, reservation_id, professor):
         """
         Cancela una reserva (solo si es del profesor y está activa).
         """
-        
+
         try:
             reservation = ClassroomReservation.objects.get(
-                reservation_id=reservation_id,
-                professor=professor
+                reservation_id=reservation_id, professor=professor
             )
-            
+
             if not reservation.can_cancel():
                 return {
-                    'success': False, 
-                    'error': 'Esta reserva no puede ser cancelada'
+                    "success": False,
+                    "error": "Esta reserva no puede ser cancelada",
                 }
-            
-            reservation.status = 'CANCELADA'
+
+            reservation.status = "CANCELADA"
             reservation.save()
-            
-            return {
-                'success': True,
-                'message': 'Reserva cancelada correctamente'
-            }
-            
+
+            return {"success": True, "message": "Reserva cancelada correctamente"}
+
         except ClassroomReservation.DoesNotExist:
-            return {'success': False, 'error': 'Reserva no encontrada'}
+            return {"success": False, "error": "Reserva no encontrada"}
