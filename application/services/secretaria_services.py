@@ -120,23 +120,25 @@ class SecretariaService:
     @staticmethod
     @transaction.atomic
     def update_course_group_schedules(group_id, horarios_data):
-        """Actualiza los horarios de un grupo (Lógica de la API)"""
-        group = CourseGroup.objects.get(group_id=group_id)
-        dias_a_actualizar = set(h["day"] for h in horarios_data)
+    """Actualiza los horarios de un grupo (Lógica de la API)"""
+    group = CourseGroup.objects.get(group_id=group_id)
 
-        # Limpiar horarios existentes en esos días
-        if dias_a_actualizar:
-            group.schedules.filter(day_of_week__in=dias_a_actualizar).delete()
+    dias_a_actualizar = {h["day"] for h in horarios_data}
 
-        # Crear nuevos
-        for h in horarios_data:
-            Schedule.objects.create(
-                course_group=group,
-                room_id=h["room_id"],
-                day_of_week=h["day"],
-                start_time=h["start_time"],
-                end_time=h["end_time"],
-            )
+    # Limpiar horarios existentes en esos días
+    if dias_a_actualizar:
+        group.schedules.filter(day_of_week__in=dias_a_actualizar).delete()
+
+    # Crear nuevos
+    for h in horarios_data:
+        Schedule.objects.create(
+            course_group=group,
+            room_id=h["room_id"],
+            day_of_week=h["day"],
+            start_time=h["start_time"],
+            end_time=h["end_time"],
+        )
+
 
     # ==================== CARGA MASIVA (CSV) ====================
     @staticmethod
@@ -246,7 +248,7 @@ class SecretariaService:
             last_part = parts[0].strip().split("/")
             first_part = parts[1].strip()
 
-            first_name = " ".join([n.capitalize() for n in first_part.split() if n])
+            first_name = " ".join(n.capitalize() for n in first_part.split() if n)
             paterno = last_part[0].capitalize() if last_part else ""
             materno = last_part[1].capitalize() if len(last_part) > 1 else ""
             last_name = f"{paterno} {materno}".strip()
@@ -265,8 +267,10 @@ class SecretariaService:
                     email = f"{initial}{pat_slug}{cui}@unsa.edu.pe"
 
             return first_name, last_name, email
-        except:
+
+        except (AttributeError, IndexError, TypeError):
             return "Error", "Error", f"error_{cui}@unsa.edu.pe"
+
 
     # ==================== REPORTES (EXCEL) ====================
     @staticmethod
@@ -421,38 +425,47 @@ class SecretariaService:
         msgs = []
         has_conflict = False
 
-        # Helper interno
         def overlap(s1, e1, s2, e2):
             return s1 < e2 and s2 < e1
 
+        def register_conflict(condition, message):
+            nonlocal has_conflict
+            if condition:
+                has_conflict = True
+                msgs.append(message)
+
         # 1. Teoría
         theory_qs = Schedule.objects.filter(
-            course_group__course_id=course_id, day_of_week=day
+            course_group__course_id=course_id,
+            day_of_week=day,
         )
         for s in theory_qs:
-            if overlap(start, end, s.start_time, s.end_time):
-                has_conflict = True
-                msgs.append(f"Cruce con Teoría: {s.start_time}-{s.end_time}")
+            register_conflict(
+                overlap(start, end, s.start_time, s.end_time),
+                f"Cruce con Teoría: {s.start_time}-{s.end_time}",
+            )
 
         # 2. Sala (Room)
         if room_id:
-            # Cruce con clases normales
             occupied = Schedule.objects.filter(room_id=room_id, day_of_week=day)
             for s in occupied:
-                if overlap(start, end, s.start_time, s.end_time):
-                    has_conflict = True
-                    msgs.append(f"Salón ocupado por clase: {s.start_time}")
+                register_conflict(
+                    overlap(start, end, s.start_time, s.end_time),
+                    f"Salón ocupado por clase: {s.start_time}",
+                )
 
-            # Cruce con otros labs
             labs = LaboratoryGroup.objects.filter(room_id=room_id, day_of_week=day)
             if exclude_lab_id:
                 labs = labs.exclude(lab_id=exclude_lab_id)
+
             for l in labs:
-                if overlap(start, end, l.start_time, l.end_time):
-                    has_conflict = True
-                    msgs.append(f"Salón ocupado por Lab {l.lab_nomenclature}")
+                register_conflict(
+                    overlap(start, end, l.start_time, l.end_time),
+                    f"Salón ocupado por Lab {l.lab_nomenclature}",
+                )
 
         return {"has_conflict": has_conflict, "messages": msgs}
+
 
     @staticmethod
     def get_available_classrooms(day, start, end):
@@ -591,7 +604,6 @@ class SecretariaService:
         Nos dice en tiempo real cómo va llenándose cada grupo.
         Calcula si un lab está vacío, normal, lleno o reventando de gente.
         """
-        # Buscamos la última campaña creada
         campaign = (
             LabEnrollmentCampaign.objects.filter(course_id=course_id)
             .order_by("-created_at")
@@ -601,7 +613,6 @@ class SecretariaService:
         if not campaign:
             return {"exists": False}
 
-        # Contamos cuántos alumnos han pedido cada grupo
         labs = LaboratoryGroup.objects.filter(course_id=course_id).annotate(
             enrolled_count=Count(
                 "postulations", filter=Q(postulations__campaign=campaign)
@@ -610,8 +621,6 @@ class SecretariaService:
 
         labs_data = []
         for lab in labs:
-            # Ponemos etiquetas visuales según qué tan lleno esté
-            status = "empty"
             if lab.enrolled_count == 0:
                 status = "empty"
             elif lab.enrolled_count < lab.capacity * 0.8:
@@ -641,6 +650,7 @@ class SecretariaService:
             "end_date": campaign.end_date.isoformat(),
             "labs": labs_data,
         }
+
 
     @staticmethod
     def get_lab_enrolled_students(lab_id):
@@ -679,44 +689,51 @@ class SecretariaService:
         El "Detector de Choques".
         Revisa la agenda del alumno para ver si tiene clases a la misma hora
         que el lab que quiere.
-        Revisa:
-        1. Sus clases de Teoría.
-        2. Otros Laboratorios donde ya esté inscrito.
         """
 
         def overlap(s1, e1, s2, e2):
             return s1 < e2 and s2 < e1
 
-        enrollments = StudentEnrollment.objects.filter(
-            student_id=student_id, status="ACTIVO"
-        ).select_related("course", "group")
+        def same_day_and_overlap(other):
+            return (
+                other.day_of_week == lab_group.day_of_week
+                and overlap(
+                    lab_group.start_time,
+                    lab_group.end_time,
+                    other.start_time,
+                    other.end_time,
+                )
+            )
+
+        enrollments = (
+            StudentEnrollment.objects.filter(student_id=student_id, status="ACTIVO")
+            .select_related("course", "group", "lab_assignment__lab_group")
+        )
 
         for enrollment in enrollments:
-            if enrollment.group:
-                schedules = Schedule.objects.filter(course_group=enrollment.group)
-                for sch in schedules:
-                    if sch.day_of_week == lab_group.day_of_week:
-                        if overlap(
-                            lab_group.start_time,
-                            lab_group.end_time,
-                            sch.start_time,
-                            sch.end_time,
-                        ):
-                            return True
+            if enrollment.group and _has_theory_conflict(enrollment.group, same_day_and_overlap):
+                return True
 
-            if enrollment.lab_assignment:
-                other_lab = enrollment.lab_assignment.lab_group
-                if other_lab.lab_id != lab_group.lab_id:
-                    if other_lab.day_of_week == lab_group.day_of_week:
-                        if overlap(
-                            lab_group.start_time,
-                            lab_group.end_time,
-                            other_lab.start_time,
-                            other_lab.end_time,
-                        ):
-                            return True
+            if _has_lab_conflict(enrollment, lab_group, same_day_and_overlap):
+                return True
 
         return False
+
+
+    def _has_theory_conflict(group, conflict_check):
+        schedules = Schedule.objects.filter(course_group=group)
+        return any(conflict_check(sch) for sch in schedules)
+
+
+    def _has_lab_conflict(enrollment, lab_group, conflict_check):
+        if not enrollment.lab_assignment:
+            return False
+
+        other_lab = enrollment.lab_assignment.lab_group
+        if other_lab.lab_id == lab_group.lab_id:
+            return False
+
+        return conflict_check(other_lab)
 
     @staticmethod
     @transaction.atomic
@@ -766,30 +783,28 @@ class SecretariaService:
             enrollment.save()
 
     # ==================== ESTADÍSTICAS AVANZADAS ====================
-    @staticmethod
-    def get_statistics_context(semester_id=None):
-        """
-        Calcula todas las métricas para la vista de estadísticas.
-        """
-        # 1. Filtros Base
-        enrollments_qs = StudentEnrollment.objects.filter(status="ACTIVO")
-        courses_qs = Course.objects.all()
-        groups_qs = CourseGroup.objects.all()
+    def _get_base_qs(semester_id):
+        enrollments = StudentEnrollment.objects.filter(status="ACTIVO")
+        courses = Course.objects.all()
+        groups = CourseGroup.objects.all()
 
         if semester_id:
-            courses_qs = courses_qs.filter(semester_id=semester_id)
-            enrollments_qs = enrollments_qs.filter(course__semester_id=semester_id)
-            groups_qs = groups_qs.filter(course__semester_id=semester_id)
+            enrollments = enrollments.filter(course__semester_id=semester_id)
+            courses = courses.filter(semester_id=semester_id)
+            groups = groups.filter(course__semester_id=semester_id)
 
-        # 2. Análisis de Saturación
-        groups_analysis = groups_qs.annotate(
+        return enrollments, courses, groups
+
+    def _get_saturation_analysis(groups_qs):
+        groups = groups_qs.annotate(
             student_count=Count("enrollments", filter=Q(enrollments__status="ACTIVO"))
         )
-        full, optimal, low = 0, 0, 0
 
-        for group in groups_analysis:
-            cap = group.capacity if (group.capacity and group.capacity > 0) else 40
-            ratio = group.student_count / cap
+        full = optimal = low = 0
+
+        for g in groups:
+            cap = g.capacity if g.capacity and g.capacity > 0 else 40
+            ratio = g.student_count / cap
             if ratio >= 0.9:
                 full += 1
             elif ratio >= 0.5:
@@ -797,7 +812,7 @@ class SecretariaService:
             else:
                 low += 1
 
-        saturation_json = json.dumps(
+        return json.dumps(
             {
                 "labels": [
                     "Sobresaturados (>90%)",
@@ -808,81 +823,88 @@ class SecretariaService:
             }
         )
 
-        # 3. Top 10 Cursos
-        students_by_course = (
+    def _get_students_by_course(enrollments_qs):
+        data = (
             enrollments_qs.values("course__course_code", "course__course_name")
             .annotate(count=Count("student"))
             .order_by("-count")[:10]
         )
 
-        students_by_course_json = json.dumps(
+        return json.dumps(
             {
-                "labels": [i["course__course_code"] for i in students_by_course],
-                "names": [i["course__course_name"] for i in students_by_course],
-                "data": [i["count"] for i in students_by_course],
+                "labels": [d["course__course_code"] for d in data],
+                "names": [d["course__course_name"] for d in data],
+                "data": [d["count"] for d in data],
             }
         )
 
-        # 4. Carga Docente (Top 15)
+    def _get_professors_load():
         professors = CustomUser.objects.filter(
             user_role="PROFESOR", account_status="ACTIVO"
         )
-        professors_load = []
+
+        load = []
         for prof in professors:
-            # Calculamos horas únicas (evitando duplicados si un horario se repite en data sucia)
-            schedules = Schedule.objects.filter(course_group__professor=prof).distinct()
+            schedules = Schedule.objects.filter(
+                course_group__professor=prof
+            ).distinct()
+
             minutes = sum(
-                [
-                    (s.end_time.hour * 60 + s.end_time.minute)
-                    - (s.start_time.hour * 60 + s.start_time.minute)
-                    for s in schedules
-                ]
+                (s.end_time.hour * 60 + s.end_time.minute)
+                - (s.start_time.hour * 60 + s.start_time.minute)
+                for s in schedules
             )
-            hours = minutes / 60
-            if hours > 0:
-                professors_load.append(
-                    {"name": prof.get_full_name(), "hours": round(hours, 1)}
+
+            if minutes > 0:
+                load.append(
+                    {"name": prof.get_full_name(), "hours": round(minutes / 60, 1)}
                 )
 
-        professors_load.sort(key=lambda x: x["hours"], reverse=True)
-        professors_load_json = json.dumps(
-            {
-                "labels": [p["name"] for p in professors_load[:15]],
-                "data": [p["hours"] for p in professors_load[:15]],
-            }
+        load.sort(key=lambda x: x["hours"], reverse=True)
+
+        return (
+            json.dumps(
+                {
+                    "labels": [p["name"] for p in load[:15]],
+                    "data": [p["hours"] for p in load[:15]],
+                }
+            ),
+            professors.count(),
         )
 
-        # 5. Avance de Sílabos
-        syllabuses = Syllabus.objects.filter(course__in=courses_qs).select_related(
-            "course"
-        )
-        syllabus_progress = []
-        for syllabus in syllabuses:
-            total = syllabus.sessions.count()
+    def _get_syllabus_progress(courses_qs):
+        syllabuses = Syllabus.objects.filter(course__in=courses_qs).select_related("course")
+
+        progress = []
+        for s in syllabuses:
+            total = s.sessions.count()
             completed = (
-                SessionProgress.objects.filter(session__syllabus=syllabus).count()
+                SessionProgress.objects.filter(session__syllabus=s).count()
                 if total > 0
                 else 0
             )
             pct = round((completed / total) * 100, 1) if total > 0 else 0
-            syllabus_progress.append(
+
+            progress.append(
                 {
-                    "course_code": syllabus.course.course_code,
-                    "course_name": syllabus.course.course_name,
+                    "course_code": s.course.course_code,
+                    "course_name": s.course.course_name,
                     "progress": pct,
                     "completed": completed,
                     "total": total,
                 }
             )
-        syllabus_progress.sort(key=lambda x: x["progress"])
 
-        # 6. Uso de Aulas
+        return sorted(progress, key=lambda x: x["progress"])
+        
+    def _get_classrooms_usage():
         classrooms = (
             Classroom.objects.filter(is_active=True)
             .annotate(schedules_count=Count("schedules", distinct=True))
             .order_by("-schedules_count")
         )
-        classrooms_usage = [
+
+        return [
             {
                 "code": c.code,
                 "name": c.name,
@@ -892,7 +914,21 @@ class SecretariaService:
             for c in classrooms
         ]
 
-        # 7. KPIs Generales
+
+
+    @staticmethod
+    def get_statistics_context(semester_id=None):
+        """
+        Calcula todas las métricas para la vista de estadísticas.
+        """
+        enrollments_qs, courses_qs, groups_qs = _get_base_qs(semester_id)
+
+        saturation_json = _get_saturation_analysis(groups_qs)
+        students_by_course_json = _get_students_by_course(enrollments_qs)
+        professors_load_json, professors_count = _get_professors_load()
+        syllabus_progress = _get_syllabus_progress(courses_qs)
+        classrooms_usage = _get_classrooms_usage()
+
         avg_size = (
             enrollments_qs.values("course")
             .annotate(c=Count("student"))
@@ -907,9 +943,10 @@ class SecretariaService:
             "classrooms_usage": classrooms_usage,
             "total_students": enrollments_qs.values("student").distinct().count(),
             "total_courses": courses_qs.count(),
-            "total_professors": professors.count(),
+            "total_professors": professors_count,
             "avg_class_size": round(avg_size or 0, 1),
         }
+
 
     # ==================== GESTIÓN DE RESERVAS ====================
 
