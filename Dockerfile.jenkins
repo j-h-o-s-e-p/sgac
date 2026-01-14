@@ -1,0 +1,9 @@
+FROM jenkins/jenkins:lts
+
+# Cambiamos a root para poder instalar programas
+USER root
+
+# Instalamos el cliente de Docker
+RUN apt-get update && \
+    apt-get install -y docker.io && \
+    rm -rf /var/lib/apt/lists/*

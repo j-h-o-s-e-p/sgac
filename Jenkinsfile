@@ -46,7 +46,7 @@ pipeline {
                             sonar-scanner \
                             -Dsonar.projectKey=sgac_backend \
                             -Dsonar.sources=. \
-                            -Dsonar.host.url=http://sgac_sonarqube:9000 \
+                            -Dsonar.host.url=http://sgac-sonarqube:9000 \
                             -Dsonar.login=$SONAR_TOKEN
                         '''
                     }
