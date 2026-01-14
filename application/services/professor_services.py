@@ -732,28 +732,27 @@ class ProfessorService:
         try:
             group = CourseGroup.objects.get(group_id=group_id)
             syllabus = group.course.syllabus
-        except:
+        except (CourseGroup.DoesNotExist, AttributeError):
             return {"error": "Grupo no encontrado o sin sílabo"}
 
-        all_sessions = SyllabusSession.objects.filter(syllabus=syllabus).order_by(
-            "session_number"
-        )
+        all_sessions = SyllabusSession.objects.filter(
+            syllabus=syllabus
+        ).order_by("session_number")
+
         completed_ids = set(
-            SessionProgress.objects.filter(course_group=group).values_list(
-                "session_id", flat=True
-            )
+            SessionProgress.objects.filter(course_group=group)
+            .values_list("session_id", flat=True)
         )
 
-        session_list = []
-        for sess in all_sessions:
-            session_list.append(
-                {
-                    "number": sess.session_number,
-                    "topic": sess.topic,
-                    "week": sess.week_number,
-                    "is_completed": sess.session_id in completed_ids,
-                }
-            )
+        session_list = [
+            {
+                "number": sess.session_number,
+                "topic": sess.topic,
+                "week": sess.week_number,
+                "is_completed": sess.session_id in completed_ids,
+            }
+            for sess in all_sessions
+        ]
 
         return {
             "course_name": group.course.course_name,
@@ -762,6 +761,7 @@ class ProfessorService:
                 {"unit_name": "Desarrollo del Curso", "sessions": session_list}
             ],
         }
+
 
     # =========================================================================
     # 5. HELPERS PRIVADOS Y UTILITARIOS

@@ -120,24 +120,24 @@ class SecretariaService:
     @staticmethod
     @transaction.atomic
     def update_course_group_schedules(group_id, horarios_data):
-    """Actualiza los horarios de un grupo (Lógica de la API)"""
-    group = CourseGroup.objects.get(group_id=group_id)
+        """Actualiza los horarios de un grupo (Lógica de la API)"""
+        group = CourseGroup.objects.get(group_id=group_id)
 
-    dias_a_actualizar = {h["day"] for h in horarios_data}
+        dias_a_actualizar = {h["day"] for h in horarios_data}
 
-    # Limpiar horarios existentes en esos días
-    if dias_a_actualizar:
-        group.schedules.filter(day_of_week__in=dias_a_actualizar).delete()
+        # Limpiar horarios existentes en esos días
+        if dias_a_actualizar:
+            group.schedules.filter(day_of_week__in=dias_a_actualizar).delete()
 
-    # Crear nuevos
-    for h in horarios_data:
-        Schedule.objects.create(
-            course_group=group,
-            room_id=h["room_id"],
-            day_of_week=h["day"],
-            start_time=h["start_time"],
-            end_time=h["end_time"],
-        )
+        # Crear nuevos
+        for h in horarios_data:
+            Schedule.objects.create(
+                course_group=group,
+                room_id=h["room_id"],
+                day_of_week=h["day"],
+                start_time=h["start_time"],
+                end_time=h["end_time"],
+            )
 
 
     # ==================== CARGA MASIVA (CSV) ====================
@@ -896,7 +896,7 @@ class SecretariaService:
             )
 
         return sorted(progress, key=lambda x: x["progress"])
-        
+
     def _get_classrooms_usage():
         classrooms = (
             Classroom.objects.filter(is_active=True)

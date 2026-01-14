@@ -43,35 +43,8 @@ class StudentService:
     @staticmethod
     def get_student_schedule(student):
         """Armo el horario cruzando datos de teoría y laboratorio"""
-
-        TIME_SLOTS = _get_time_slots()
-        DAYS = _get_days()
-
-        enrollments = _get_active_enrollments(student)
-        course_colors = _assign_course_colors(enrollments)
-
-        schedule_grid = defaultdict(lambda: defaultdict(list))
-        courses_legend = []
-        has_collisions = False
-
-        has_collisions |= _process_theory_schedules(
-            enrollments, TIME_SLOTS, course_colors, schedule_grid, courses_legend
-        )
-
-        has_collisions |= _process_lab_schedules(
-            enrollments, TIME_SLOTS, course_colors, schedule_grid
-        )
-
-        return {
-            "time_slots": TIME_SLOTS,
-            "days": DAYS,
-            "schedule_grid": dict(schedule_grid),
-            "courses_legend": courses_legend,
-            "has_collisions": has_collisions,
-        }
-
-    def _get_time_slots():
-        return [
+        # Bloques horarios definidos
+        TIME_SLOTS = [
             {"start": "07:00", "end": "07:50"},
             {"start": "07:50", "end": "08:40"},
             {"start": "08:50", "end": "09:40"},
@@ -88,114 +61,108 @@ class StudentService:
             {"start": "18:30", "end": "19:20"},
             {"start": "19:20", "end": "20:10"},
         ]
+        DAYS = ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"]
 
-
-    def _get_days():
-        return ["LUNES", "MARTES", "MIERCOLES", "JUEVES", "VIERNES"]
-
-    def _get_active_enrollments(student):
-        return StudentEnrollment.objects.filter(
+        enrollments = StudentEnrollment.objects.filter(
             student=student, status="ACTIVO"
         ).select_related("course", "group", "lab_assignment__lab_group__room")
 
+        # Asigno colores a los cursos para que se vea bonito
+        course_colors = {}
+        color_index = 1
+        for enrollment in enrollments:
+            if enrollment.course.course_code not in course_colors:
+                course_colors[enrollment.course.course_code] = color_index
+                color_index = (color_index % 10) + 1
 
-    def _assign_course_colors(enrollments):
-        colors = {}
-        idx = 1
-        for e in enrollments:
-            code = e.course.course_code
-            if code not in colors:
-                colors[code] = idx
-                idx = (idx % 10) + 1
-        return colors
+        schedule_grid = defaultdict(lambda: defaultdict(list))
+        courses_legend = []
+        has_collisions = False
 
-    def _time_to_minutes(t):
-        if isinstance(t, str):
-            h, m = map(int, t.split(":"))
-            return h * 60 + m
-        return t.hour * 60 + t.minute
+        # Helpers para calcular minutos y choques
+        def time_to_minutes(t):
+            if isinstance(t, str):
+                h, m = map(int, t.split(":"))
+                return h * 60 + m
+            return t.hour * 60 + t.minute
 
+        def get_occupied_slots(start_time, end_time):
+            start_minutes = time_to_minutes(start_time)
+            end_minutes = time_to_minutes(end_time)
+            occupied = []
+            for slot in TIME_SLOTS:
+                slot_start = time_to_minutes(slot["start"])
+                if start_minutes <= slot_start and end_minutes > slot_start:
+                    occupied.append(slot["start"])
+            return occupied
 
-    def _get_occupied_slots(start, end, time_slots):
-        start_m = _time_to_minutes(start)
-        end_m = _time_to_minutes(end)
+        # 1. Proceso horarios de Teoría
+        for enrollment in enrollments:
+            if enrollment.group:
+                schedules = enrollment.group.schedules.select_related("room").all()
+                for schedule in schedules:
+                    slots = get_occupied_slots(schedule.start_time, schedule.end_time)
+                    room_name = schedule.room.name if schedule.room else "Sin asignar"
 
-        return [
-            slot["start"]
-            for slot in time_slots
-            if start_m <= _time_to_minutes(slot["start"]) < end_m
-        ]
+                    course_info = {
+                        "code": enrollment.course.course_code,
+                        "name": enrollment.course.course_name,
+                        "group": enrollment.group.group_code,
+                        "room": room_name,
+                        "type": "Teoría",
+                        "color_index": course_colors[enrollment.course.course_code],
+                        "start": schedule.start_time,
+                        "end": schedule.end_time,
+                    }
 
-    def _process_theory_schedules(
-        enrollments, time_slots, course_colors, schedule_grid, legend
-    ):
-        collision = False
+                    if not any(
+                        c["code"] == course_info["code"] for c in courses_legend
+                    ):
+                        courses_legend.append(
+                            {
+                                "code": course_info["code"],
+                                "name": course_info["name"],
+                                "color_index": course_info["color_index"],
+                            }
+                        )
 
-        for e in enrollments:
-            if not e.group:
-                continue
+                    for slot_start in slots:
+                        if schedule_grid[schedule.day_of_week][slot_start]:
+                            has_collisions = True
+                        schedule_grid[schedule.day_of_week][slot_start].append(
+                            course_info
+                        )
 
-            for s in e.group.schedules.select_related("room").all():
-                slots = _get_occupied_slots(s.start_time, s.end_time, time_slots)
-                room = s.room.name if s.room else "Sin asignar"
+        # 2. Proceso horarios de Laboratorio
+        for enrollment in enrollments:
+            if enrollment.lab_assignment:
+                lab = enrollment.lab_assignment.lab_group
+                slots = get_occupied_slots(lab.start_time, lab.end_time)
+                room_name = lab.room.name if lab.room else "Sin asignar"
 
-                info = _build_course_info(
-                    e, "Teoría", e.group.group_code, room, course_colors
-                )
+                course_info = {
+                    "code": enrollment.course.course_code,
+                    "name": enrollment.course.course_name,
+                    "group": f"Lab {lab.lab_nomenclature}",
+                    "room": room_name,
+                    "type": "Laboratorio",
+                    "color_index": course_colors[enrollment.course.course_code],
+                    "start": lab.start_time,
+                    "end": lab.end_time,
+                }
 
-                if not any(c["code"] == info["code"] for c in legend):
-                    legend.append(
-                        {
-                            "code": info["code"],
-                            "name": info["name"],
-                            "color_index": info["color_index"],
-                        }
-                    )
+                for slot_start in slots:
+                    if schedule_grid[lab.day_of_week][slot_start]:
+                        has_collisions = True
+                    schedule_grid[lab.day_of_week][slot_start].append(course_info)
 
-                for slot in slots:
-                    if schedule_grid[s.day_of_week][slot]:
-                        collision = True
-                    schedule_grid[s.day_of_week][slot].append(info)
-
-        return collision
-
-    def _process_lab_schedules(
-        enrollments, time_slots, course_colors, schedule_grid
-    ):
-        collision = False
-
-        for e in enrollments:
-            if not e.lab_assignment:
-                continue
-
-            lab = e.lab_assignment.lab_group
-            slots = _get_occupied_slots(lab.start_time, lab.end_time, time_slots)
-            room = lab.room.name if lab.room else "Sin asignar"
-
-            info = _build_course_info(
-                e, "Laboratorio", f"Lab {lab.lab_nomenclature}", room, course_colors
-            )
-
-            for slot in slots:
-                if schedule_grid[lab.day_of_week][slot]:
-                    collision = True
-                schedule_grid[lab.day_of_week][slot].append(info)
-
-        return collision
-
-    def _build_course_info(enrollment, type_, group, room, colors):
         return {
-            "code": enrollment.course.course_code,
-            "name": enrollment.course.course_name,
-            "group": group,
-            "room": room,
-            "type": type_,
-            "color_index": colors[enrollment.course.course_code],
-            "start": None,
-            "end": None,
+            "time_slots": TIME_SLOTS,
+            "days": DAYS,
+            "schedule_grid": dict(schedule_grid),
+            "courses_legend": courses_legend,
+            "has_collisions": has_collisions,
         }
-
-
 
     @staticmethod
     def get_grades_summary(student):
@@ -490,87 +457,64 @@ class StudentService:
     def _check_student_lab_conflict(student, lab_group):
         """
         Verifica si el alumno tiene cruce de horario con este lab
+        Revisa:
+        - Horarios de teoría de TODOS sus cursos
+        - Otros labs ya asignados
+        - Otras postulaciones pendientes en otras campañas
         """
-        enrollments = _get_active_enrollments(student)
 
-        if _has_theory_conflict(enrollments, lab_group):
-            return True
+        def overlap(s1, e1, s2, e2):
+            return s1 < e2 and s2 < e1
 
-        if _has_assigned_lab_conflict(enrollments, lab_group):
-            return True
-
-        if _has_pending_postulation_conflict(student, lab_group):
-            return True
-
-        return False
-    
-    def _time_overlap(s1, e1, s2, e2):
-        return s1 < e2 and s2 < e1
-
-    def _get_active_enrollments(student):
-        return StudentEnrollment.objects.filter(
+        # 1. Obtener todas las matrículas activas del alumno
+        enrollments = StudentEnrollment.objects.filter(
             student=student, status="ACTIVO"
-        ).select_related("course", "group", "lab_assignment__lab_group")
+        ).select_related("course", "group")
 
-    def _has_theory_conflict(enrollments, lab_group):
         for enrollment in enrollments:
-            if not enrollment.group:
-                continue
+            # 2. Verificar horarios de teoría
+            if enrollment.group:
+                schedules = Schedule.objects.filter(course_group=enrollment.group)
+                for sch in schedules:
+                    if sch.day_of_week == lab_group.day_of_week:
+                        if overlap(
+                            lab_group.start_time,
+                            lab_group.end_time,
+                            sch.start_time,
+                            sch.end_time,
+                        ):
+                            return True
 
-            schedules = Schedule.objects.filter(course_group=enrollment.group)
-            for sch in schedules:
-                if _same_day_and_overlap(
-                    lab_group, sch.day_of_week, sch.start_time, sch.end_time
-                ):
-                    return True
-        return False
+            # 3. Verificar labs ya asignados
+            if enrollment.lab_assignment:
+                other_lab = enrollment.lab_assignment.lab_group
+                if other_lab.lab_id != lab_group.lab_id:
+                    if other_lab.day_of_week == lab_group.day_of_week:
+                        if overlap(
+                            lab_group.start_time,
+                            lab_group.end_time,
+                            other_lab.start_time,
+                            other_lab.end_time,
+                        ):
+                            return True
 
-    def _has_assigned_lab_conflict(enrollments, lab_group):
-        for enrollment in enrollments:
-            if not enrollment.lab_assignment:
-                continue
-
-            other_lab = enrollment.lab_assignment.lab_group
-            if other_lab.lab_id == lab_group.lab_id:
-                continue
-
-            if _same_day_and_overlap(
-                lab_group,
-                other_lab.day_of_week,
-                other_lab.start_time,
-                other_lab.end_time,
-            ):
-                return True
-        return False
-
-    def _has_pending_postulation_conflict(student, lab_group):
-        postulations = StudentPostulation.objects.filter(
+        # 4. Verificar otras postulaciones pendientes (en otras campañas activas)
+        other_postulations = StudentPostulation.objects.filter(
             student=student, status="PENDIENTE"
         ).select_related("lab_group")
 
-        for post in postulations:
-            if post.lab_group.lab_id == lab_group.lab_id:
-                continue
+        for post in other_postulations:
+            if post.lab_group.lab_id != lab_group.lab_id:
+                if post.lab_group.day_of_week == lab_group.day_of_week:
+                    if overlap(
+                        lab_group.start_time,
+                        lab_group.end_time,
+                        post.lab_group.start_time,
+                        post.lab_group.end_time,
+                    ):
+                        return True
 
-            if _same_day_and_overlap(
-                lab_group,
-                post.lab_group.day_of_week,
-                post.lab_group.start_time,
-                post.lab_group.end_time,
-            ):
-                return True
         return False
-
-    def _same_day_and_overlap(lab_group, day, start, end):
-        return (
-            lab_group.day_of_week == day
-            and _time_overlap(
-                lab_group.start_time,
-                lab_group.end_time,
-                start,
-                end,
-            )
-        )
 
     @staticmethod
     @transaction.atomic
